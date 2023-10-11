@@ -11,9 +11,9 @@ class Config {
     public:
         Config();
 
-        const vector<string>    &ports();
+        const vector<string>    &ports() const;
         void                    ports(vector<string> ports);
-        int                     backlog();
+        int                     backlog() const;
         void                    backlog(int backlog);
 
     private:

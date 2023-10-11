@@ -6,7 +6,7 @@ Config::Config()
     _backlog = 20;
 }
 
-const vector<string> &Config::ports()
+const vector<string> &Config::ports() const
 {
     return _ports;
 }
@@ -16,7 +16,7 @@ void Config::ports(vector<string> ports)
     _ports = ports;
 }
 
-int Config::backlog()
+int Config::backlog() const
 {
     return _backlog;
 }
