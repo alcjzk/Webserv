@@ -57,7 +57,7 @@ void Server::start()
     this->_connect(_config.ports().front().c_str());
     while (!_is_interrupt_signaled)
     {
-        poll(_pollfds.data(), _pollfds.size(), 0);
+        poll(_pollfds.data(), _pollfds.size(), -1); // TODO: Handle retval?
         for (
             vector<struct pollfd>::size_type i = 0, size = _pollfds.size();
             i < size;
