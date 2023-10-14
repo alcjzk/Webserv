@@ -1,6 +1,9 @@
 #include <iostream>
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <signal.h>
 #include "Server.hpp"
 
 const size_t Server::_buffer_size = 512;

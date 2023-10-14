@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdlib>
 #include "Config.hpp"
 #include "Server.hpp"
 
