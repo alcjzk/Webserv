@@ -132,7 +132,6 @@ void    Server::_send_response(int fd)
 vector<Server::_Task>::iterator Server::_task(int fd)
 {
     vector<_Task>::iterator it = _tasks.begin();
-    cout << "Task " << fd << endl;
     while (it != _tasks.end())
     {
         if (it->fd == fd)
