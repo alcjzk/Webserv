@@ -1,8 +1,13 @@
 #ifndef CONNECTION_H
 # define CONNECTION_H
 
-class Connection {
+# include "Request.hpp"
+# include "Response.hpp"
 
+class Connection {
+    public:
+        Request    &receive() const;
+        void       send(Response &response) const;
 };
 
 #endif
