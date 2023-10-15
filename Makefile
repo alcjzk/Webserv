@@ -12,7 +12,7 @@ EXTRA = -g -MP -MMD
 CFLAGS 	= -I$(SRC_DIR) $(EXTRA) $(WARN:%=-W%) -O$(OPT) -std=c++98
 SHELL	= /bin/sh
 
-SRCS	= main.cpp Config.cpp
+SRCS	= main.cpp Config.cpp Server.cpp
 
 all: $(NAME)
 

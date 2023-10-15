@@ -11,17 +11,7 @@ const vector<string> &Config::ports() const
     return _ports;
 }
 
-void Config::ports(vector<string> ports)
-{
-    _ports = ports;
-}
-
 int Config::backlog() const
 {
     return _backlog;
-}
-
-void Config::backlog(int backlog)
-{
-    _backlog = backlog;
 }

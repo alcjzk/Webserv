@@ -12,9 +12,7 @@ class Config {
         Config();
 
         const vector<string>    &ports() const;
-        void                    ports(vector<string> ports);
         int                     backlog() const;
-        void                    backlog(int backlog);
 
     private:
         vector<string>    _ports;
