@@ -1,8 +1,2 @@
-#ifndef REQUEST_H
-# define REQUEST_H
+#include "Request.hpp"
 
-class Request {
-
-};
-
-#endif
