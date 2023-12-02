@@ -42,8 +42,6 @@ void Runtime::_dequeue(Task *task)
 
 void Runtime::run()
 {
-    extern int errno;
-
     if (signal(SIGINT, _handle_interrupt) == SIG_ERR)
         throw "Failed to register handler for SIGINT";
     while (!_is_interrupt_signaled)

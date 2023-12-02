@@ -15,7 +15,6 @@
 
 Server::Server(const Config &config) : _config(config), _port(config.ports().front().c_str()), _fd(-1)
 {
-    extern int      errno;
     struct addrinfo hints;
     int             status;
 
@@ -107,7 +106,6 @@ char* ServerReceiveRequestTask::buffer_head()
 
 void ServerReceiveRequestTask::fill_buffer()
 {
-    extern int              errno;
     ssize_t                 bytes_received = 0;
 
     bytes_received = recv(_fd, buffer_head(), buffer_size_available(), 0);
@@ -201,7 +199,6 @@ ServerAcceptTask::ServerAcceptTask(Server& server)
 
 void ServerAcceptTask::run()
 {
-    extern int  errno;
     int         fd;
 
     try
