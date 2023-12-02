@@ -2,8 +2,8 @@
 
 // TODO: Impl into source file
 
-// #define LOG_ENABLE
-// #define LOGLEVEL_INFO
+#define LOG_ENABLE
+#define LOGLEVEL_INFO
 
 #ifdef LOG_ENABLE
 # undef LOG_ENABLE
@@ -60,21 +60,21 @@ class Logger
 #endif
 
 #ifdef LOG_ENABLE_INFO
-# define INFO(message) Logger::info(static_cast<std::ostringstream>((std::ostringstream() << message)).str())
+# define INFO(message) {std::ostringstream log_stream_; log_stream_ << message; Logger::info(log_stream_.str());}
 # undef LOG_ENABLE_INFO
 #else
 # define INFO(x)
 #endif
 
 #ifdef LOG_ENABLE_WARN
-# define WARN(message) Logger::warn(static_cast<std::ostringstream>((std::ostringstream() << message)).str())
+# define WARN(message) {std::ostringstream log_stream_; log_stream_ << message; Logger::warn(log_stream_.str());}
 # undef LOG_ENABLE_WARN
 #else
 # define WARN(x)
 #endif
 
 #ifdef LOG_ENABLE_ERR
-# define ERR(message) Logger::error(static_cast<std::ostringstream>((std::ostringstream() << message)).str(), __FILE__, __LINE__)
+# define ERR(message) {std::ostringstream log_stream_; log_stream_ << message; Logger::error(log_stream_.str(), __FILE__, __LINE__);}
 # undef LOG_ENABLE_ERR
 #else
 # define ERR(x)
