@@ -6,7 +6,7 @@ Config::Config()
     _backlog = 20;
 }
 
-const vector<string> &Config::ports() const
+const vector<string>& Config::ports() const
 {
     return _ports;
 }
