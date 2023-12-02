@@ -2,8 +2,8 @@
 
 // TODO: Impl into source file
 
-#define LOG_ENABLE
-#define LOGLEVEL_INFO
+// #define LOG_ENABLE
+// #define LOGLEVEL_INFO
 
 #ifdef LOG_ENABLE
 # undef LOG_ENABLE
