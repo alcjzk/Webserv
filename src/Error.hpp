@@ -12,11 +12,14 @@ class Error : public std::runtime_error
 
         Error(Kind kind);
         Error(const Error& other);
+
         virtual ~Error() throw();
 
-        Error& operator=(const Error& other);
-        bool operator==(const Error& other) const;
-        bool operator==(Kind other) const;
+        virtual const char* what() const throw();
+
+        Error&  operator=(const Error& other);
+        bool    operator==(const Error& other) const;
+        bool    operator==(Kind other) const;
 
         Kind kind() const;
 

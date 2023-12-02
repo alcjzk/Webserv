@@ -12,14 +12,8 @@ class Reader
 
         /// @brief Advance the reader until a byte not present in charset.
         /// @param charset
+        // TODO: Unused?
         Reader& trim(const std::string& charset) throw();
-
-        /// @brief Extracts a portion from the beginning of the reader consisting
-        /// only of non-delimiting characters, advancing the reader accordingly.
-        /// @param delimeters The set of characters considered as delimiters.
-        /// @return String constructed from the extracted portion.
-        /// @throw When no token is found at the current position.
-        std::string token(const std::string& delimeters, size_t limit = std::numeric_limits<size_t>::max());
 
         /// Extracts a line and advances the reader accordinly
         ///

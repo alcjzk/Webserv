@@ -14,6 +14,7 @@ class Status
 
         Code        code() const;
         const char* text() const;
+        bool        is_error() const;
 
     private:
         Code    _code;

@@ -6,32 +6,26 @@
 using std::istream;
 using std::string;
 
-Method::Method(const std::string& str) : _type(_type_from(str))
+Method::Method() : _type(GET)
 {
 
 }
 
-Method::Type Method::_type_from(const std::string& str)
+Method::Method(const std::string& str) : _type(type_from(str))
+{
+
+}
+
+Method::Type Method::type_from(const std::string& str)
 {
     if (str == "GET")
-        return Get;
+        return GET;
     else if (str == "POST")
-        return Post;
+        return POST;
     else if (str == "DELETE")
-        return Delete;
+        return DELETE;
     else
         throw HTTPError(Status::BAD_REQUEST);
-}
-
-Method::Method() : _type(Get)
-{
-
-}
-
-Method::Method(Reader& reader) :
-    _type(_type_from(reader.token(HTTP_FIELD_DELIMETER, STRING_MAX_LENGTH)))
-{
-
 }
 
 bool Method::operator==(const Method& other)
@@ -39,22 +33,15 @@ bool Method::operator==(const Method& other)
     return _type == other._type;
 }
 
-const Method Method::deserialize(Reader& reader)
-{
-    const char* delimeters =  " \t";
-
-    return Method(reader.trim(delimeters).token(delimeters));
-}
-
 string Method::to_string() const
 {
     switch (_type)
     {
-        case Get:
+        case GET:
             return "GET";
-        case Post:
+        case POST:
             return "POST";
-        case Delete:
+        case DELETE:
             return "DELETE";
         default:
             assert(false);

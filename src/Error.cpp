@@ -16,6 +16,11 @@ Error::~Error() throw()
 
 }
 
+const char* Error::what() const throw()
+{
+    return kind_str(_kind);
+}
+
 Error& Error::operator=(const Error& other)
 {
     (void)std::runtime_error::operator=(other);

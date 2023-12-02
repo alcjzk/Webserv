@@ -27,3 +27,10 @@ const char* Status::text() const
             assert(false);
     }
 }
+
+bool Status::is_error() const
+{
+    if (_code >= 400)
+        return true;
+    return false;
+}

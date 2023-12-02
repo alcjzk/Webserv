@@ -1,5 +1,4 @@
-#ifndef RUNTIME_H
-# define RUNTIME_H
+#pragma once
 
 #include <poll.h>
 #include <vector>
@@ -27,5 +26,3 @@ class Runtime
         static bool                     _is_interrupt_signaled;
         static Runtime                  _instance;
 };
-
-#endif

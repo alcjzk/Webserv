@@ -5,8 +5,6 @@
 #include "Config.hpp"
 #include "Server.hpp"
 
-using namespace std;
-
 int main()
 {
     try

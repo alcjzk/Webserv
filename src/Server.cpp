@@ -13,6 +13,8 @@
 #include "Log.hpp"
 #include "Server.hpp"
 
+using std::string;
+
 Server::Server(const Config &config) : _config(config), _port(config.ports().front().c_str()), _fd(-1)
 {
     struct addrinfo hints;

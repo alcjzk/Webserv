@@ -43,25 +43,6 @@ vector<char>::const_iterator Reader::next()
     return _head + 1;
 }
 
-string  Reader::token(const string& delimeters, size_t limit)
-{
-    this->trim(delimeters);
-    vector<char>::const_iterator token_end = _head;
-    while (token_end != _buffer.end() && delimeters.find(*token_end) == string::npos)
-    {
-        if (limit-- == 0)
-            throw "No token";
-        token_end++;
-    }
-    if (token_end == _head)
-        throw "No token";
-    vector<char>::const_iterator token_start = _head;
-    _head = token_end;
-    if (_head != _buffer.end())
-        _head++;
-    return string(token_start, token_end);
-}
-
 void Reader::consume(size_t amount)
 {
     if (std::distance(_head, _buffer.end()) > (ssize_t)amount)
