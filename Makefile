@@ -11,11 +11,11 @@ OPT = 0
 WARN = all extra error no-unused-variable no-unused-parameter
 EXTRA = -g -MP -MMD
 
-CFLAGS 	= -I$(SRC_DIR) $(EXTRA) $(WARN:%=-W%) -O$(OPT) -std=c++98
+CFLAGS 	= -I$(SRC_DIR) $(EXTRA) $(WARN:%=-W%) -O$(OPT) -std=c++98 -D LOG_ENABLE -D LOGLEVEL_INFO
 
 SHELL	= /bin/sh
 
-SRCS	= main.cpp Config.cpp Server.cpp Runtime.cpp Task.cpp Reader.cpp Method.cpp HTTPVersion.cpp URI.cpp RequestLine.cpp Error.cpp Status.cpp HTTPError.cpp Response.cpp
+SRCS	= main.cpp Config.cpp Server.cpp Runtime.cpp Task.cpp Reader.cpp Method.cpp HTTPVersion.cpp URI.cpp RequestLine.cpp Error.cpp Status.cpp HTTPError.cpp Response.cpp Log.cpp
 
 SRCS_TEST = test.cpp Reader.cpp HTTPVersion.cpp Method.cpp RequestLine.cpp URI.cpp
 
