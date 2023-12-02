@@ -1,3 +1,5 @@
+#include <cstring>
+#include <sys/types.h>
 #include "Reader.hpp"
 
 using std::vector;
