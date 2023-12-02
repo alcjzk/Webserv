@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <errno.h>
 #include <signal.h>
+#include <string.h>
 #include "Runtime.hpp"
 #include "Task.hpp"
 
