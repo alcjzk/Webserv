@@ -1,3 +1,4 @@
+#include <cassert>
 #include "defs.hpp"
 #include "HTTPError.hpp"
 #include "Method.hpp"
