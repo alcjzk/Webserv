@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <vector>
 #include <string>
-#include <numeric>
+#include <limits>
 #include <exception>
 
 class Reader
