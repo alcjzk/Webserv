@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include "defs.hpp"
 #include "HTTPError.hpp"
 #include "HTTPVersion.hpp"
