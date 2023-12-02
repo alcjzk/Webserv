@@ -12,7 +12,7 @@ int main()
         Config  config;
         Server  server(config);
 
-        server.start();
+        Runtime::instance().run();
     }
     catch (const char *e)
     {

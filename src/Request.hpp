@@ -1,29 +1,24 @@
-#ifndef REQUEST_H
-# define REQUEST_H
+#pragma once
 
 # include <vector>
-# include <stdint.h>
+# include <cstdint>
 # include <string>
-# include "Method.hpp"
 
-class Request {
+class Request
+{
     public:
-        Request(std::vector<uint8_t>& bytes);
-
-        bool                        is_complete() const;
-        bool                        is_headers_complete() const;
-        void                        extend(const std::vector<uint8_t>& bytes);
-        std::vector<uint8_t>        body() const;
-        std::vector<std::string>    headers() const;
-        std::string                 url() const;
-        Method                      method() const;
+        Request();
 
     private:
-        std::vector<uint8_t>        _data;
-        std::vector<uint8_t>        _body;
+        std::string                 _request_line;
         std::vector<std::string>    _headers;
-        std::string                 _url;
-        Method                      _method;
-};
 
-#endif
+        typedef enum Expect
+        {
+            RequestLine,
+            Headers,
+            Body
+        } Expect;
+        Expect                  _expect;
+        std::vector<uint8_t>    _buffer;
+};

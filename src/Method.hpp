@@ -2,23 +2,34 @@
 # define METHOD_H
 
 # include <string>
+# include <iostream>
+# include "Reader.hpp"
 
 class Method {
     public:
+        Method();
         Method(const std::string& str);
+        Method(Reader& reader);
 
         std::string             to_string() const;
-        static const Method     GET();
-        static const Method     POST();
-        static const Method     PUT();
+        static const Method     deserialize(Reader& reader);
 
+        bool operator==(const Method& other);
+
+
+        static const size_t STRING_MAX_LENGTH = 7;
     private:
-        enum type
+        typedef enum Type
         {
-            _GET,
-            _POST,
-            _PUT
-        }   _type;
+            Get,
+            Post,
+            Delete
+        }   Type;
+        Type   _type;
+
+        static Type _type_from(const std::string& str);
 };
+
+std::ostream& operator<<(std::ostream& os, const Method& method);
 
 #endif

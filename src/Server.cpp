@@ -1,162 +1,230 @@
-#include <iostream>
-#include <fcntl.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <signal.h>
+#include <sys/errno.h>
+#include <string.h>
+#include <netdb.h>
+#include <stdexcept>
+#include "Reader.hpp"
+#include "Error.hpp"
+#include "RequestLine.hpp"
+#include "HTTPError.hpp"
+#include "Log.hpp"
 #include "Server.hpp"
 
-const size_t Server::_buffer_size = 512;
-volatile bool Server::_is_interrupt_signaled = false;
-
-Server::Server(const Config &config) : _config(config) {}
-
-Server::~Server()
+Server::Server(const Config &config) : _config(config), _port(config.ports().front().c_str()), _fd(-1)
 {
-    freeaddrinfo(_address_info);
-    cout << "Graceful exit" << endl;
-}
-
-void Server::_connect(const char *port)
-{
-    int             status;
+    extern int      errno;
     struct addrinfo hints;
-    int             fd;
+    int             status;
 
     hints = (struct addrinfo){};
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_family = AF_UNSPEC;
     hints.ai_flags = AI_PASSIVE;
 
-    status = getaddrinfo(NULL, port, &hints, &_address_info);
+    status = getaddrinfo(NULL, _port, &hints, &_address_info);
     if (status != 0)
-        throw gai_strerror(status);
-
-    // TODO: Error handling + fd manual close? ----
-    fd = socket(_address_info->ai_family, _address_info->ai_socktype, _address_info->ai_protocol);
-    fcntl(fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
-    bind(fd, _address_info->ai_addr, _address_info->ai_addrlen);
-    listen(fd, _config.backlog());
-    // -----
-
-    cout << "listening on socket " << fd << endl;
-    _pollfds.push_back((struct pollfd) {
-        .fd = fd,
-        .events = POLLIN,
-        .revents = 0,
-    });
-    _tasks.push_back((_Task){
-        .fd = fd,
-        .func = &Server::_accept_connection
-    });
+        throw std::runtime_error(gai_strerror(status));
+    _fd = socket(_address_info->ai_family, _address_info->ai_socktype, _address_info->ai_protocol);
+    if (_fd == -1)
+        throw std::runtime_error(strerror(errno));
+    if (fcntl(_fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
+        throw std::runtime_error(strerror(errno));
+    if (bind(_fd, _address_info->ai_addr, _address_info->ai_addrlen) == -1)
+        throw std::runtime_error(strerror(errno));
+    if (listen(_fd, _config.backlog()) == -1)
+        throw std::runtime_error(strerror(errno));
+    INFO("Listening on " << _fd);
+    Runtime::enqueue(new ServerAcceptTask(*this));
 }
 
-void Server::start()
+const HTTPVersion Server::http_version()
 {
-    vector<_Task>::iterator  task;
+    return HTTPVersion(1, 1);
+}
 
-    if (signal(SIGINT, _handle_interrupt) == SIG_ERR)
-        throw "Failed to register handler for SIGINT";
-    this->_connect(_config.ports().front().c_str());
-    while (!_is_interrupt_signaled)
+Server::~Server()
+{
+    if (_fd != -1)
+        (void)close(_fd);
+    freeaddrinfo(_address_info);
+    INFO("Graceful exit");
+}
+
+int Server::fd()
+{
+    return _fd;
+}
+
+ServerSendResponseTask::ServerSendResponseTask(int fd, Response* response)
+    : Task(fd, Writable), _response(response)
+{
+
+}
+
+ServerSendResponseTask::~ServerSendResponseTask()
+{
+    delete _response;
+}
+
+void ServerSendResponseTask::run()
+{
+    try
     {
-        poll(_pollfds.data(), _pollfds.size(), -1); // TODO: Handle retval?
-        for (
-            vector<struct pollfd>::size_type i = 0, size = _pollfds.size();
-            i < size;
-            i++)
+        if (!_response->send(_fd))
+            return ;
+    }
+    catch (const std::runtime_error& error)
+    {
+        ERR(error.what());
+    }
+    catch (...) { assert(false); }
+    _is_complete = true;
+    (void)close(_fd);
+}
+
+ServerReceiveRequestTask::ServerReceiveRequestTask(int fd) :
+    Task(fd, Readable),
+    _expect(REQUEST_LINE),
+    _bytes_received_total(0),
+    _buffer(_header_buffer_size),
+    _reader(_buffer)
+{
+
+}
+
+size_t ServerReceiveRequestTask::buffer_size_available()
+{
+    return _header_buffer_size - _bytes_received_total;
+}
+
+uint8_t* ServerReceiveRequestTask::buffer_head()
+{
+    return _buffer.data() + _bytes_received_total;
+}
+
+void ServerReceiveRequestTask::fill_buffer()
+{
+    extern int              errno;
+    ssize_t                 bytes_received = 0;
+
+    bytes_received = recv(_fd, buffer_head(), buffer_size_available(), 0);
+    if (bytes_received == 0)
+    {
+        throw Error(Error::CLOSED);
+    }
+    else if (bytes_received == -1)
+    {
+        throw std::runtime_error(strerror(errno));
+    }
+    _bytes_received_total += bytes_received;
+}
+
+void ServerReceiveRequestTask::receive_start_line()
+{
+    try
+    {
+        fill_buffer();
+        _reader.trim_empty_lines();
+        _request_line = RequestLine(_reader.line());
+        if (!_request_line.http_version().is_compatible_with(Server::http_version()))
         {
-            if (_pollfds[i].revents)
-            {
-                 // TODO Necessary or not? a.e. does poll() overwrite .revents
-                 // for a pollfd structure that has no pending events?
-                _pollfds[i].revents = 0;
-                vector<_Task>::iterator task = _task(_pollfds[i].fd);
-                (this->*task->func)(_pollfds[i].fd);
-            }
+            throw HTTPError(Status::HTTP_VERSION_NOT_SUPPORTED);
+        }
+        INFO(_request_line);
+        Runtime::enqueue(new ServerSendResponseTask(_fd, new TextResponse("Got request\n")));
+        _is_complete = true;
+        // TODO: _expect = HEADERS;
+    }
+    catch (const ReaderException& e)
+    {
+        assert(e.type() == ReaderException::NoLine);
+        if (_bytes_received_total >= _header_buffer_size)
+        {
+            throw HTTPError(Status::BAD_REQUEST);
         }
     }
 }
 
-void Server::_handle_request(int fd)
+void ServerReceiveRequestTask::receive_headers()
 {
-    vector<struct pollfd>::iterator pollfd;
-    vector<_Task>::iterator          task;
-    ssize_t                         bytes_read;
-    char                            buffer[_buffer_size];
-
-    bytes_read = recv(fd, buffer, _buffer_size, 0);
-    if (bytes_read == -1)
-        throw "recv error";
-    // TODO: This needs to be handled gracefully
-    if (bytes_read == 0)
-        throw "client unexpectedly closed the connection";
-    buffer[bytes_read] = '\0';
-    task = _task(fd);
-    task->func = &Server::_send_response;
-    pollfd = _pollfd(fd);
-    pollfd->events = POLLOUT;
+    // TODO: Implement receiving headers
 }
 
-void Server::_accept_connection(int fd)
+void ServerReceiveRequestTask::run()
 {
-    int connection_fd;
-
-    connection_fd = accept(fd, NULL, NULL);
-    if (connection_fd == -1)
-        throw "Failed to accept connection from socket";
-    cout << "connected on " << connection_fd << endl;
-    (void)fcntl(connection_fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
-    _pollfds.push_back((struct pollfd) {
-        .fd = connection_fd,
-        .events = POLLIN,
-        .revents = 0
-    });
-    _tasks.push_back((_Task) {
-        .fd = connection_fd,
-        .func = &Server::_handle_request
-    });
-}
-
-void    Server::_send_response(int fd)
-{
-    vector<struct pollfd>::iterator pollfd;
-    vector<_Task>::iterator          task;
-
-    // TODO: Error handling for send
-    send(fd, "Msg received", 12, 0);
-    task = _task(fd);
-    _tasks.erase(task);
-    pollfd = _pollfd(fd);
-    _pollfds.erase(pollfd);
-    close(fd);
-}
-
-vector<Server::_Task>::iterator Server::_task(int fd)
-{
-    vector<_Task>::iterator it = _tasks.begin();
-    while (it != _tasks.end())
+    try
     {
-        if (it->fd == fd)
-            return it;
-        it++;
+        switch (_expect)
+        {
+            case REQUEST_LINE:
+                return receive_start_line();
+            case HEADERS:
+                return receive_headers();
+            default:
+                assert(false);
+        }
     }
-    throw "Unknown task";
-}
-
-vector<struct pollfd>::iterator Server::_pollfd(int fd)
-{
-    vector<struct pollfd>::iterator it = _pollfds.begin();
-    while (it != _pollfds.end())
+    catch (const Error& error)
     {
-        if (it->fd == fd)
-            return it;
-        it++;
+        assert(error == Error::CLOSED);
+        WARN(error.what());
+        close(_fd);
     }
-    throw "Unknown pollfd";
+    catch (const HTTPError& error)
+    {
+        WARN(error.what());
+        // TODO: Replace with proper error response
+        Response* response = new TextResponse(string(error.what()) + '\n');
+        Runtime::enqueue(new ServerSendResponseTask(_fd, response));
+    }
+    catch (const std::runtime_error& error)
+    {
+        ERR(error.what());
+        close(_fd);
+    }
+    _is_complete = true;
 }
 
-void Server::_handle_interrupt(int)
+ServerReceiveRequestTask::~ServerReceiveRequestTask()
 {
-    Server::_is_interrupt_signaled = true;
+
+}
+
+ServerAcceptTask::ServerAcceptTask(Server& server)
+    : Task(server.fd(), Readable), _server(server)
+{
+
+}
+
+void ServerAcceptTask::run()
+{
+    extern int  errno;
+    int         fd;
+
+    try
+    {
+        fd = accept(_server.fd(), NULL, NULL);
+        if (fd == -1)
+        {
+            throw std::runtime_error(strerror(errno));
+        }
+        if (fcntl(fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
+        {
+            (void)close(fd);
+            throw std::runtime_error(strerror(errno));
+        }
+        INFO("Client connected on fd " << fd);
+        Runtime::enqueue(new ServerReceiveRequestTask(fd));
+    }
+    catch (const std::runtime_error& error)
+    {
+        ERR(error.what());
+    }
+}
+
+ServerAcceptTask::~ServerAcceptTask()
+{
+
 }
