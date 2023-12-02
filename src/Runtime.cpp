@@ -52,7 +52,7 @@ void Runtime::run()
         vector<Task *>::iterator task = _tasks.begin();
         for (; task != _tasks.end(); task++)
         {
-            int events = 0;
+            short events = 0;
             if ((*task)->wait_for() == Task::Readable)
                 events = POLLIN;
             else if ((*task)->wait_for() == Task::Writable)
