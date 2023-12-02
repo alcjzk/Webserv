@@ -26,7 +26,7 @@ int main()
         HTTPVersionTests::all();
 
         static const char content[] = "GET     \t\t\t   /\t\t      HTTP/1.1  \t\t\t\t    \r\n";
-        vector<uint8_t> buffer(content, content + sizeof(content) / sizeof(*content));
+        vector<char> buffer(content, content + sizeof(content) / sizeof(*content));
         Reader reader(buffer);
 
         RequestLine line(reader.line());

@@ -71,14 +71,14 @@ class ServerReceiveRequestTask : public Task
 
         // Util
         void        fill_buffer();
-        uint8_t*    buffer_head();
+        char*    buffer_head();
         size_t      buffer_size_available();
 
         // TODO: Use value from config + expanding buffersize?
         static const size_t  _header_buffer_size = 4096;
         Expect               _expect;
         size_t               _bytes_received_total;
-        std::vector<uint8_t> _buffer;
+        std::vector<char> _buffer;
         Reader               _reader;
         RequestLine          _request_line;
 };

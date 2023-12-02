@@ -20,5 +20,5 @@ class Request
             Body
         } Expect;
         Expect                  _expect;
-        std::vector<uint8_t>    _buffer;
+        std::vector<char>    _buffer;
 };

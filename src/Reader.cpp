@@ -4,7 +4,7 @@ using std::vector;
 using std::string;
 using std::distance;
 
-Reader::Reader(const vector<uint8_t>& buffer, size_t position) : _buffer(buffer), _head(_buffer.begin())
+Reader::Reader(const vector<char>& buffer, size_t position) : _buffer(buffer), _head(_buffer.begin())
 {
 
 }
@@ -36,7 +36,7 @@ void Reader::trim_empty_lines()
     }
 }
 
-vector<uint8_t>::const_iterator Reader::next()
+vector<char>::const_iterator Reader::next()
 {
     return _head + 1;
 }
@@ -44,7 +44,7 @@ vector<uint8_t>::const_iterator Reader::next()
 string  Reader::token(const string& delimeters, size_t limit)
 {
     this->trim(delimeters);
-    vector<uint8_t>::const_iterator token_end = _head;
+    vector<char>::const_iterator token_end = _head;
     while (token_end != _buffer.end() && delimeters.find(*token_end) == string::npos)
     {
         if (limit-- == 0)
@@ -53,7 +53,7 @@ string  Reader::token(const string& delimeters, size_t limit)
     }
     if (token_end == _head)
         throw "No token";
-    vector<uint8_t>::const_iterator token_start = _head;
+    vector<char>::const_iterator token_start = _head;
     _head = token_end;
     if (_head != _buffer.end())
         _head++;
@@ -71,8 +71,8 @@ void Reader::consume(size_t amount)
 // Throws no line, if the buffer does not contain a line
 std::string Reader::line()
 {
-    vector<uint8_t>::const_iterator start = _head;
-    vector<uint8_t>::const_iterator end = _head;
+    vector<char>::const_iterator start = _head;
+    vector<char>::const_iterator end = _head;
 
     while (end != _buffer.end())
     {
@@ -110,14 +110,14 @@ const char* ReaderException::what() const throw()
 
 #ifdef TESTS
 
-vector<uint8_t> ReaderTests::buffer(const char* content)
+vector<char> ReaderTests::buffer(const char* content)
 {
-    return vector<uint8_t>(content, content + std::strlen(content));
+    return vector<char>(content, content + std::strlen(content));
 }
 
 void ReaderTests::line_empty()
 {
-    vector<uint8_t> buffer = ReaderTests::buffer("\n");
+    vector<char> buffer = ReaderTests::buffer("\n");
     Reader reader(buffer);
 
     if (reader.line() != "")
@@ -126,7 +126,7 @@ void ReaderTests::line_empty()
 
 void ReaderTests::line_noline()
 {
-    vector<uint8_t> buffer = ReaderTests::buffer("aaaa");
+    vector<char> buffer = ReaderTests::buffer("aaaa");
     Reader reader(buffer);
 
     try {
@@ -141,7 +141,7 @@ void ReaderTests::line_noline()
 
 void ReaderTests::line_one()
 {
-    vector<uint8_t> buffer = ReaderTests::buffer("a\n");
+    vector<char> buffer = ReaderTests::buffer("a\n");
     Reader reader(buffer);
 
     if (reader.line() != "a")
@@ -150,7 +150,7 @@ void ReaderTests::line_one()
 
 void ReaderTests::line_basic()
 {
-    vector<uint8_t> buffer = ReaderTests::buffer("aa\nbb\r\n");
+    vector<char> buffer = ReaderTests::buffer("aa\nbb\r\n");
     Reader reader(buffer);
 
     string line1 = reader.line();

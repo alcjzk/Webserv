@@ -99,7 +99,7 @@ size_t ServerReceiveRequestTask::buffer_size_available()
     return _header_buffer_size - _bytes_received_total;
 }
 
-uint8_t* ServerReceiveRequestTask::buffer_head()
+char* ServerReceiveRequestTask::buffer_head()
 {
     return _buffer.data() + _bytes_received_total;
 }

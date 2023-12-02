@@ -9,7 +9,7 @@
 class Reader
 {
     public:
-        Reader(const std::vector<uint8_t>& buffer, size_t position = 0);
+        Reader(const std::vector<char>& buffer, size_t position = 0);
 
         /// @brief Advance the reader until a byte not present in charset.
         /// @param charset
@@ -42,10 +42,10 @@ class Reader
     private:
 
         /// Returns a constant iterator pointing to the next element in the reader.
-        std::vector<uint8_t>::const_iterator    next();
+        std::vector<char>::const_iterator    next();
 
-        const std::vector<uint8_t>&             _buffer;
-        std::vector<uint8_t>::const_iterator    _head;
+        const std::vector<char>&             _buffer;
+        std::vector<char>::const_iterator    _head;
 };
 
 class ReaderException : public std::exception
@@ -76,7 +76,7 @@ class ReaderTests : public Reader
         static void line_one();
         static void line_noline();
     private:
-        static std::vector<uint8_t> buffer(const char* content);
+        static std::vector<char> buffer(const char* content);
 };
 
 #endif
