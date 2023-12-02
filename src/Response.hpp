@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstdint>
 #include <cstddef>
 
 /// An abstract Response that can be sent.
