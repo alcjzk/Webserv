@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdexcept>
 #include <cassert>
+#include <errno.h>
 #include "Response.hpp"
 
 Response::Response()
@@ -16,7 +17,6 @@ Response::~Response()
 
 bool Response::send(int fd)
 {
-    extern int  errno;
     ssize_t     bytes_sent;
 
     bytes_sent = ::send(fd, buffer_head(), buffer_bytes_left(), 0);
