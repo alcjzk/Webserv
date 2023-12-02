@@ -5,6 +5,7 @@
 #include <string.h>
 #include <netdb.h>
 #include <stdexcept>
+#include <cassert>
 #include "Reader.hpp"
 #include "Error.hpp"
 #include "RequestLine.hpp"
