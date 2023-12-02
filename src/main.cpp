@@ -1,5 +1,7 @@
 #include <iostream>
 #include <cstdlib>
+#include <exception>
+#include "Log.hpp"
 #include "Config.hpp"
 #include "Server.hpp"
 
@@ -16,7 +18,13 @@ int main()
     }
     catch (const char *e)
     {
-        cout << e << endl;
+        ERR(e);
+        return EXIT_FAILURE;
     }
-    return (EXIT_SUCCESS);
+    catch (const std::exception& e)
+    {
+        ERR(e.what());
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
 }
