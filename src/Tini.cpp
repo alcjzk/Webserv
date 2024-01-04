@@ -181,43 +181,31 @@ class Node
                 case MAP:
                     for (auto const& [key, val] : *_mapValue)
                     {
-                        switch (val->getType())
+                        if (val->getType() == STRING)
                         {
-                            case STRING:
-                                for (size_t i = 0; i < depth; ++i)
-                                    std::cout << " ";
-                                std::cout << "key: " << key << "   val: " << val->getStringValue() << std::endl;
-                                break;
-                            default:
-                                break;
+                            for (size_t i = 0; i < depth; ++i)
+                                std::cout << " ";
+                            std::cout << "key: " << key << "   val: " << val->getStringValue() << std::endl;
                         }
                     }
                     for (auto const& [key, val] : *_mapValue)
                     {
-                        switch (val->getType())
+                        if (val->getType() == VECTOR)
                         {
-                            case VECTOR:
-                                for (size_t i = 0; i < depth; ++i)
-                                    std::cout << " ";
-                                std::cout << key << " vector values\n";
-                                val->print_contents(depth + 2, key);
-                                break;
-                            default:
-                                break;
+                            for (size_t i = 0; i < depth; ++i)
+                                std::cout << " ";
+                            std::cout << key << " vector values\n";
+                            val->print_contents(depth + 2, key);
                         }
                     }
                     for (auto const& [key, val] : *_mapValue)
                     {
-                        switch (val->getType())
+                        if (val->getType() == MAP)
                         {
-                            case MAP:
                                 for (size_t i = 0; i < depth; ++i)
                                     std::cout << " ";
                                 std::cout << key << " map values\n";
                                 val->print_contents(depth + 2, key);
-                                break;
-                            default:
-                                break;
                         }
                     }
                     break;
