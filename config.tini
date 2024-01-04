@@ -1,0 +1,47 @@
+root_map_value=test
+second_root_map_value=test
+
+[[http.servers]]
+    ip=192.168.1.2
+    hostname=hive_pc
+[[http.servers]]
+    ip=192.168.1.3
+    hostname=home_pc
+[[http.servers]]
+    ip=192.168.1.4
+    hostname=work_pc
+[http]
+    project=webserv
+
+[[spamvector]]
+    key=value
+    value=key
+[[spamvector]]
+    key=value
+    value=key
+[[spamvector]]
+    key=value
+    value=key
+[[spamvector]]
+    key=value
+    value=key
+[[spamvector]]
+    key=value
+    value=key
+[[spamvector]]
+    key=value
+    value=key
+[[spamvector]]
+    key=value
+    value=key
+[[spamvector]]
+    key=value
+    value=key
+
+[a.b.c.d.e.f.g.h.i.j.k.l.m.n.o.p.q.r.s.t.u]
+    key=value
+    value=key
+
+[a.b.c.d.e.f.g.h.i.j.k.boo.m.n.o.p.q.r.s.t.u]
+    key=value
+    value=key
