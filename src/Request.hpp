@@ -11,9 +11,10 @@ class Request
     public:
         Request() = default;
 
-        const Method&       method() const;
-        const URI&          uri() const;
-        const HTTPVersion&  http_version() const;
+        const Method&                       method() const;
+        const URI&                          uri() const;
+        const HTTPVersion&                  http_version() const;
+        std::vector<Header>::const_iterator header(const std::string& name) const;
 
         Response*           into_response() const;
 

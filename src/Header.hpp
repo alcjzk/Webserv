@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <ostream>
 
 class Header
 {
@@ -35,3 +36,5 @@ class Header
         std::string _name;
         std::string _value;
 };
+
+std::ostream& operator<<(std::ostream& os, const Header& header);

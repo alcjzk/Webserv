@@ -35,7 +35,6 @@ bool is_token(const std::string& text)
     return true;
 }
 
-
 Header::Header(string name, string value) :
     _name(name),
     _value(value) {}
@@ -55,10 +54,10 @@ Header::Header(const string& text)
         throw HTTPError(Status::BAD_REQUEST);
     }
     start_pos = text.find_first_not_of(HTTP_LWS, end_pos + 1);
-    end_pos = text.find_last_not_of(HTTP_LWS, start_pos);
-    if (end_pos != string::npos)
+    if (start_pos != string::npos)
     {
-        _value = text.substr(start_pos, end_pos - start_pos);
+        end_pos = text.find_last_not_of(HTTP_LWS);
+        _value = text.substr(start_pos, end_pos - start_pos + 1);
     }
 }
 
@@ -73,4 +72,9 @@ void Header::append(const string& value)
     }
     _value.append(1, SP);
     _value.append(value.substr(start_pos, end_pos - start_pos));
+}
+
+std::ostream& operator<<(std::ostream& os, const Header& header)
+{
+    return os << header._name << ": " << header._value;
 }

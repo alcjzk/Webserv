@@ -175,6 +175,7 @@ void ServerReceiveRequestTask::receive_headers()
             {
                 _request._headers.push_back(Header(line));
             }
+            INFO(_request._headers.back());
         }
     }
     catch (const ReaderException& error)

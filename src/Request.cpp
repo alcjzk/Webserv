@@ -1,4 +1,8 @@
+#include <algorithm>
 #include "Request.hpp"
+
+using std::string;
+using std::vector;
 
 Response* Request::into_response() const
 {
@@ -19,4 +23,15 @@ const URI& Request::uri() const
 const HTTPVersion& Request::http_version() const
 {
     return _request_line.http_version();
+}
+
+vector<Header>::const_iterator Request::header(const string& name) const
+{
+    return std::find_if(
+        _headers.begin(),
+        _headers.end(),
+        [name] (const Header& header) {
+            return header._name == name;
+        }
+    );
 }
