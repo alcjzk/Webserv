@@ -18,10 +18,10 @@ class Server
 
         Server(const Config &config);
         Server(const Server&) = delete;
-        Server(const Server&&) = delete;
+        Server(Server&&) = delete;
 
         Server& operator=(const Server&) = delete;
-        Server& operator=(const Server&&) = delete;
+        Server& operator=(Server&&) = delete;
 
         int fd();
 
@@ -41,10 +41,10 @@ class ServerSendResponseTask : public Task
 
         ServerSendResponseTask(int fd, Response* response);
         ServerSendResponseTask(const ServerSendResponseTask&) = delete;
-        ServerSendResponseTask(const ServerSendResponseTask&&) = delete;
+        ServerSendResponseTask(ServerSendResponseTask&&) = delete;
 
         ServerSendResponseTask& operator=(const ServerSendResponseTask&) = delete;
-        ServerSendResponseTask& operator=(const ServerSendResponseTask&&) = delete;
+        ServerSendResponseTask& operator=(ServerSendResponseTask&&) = delete;
 
         virtual void run() override;
 
@@ -59,10 +59,10 @@ class ServerReceiveRequestTask : public Task
 
         ServerReceiveRequestTask(int fd);
         ServerReceiveRequestTask(const ServerReceiveRequestTask&) = delete;
-        ServerReceiveRequestTask(const ServerReceiveRequestTask&&) = delete;
+        ServerReceiveRequestTask(ServerReceiveRequestTask&&) = delete;
 
         ServerReceiveRequestTask& operator=(const ServerReceiveRequestTask&) = delete;
-        ServerReceiveRequestTask& operator=(const ServerReceiveRequestTask&&) = delete;
+        ServerReceiveRequestTask& operator=(ServerReceiveRequestTask&&) = delete;
 
         virtual void run() override;
 
@@ -101,10 +101,10 @@ class ServerAcceptTask : public Task
         ServerAcceptTask(Server& server);
 
         ServerAcceptTask(const ServerAcceptTask&) = delete;
-        ServerAcceptTask(const ServerAcceptTask&&) = delete;
+        ServerAcceptTask(ServerAcceptTask&&) = delete;
 
         ServerAcceptTask& operator=(const ServerAcceptTask&) = delete;
-        ServerAcceptTask& operator=(const ServerAcceptTask&&) = delete;
+        ServerAcceptTask& operator=(ServerAcceptTask&&) = delete;
 
         virtual void run() override;
 
