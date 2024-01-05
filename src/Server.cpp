@@ -11,7 +11,7 @@
 #include "RequestLine.hpp"
 #include "HTTPError.hpp"
 #include "Log.hpp"
-#include "defs.hpp"
+#include "http.hpp"
 #include "Server.hpp"
 
 using std::string;
@@ -167,7 +167,7 @@ void ServerReceiveRequestTask::receive_headers()
                 return ;
             }
             // Append to pre-existing headers when header is prefixed by SP/HT
-            if ((line[0] == SP || line[0] == HT) && !_request._headers.empty())
+            if ((line[0] == http::SP || line[0] == http::HT) && !_request._headers.empty())
             {
                 _request._headers.back().append(line);
             }

@@ -24,8 +24,6 @@ std::ostream& operator<<(std::ostream& os, const HTTPVersion& version);
 
 #ifdef TESTS
 
-#include "defs.hpp"
-
 class HTTPVersionTests : public HTTPVersion
 {
     public:
