@@ -11,7 +11,7 @@ OPT = 0
 WARN = all extra error no-unused-variable no-unused-parameter
 EXTRA = -g -MP -MMD
 
-CFLAGS 	= -I$(SRC_DIR) $(EXTRA) $(WARN:%=-W%) -O$(OPT) -std=c++98 -D LOG_ENABLE -D LOGLEVEL_INFO
+CFLAGS 	= -I$(SRC_DIR) $(EXTRA) $(WARN:%=-W%) -O$(OPT) -std=c++11 -D LOG_ENABLE -D LOGLEVEL_INFO
 
 SHELL	= /bin/sh
 

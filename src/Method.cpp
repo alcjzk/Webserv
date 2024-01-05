@@ -6,11 +6,6 @@
 using std::istream;
 using std::string;
 
-Method::Method() : _type(GET)
-{
-
-}
-
 Method::Method(const std::string& str) : _type(type_from(str))
 {
 

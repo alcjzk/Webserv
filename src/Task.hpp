@@ -12,7 +12,7 @@ class Task
             Writable
         } WaitFor;
 
-        virtual ~Task();
+        virtual ~Task() = default;
 
         int     fd();
         bool    is_complete();

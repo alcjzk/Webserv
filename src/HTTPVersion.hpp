@@ -7,7 +7,7 @@
 class HTTPVersion
 {
     public:
-        HTTPVersion();
+        HTTPVersion() = default;
         HTTPVersion(const std::string& version);
         HTTPVersion(unsigned int major, unsigned int minor) throw();
 

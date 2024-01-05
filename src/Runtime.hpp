@@ -9,14 +9,18 @@ class Runtime
 {
     public:
         ~Runtime();
+        Runtime(const Runtime&) = delete;
+        Runtime(const Runtime&&) = delete;
+
+        Runtime& operator=(const Runtime&) = delete;
+        Runtime& operator=(const Runtime&&) = delete;
+
         static void enqueue(Task* task);
         void run();
         static Runtime& instance();
 
     private:
-        Runtime();
-        Runtime(const Runtime&);
-        void operator=(const Runtime&);
+        Runtime() = default;
 
         static void                     _handle_interrupt(int);
         void                            _dequeue(Task* task);

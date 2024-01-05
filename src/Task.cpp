@@ -27,8 +27,3 @@ Task::WaitFor Task::wait_for()
 {
     return _wait_for;
 }
-
-Task::~Task()
-{
-
-}

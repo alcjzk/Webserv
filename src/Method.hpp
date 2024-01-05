@@ -5,7 +5,7 @@
 
 class Method {
     public:
-        Method();
+        Method() = default;
         Method(const std::string& str);
 
         std::string to_string() const;

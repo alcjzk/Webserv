@@ -6,26 +6,9 @@ Error::Error(Kind kind) : std::runtime_error(kind_str(kind)), _kind(kind)
 
 }
 
-Error::Error(const Error& other) : std::runtime_error(other), _kind(other._kind)
-{
-
-}
-
-Error::~Error() throw()
-{
-
-}
-
 const char* Error::what() const throw()
 {
     return kind_str(_kind);
-}
-
-Error& Error::operator=(const Error& other)
-{
-    (void)std::runtime_error::operator=(other);
-    _kind = other._kind;
-    return *this;
 }
 
 bool Error::operator==(const Error& other) const

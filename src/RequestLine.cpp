@@ -5,11 +5,6 @@
 using std::string;
 using std::ostream;
 
-RequestLine::RequestLine()
-{
-
-}
-
 // TODO: Cleanup
 RequestLine::RequestLine(const string& line)
 {

@@ -5,16 +5,6 @@
 #include <errno.h>
 #include "Response.hpp"
 
-Response::Response()
-{
-
-}
-
-Response::~Response()
-{
-
-}
-
 bool Response::send(int fd)
 {
     ssize_t     bytes_sent;
@@ -33,11 +23,6 @@ TextResponse::TextResponse(std::string text)
 :   Response(),
     _text(text),
     _bytes_left(_text.length())
-{
-
-}
-
-TextResponse::~TextResponse()
 {
 
 }

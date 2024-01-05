@@ -9,9 +9,7 @@
 class Response
 {
     public:
-        Response();
-
-        virtual ~Response();
+        virtual ~Response() = default;
 
         /// Sends the response using SEND(3).
         ///
@@ -30,10 +28,6 @@ class Response
         ///
         /// @param bytes_count Amount of bytes to advance the buffer by.
         virtual void    buffer_advance(size_t bytes_count) throw() = 0;
-
-    private:
-        Response(const Response&);
-        Response& operator=(const Response&);
 };
 
 #include <string>
@@ -45,17 +39,12 @@ class TextResponse : public Response
     public:
         TextResponse(std::string text);
 
-        virtual ~TextResponse();
-
     protected:
-        virtual const void* buffer_head() const throw();
-        virtual size_t      buffer_bytes_left() const throw();
-        virtual void        buffer_advance(size_t bytes_count) throw();
+        virtual const void* buffer_head() const throw() override;
+        virtual size_t      buffer_bytes_left() const throw() override;
+        virtual void        buffer_advance(size_t bytes_count) throw() override;
 
     private:
         std::string _text;
         size_t      _bytes_left;
-
-        TextResponse(const TextResponse&);
-        TextResponse& operator=(const TextResponse&);
 };

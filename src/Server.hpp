@@ -14,17 +14,20 @@
 class Server
 {
     public:
-        Server(const Config &config);
         ~Server();
+
+        Server(const Config &config);
+        Server(const Server&) = delete;
+        Server(const Server&&) = delete;
+
+        Server& operator=(const Server&) = delete;
+        Server& operator=(const Server&&) = delete;
 
         int fd();
 
         static const HTTPVersion http_version();
 
     private:
-        Server(const Server&);
-        Server& operator=(const Server&);
-
         const Config            &_config;
         const char*             _port;
         struct addrinfo         *_address_info;
@@ -34,25 +37,34 @@ class Server
 class ServerSendResponseTask : public Task
 {
     public:
-        ServerSendResponseTask(int fd, Response* response);
+        virtual ~ServerSendResponseTask() override;
 
-        virtual ~ServerSendResponseTask();
-        virtual void run();
+        ServerSendResponseTask(int fd, Response* response);
+        ServerSendResponseTask(const ServerSendResponseTask&) = delete;
+        ServerSendResponseTask(const ServerSendResponseTask&&) = delete;
+
+        ServerSendResponseTask& operator=(const ServerSendResponseTask&) = delete;
+        ServerSendResponseTask& operator=(const ServerSendResponseTask&&) = delete;
+
+        virtual void run() override;
 
     private:
-        ServerSendResponseTask(const ServerSendResponseTask&);
-        ServerSendResponseTask& operator=(const ServerSendResponseTask&);
-
         Response* _response;
 };
 
 class ServerReceiveRequestTask : public Task
 {
     public:
-        ServerReceiveRequestTask(int fd);
+        virtual ~ServerReceiveRequestTask() override;
 
-        virtual ~ServerReceiveRequestTask();
-        virtual void run();
+        ServerReceiveRequestTask(int fd);
+        ServerReceiveRequestTask(const ServerReceiveRequestTask&) = delete;
+        ServerReceiveRequestTask(const ServerReceiveRequestTask&&) = delete;
+
+        ServerReceiveRequestTask& operator=(const ServerReceiveRequestTask&) = delete;
+        ServerReceiveRequestTask& operator=(const ServerReceiveRequestTask&&) = delete;
+
+        virtual void run() override;
 
     private:
         typedef enum Expect
@@ -60,9 +72,6 @@ class ServerReceiveRequestTask : public Task
             REQUEST_LINE,
             HEADERS
         } Expect;
-
-        ServerReceiveRequestTask(const ServerReceiveRequestTask&);
-        ServerReceiveRequestTask& operator=(const ServerReceiveRequestTask&);
 
         // State impl
         void        receive_start_line();
@@ -87,14 +96,18 @@ class ServerReceiveRequestTask : public Task
 class ServerAcceptTask : public Task
 {
     public:
+        virtual ~ServerAcceptTask() override;
+
         ServerAcceptTask(Server& server);
 
-        virtual ~ServerAcceptTask();
-        virtual void run();
+        ServerAcceptTask(const ServerAcceptTask&) = delete;
+        ServerAcceptTask(const ServerAcceptTask&&) = delete;
+
+        ServerAcceptTask& operator=(const ServerAcceptTask&) = delete;
+        ServerAcceptTask& operator=(const ServerAcceptTask&&) = delete;
+
+        virtual void run() override;
 
     private:
-        ServerAcceptTask(const ServerAcceptTask&);
-        ServerAcceptTask& operator=(const ServerAcceptTask&);
-
         Server& _server;
 };

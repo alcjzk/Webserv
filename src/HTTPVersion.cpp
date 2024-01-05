@@ -6,11 +6,6 @@
 using std::string;
 using std::ostream;
 
-HTTPVersion::HTTPVersion()
-{
-
-}
-
 HTTPVersion::HTTPVersion(unsigned int major, unsigned int minor) throw()
     : _major(major), _minor(minor)
 {

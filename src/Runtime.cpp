@@ -9,8 +9,6 @@ using std::vector;
 
 bool Runtime::_is_interrupt_signaled = false;
 
-Runtime::Runtime() {}
-
 Runtime::~Runtime()
 {
     vector<Task *>::iterator task = _tasks.begin();

@@ -10,7 +10,7 @@
 class RequestLine
 {
     public:
-        RequestLine();
+        RequestLine() = default;
         RequestLine(const std::string& line);
 
         const Method&       method() const;

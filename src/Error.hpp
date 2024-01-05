@@ -11,13 +11,9 @@ class Error : public std::runtime_error
         } Kind;
 
         Error(Kind kind);
-        Error(const Error& other);
-
-        virtual ~Error() throw();
 
         virtual const char* what() const throw();
 
-        Error&  operator=(const Error& other);
         bool    operator==(const Error& other) const;
         bool    operator==(Kind other) const;
 
@@ -26,5 +22,4 @@ class Error : public std::runtime_error
         static const char*  kind_str(Kind kind);
     private:
         Kind    _kind;
-
 };
