@@ -2,22 +2,22 @@
 
 #include <vector>
 #include <string>
+#include "RequestLine.hpp"
+#include "Response.hpp"
 
 class Request
 {
     public:
-        Request();
+        Request() = default;
+
+        const Method&       method() const;
+        const URI&          uri() const;
+        const HTTPVersion&  http_version() const;
+
+        Response*           into_response() const;
+
+        RequestLine         _request_line;
 
     private:
-        std::string                 _request_line;
         std::vector<std::string>    _headers;
-
-        typedef enum Expect
-        {
-            RequestLine,
-            Headers,
-            Body
-        } Expect;
-        Expect                  _expect;
-        std::vector<char>    _buffer;
 };

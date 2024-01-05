@@ -134,12 +134,12 @@ void ServerReceiveRequestTask::receive_start_line()
     try
     {
         _reader.trim_empty_lines();
-        _request_line = RequestLine(_reader.line());
-        if (!_request_line.http_version().is_compatible_with(Server::http_version()))
+        _request._request_line = RequestLine(_reader.line());
+        if (_request.http_version().is_compatible_with(Server::http_version()))
         {
             throw HTTPError(Status::HTTP_VERSION_NOT_SUPPORTED);
         }
-        INFO(_request_line);
+        INFO(_request._request_line);
         _expect = HEADERS;
     }
     catch (const ReaderException& error)
@@ -161,7 +161,8 @@ void ServerReceiveRequestTask::receive_headers()
             {
                 // End of headers
                 INFO("End of headers");
-                Runtime::enqueue(new ServerSendResponseTask(_fd, new TextResponse("Got request\n")));
+                Response* response = _request.into_response();
+                Runtime::enqueue(new ServerSendResponseTask(_fd, response));
                 _is_complete = true;
                 return ;
             }

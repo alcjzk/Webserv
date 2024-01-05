@@ -10,6 +10,7 @@
 #include "RequestLine.hpp"
 #include "Runtime.hpp"
 #include "Response.hpp"
+#include "Request.hpp"
 
 class Server
 {
@@ -89,7 +90,7 @@ class ServerReceiveRequestTask : public Task
         size_t              _bytes_received_total;
         std::vector<char>   _buffer;
         Reader              _reader;
-        RequestLine         _request_line;
+        Request             _request;
         bool                _is_partial_data;
 };
 

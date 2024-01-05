@@ -15,7 +15,7 @@ CFLAGS 	= -I$(SRC_DIR) $(EXTRA) $(WARN:%=-W%) -O$(OPT) -std=c++11 -D LOG_ENABLE 
 
 SHELL	= /bin/sh
 
-SRCS	= main.cpp Config.cpp Server.cpp Runtime.cpp Task.cpp Reader.cpp Method.cpp HTTPVersion.cpp URI.cpp RequestLine.cpp Error.cpp Status.cpp HTTPError.cpp Response.cpp Log.cpp
+SRCS	= main.cpp Config.cpp Server.cpp Runtime.cpp Task.cpp Reader.cpp Method.cpp HTTPVersion.cpp URI.cpp RequestLine.cpp Error.cpp Status.cpp HTTPError.cpp Response.cpp Log.cpp Request.cpp
 
 SRCS_TEST = test.cpp Reader.cpp HTTPVersion.cpp Method.cpp RequestLine.cpp URI.cpp
 
