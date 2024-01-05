@@ -135,7 +135,7 @@ void ServerReceiveRequestTask::receive_start_line()
     {
         _reader.trim_empty_lines();
         _request._request_line = RequestLine(_reader.line());
-        if (_request.http_version().is_compatible_with(Server::http_version()))
+        if (!_request.http_version().is_compatible_with(Server::http_version()))
         {
             throw HTTPError(Status::HTTP_VERSION_NOT_SUPPORTED);
         }
