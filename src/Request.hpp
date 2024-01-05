@@ -4,6 +4,7 @@
 #include <string>
 #include "RequestLine.hpp"
 #include "Response.hpp"
+#include "Header.hpp"
 
 class Request
 {
@@ -17,7 +18,5 @@ class Request
         Response*           into_response() const;
 
         RequestLine         _request_line;
-
-    private:
-        std::vector<std::string>    _headers;
+        std::vector<Header> _headers;
 };

@@ -4,6 +4,38 @@
 
 using std::string;
 
+bool is_ctl(char c)
+{
+    if (c == DEL || c <= 31)
+        return true;
+    return false;
+}
+
+/// Returns true if the character is a separator, as defined by the RFC
+bool is_separator(char c)
+{
+    const std::string separators("()<>@,;:\\\"/[]?={} \t");
+
+    for (char separator : separators)
+    {
+        if (c == separator)
+            return true;
+    }
+    return false;
+}
+
+/// Returns true if the input is a valid token, as defined by the RFC
+bool is_token(const std::string& text)
+{
+    for (char c : text)
+    {
+        if (is_ctl(c) || is_separator(c))
+            return false;
+    }
+    return true;
+}
+
+
 Header::Header(string name, string value) :
     _name(name),
     _value(value) {}

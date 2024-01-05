@@ -11,6 +11,7 @@
 #include "RequestLine.hpp"
 #include "HTTPError.hpp"
 #include "Log.hpp"
+#include "defs.hpp"
 #include "Server.hpp"
 
 using std::string;
@@ -156,17 +157,24 @@ void ServerReceiveRequestTask::receive_headers()
     {
         while (true)
         {
-            string line = _reader.line(); // TODO: Probably unnecessary copy assingnment
+            string line = _reader.line();
             if (line.empty())
             {
-                // End of headers
                 INFO("End of headers");
                 Response* response = _request.into_response();
                 Runtime::enqueue(new ServerSendResponseTask(_fd, response));
                 _is_complete = true;
                 return ;
             }
-            // Convert line to header
+            // Append to pre-existing headers when header is prefixed by SP/HT
+            if ((line[0] == SP || line[0] == HT) && !_request._headers.empty())
+            {
+                _request._headers.back().append(line);
+            }
+            else
+            {
+                _request._headers.push_back(Header(line));
+            }
         }
     }
     catch (const ReaderException& error)
