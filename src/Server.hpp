@@ -81,6 +81,7 @@ class ServerReceiveRequestTask : public Task
         std::vector<char>   _buffer;
         Reader              _reader;
         RequestLine         _request_line;
+        bool                _is_partial_data;
 };
 
 class ServerAcceptTask : public Task

@@ -91,7 +91,8 @@ ServerReceiveRequestTask::ServerReceiveRequestTask(int fd) :
     _expect(REQUEST_LINE),
     _bytes_received_total(0),
     _buffer(_header_buffer_size),
-    _reader(_buffer)
+    _reader(_buffer),
+    _is_partial_data(true)
 {
 
 }
@@ -113,6 +114,11 @@ void ServerReceiveRequestTask::fill_buffer()
     bytes_received = recv(_fd, buffer_head(), buffer_size_available(), 0);
     if (bytes_received == 0)
     {
+        if (buffer_size_available() <= 0)
+        {
+            // Out of buffer
+            throw HTTPError(Status::BAD_REQUEST);
+        }
         throw Error(Error::CLOSED);
     }
     else if (bytes_received == -1)
@@ -120,13 +126,13 @@ void ServerReceiveRequestTask::fill_buffer()
         throw std::runtime_error(strerror(errno));
     }
     _bytes_received_total += bytes_received;
+    _is_partial_data = false;
 }
 
 void ServerReceiveRequestTask::receive_start_line()
 {
     try
     {
-        fill_buffer();
         _reader.trim_empty_lines();
         _request_line = RequestLine(_reader.line());
         if (!_request_line.http_version().is_compatible_with(Server::http_version()))
@@ -134,44 +140,72 @@ void ServerReceiveRequestTask::receive_start_line()
             throw HTTPError(Status::HTTP_VERSION_NOT_SUPPORTED);
         }
         INFO(_request_line);
-        Runtime::enqueue(new ServerSendResponseTask(_fd, new TextResponse("Got request\n")));
-        _is_complete = true;
-        // TODO: _expect = HEADERS;
+        _expect = HEADERS;
     }
-    catch (const ReaderException& e)
+    catch (const ReaderException& error)
     {
-        assert(e.type() == ReaderException::NoLine);
-        if (_bytes_received_total >= _header_buffer_size)
-        {
-            throw HTTPError(Status::BAD_REQUEST);
-        }
+        // No line in buffer, we can just try to read again.
+        assert(error.type() == ReaderException::NoLine);
+        _is_partial_data = true;
     }
 }
 
 void ServerReceiveRequestTask::receive_headers()
 {
-    // TODO: Implement receiving headers
+    try
+    {
+        while (true)
+        {
+            string line = _reader.line(); // TODO: Probably unnecessary copy assingnment
+            if (line.empty())
+            {
+                // End of headers
+                INFO("End of headers");
+                Runtime::enqueue(new ServerSendResponseTask(_fd, new TextResponse("Got request\n")));
+                _is_complete = true;
+                return ;
+            }
+            // Convert line to header
+        }
+    }
+    catch (const ReaderException& error)
+    {
+        // No line in buffer, we can just try to read again.
+        assert(error.type() == ReaderException::NoLine);
+        _is_partial_data = true;
+    }
 }
 
 void ServerReceiveRequestTask::run()
 {
     try
     {
-        switch (_expect)
+        if (_is_partial_data)
         {
-            case REQUEST_LINE:
-                return receive_start_line();
-            case HEADERS:
-                return receive_headers();
-            default:
-                assert(false);
+            fill_buffer();
+        }
+        while (!_is_partial_data)
+        {
+            switch (_expect)
+            {
+                case REQUEST_LINE:
+                    receive_start_line();
+                    continue ;
+                case HEADERS:
+                    receive_headers();
+                    continue ;
+                default:
+                    assert(false);
+            }
         }
     }
     catch (const Error& error)
     {
+        // Client closed the connection
         assert(error == Error::CLOSED);
         WARN(error.what());
         close(_fd);
+        _is_complete = true;
     }
     catch (const HTTPError& error)
     {
@@ -179,13 +213,14 @@ void ServerReceiveRequestTask::run()
         // TODO: Replace with proper error response
         Response* response = new TextResponse(string(error.what()) + '\n');
         Runtime::enqueue(new ServerSendResponseTask(_fd, response));
+        _is_complete = true;
     }
-    catch (const std::runtime_error& error)
+    catch (const std::exception& error)
     {
         ERR(error.what());
         close(_fd);
+        _is_complete = true;
     }
-    _is_complete = true;
 }
 
 ServerReceiveRequestTask::~ServerReceiveRequestTask()
