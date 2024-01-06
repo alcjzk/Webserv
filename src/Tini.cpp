@@ -45,31 +45,16 @@ class Node
         std::map<std::string, Node*>* _mapValue = nullptr;
         std::string* _stringValue = nullptr;
     public:
-        Node() : _type(STRING), _stringValue(new std::string())
-        {
-            
-        }
-        Node(std::string s) : _type(STRING), _stringValue(new std::string(s))
-        {
-            std::cout << "Created new string!" << std::endl;
-        }
+        Node() : _type(STRING), _stringValue(new std::string()) { }
+        Node(std::string s) : _type(STRING), _stringValue(new std::string(s)) { }
         Node(NodeType type) : _type(type)
         {
             if (type == VECTOR)
-            {
                 _vectorValue = new std::vector<Node*>;
-                std::cout << "Created new vector: " << this << std::endl;
-            }
             if (type == MAP)
-            {
                 _mapValue = new std::map<std::string, Node*>;
-                std::cout << "Created new map: " << this << std::endl;
-            }
             if (type == STRING)
-            {
                 _stringValue = new std::string;
-                std::cout << "Created new string: " << this << std::endl;
-            }
         }
         Node(const Node& other) : _type(other._type)
         {
@@ -105,7 +90,6 @@ class Node
         }
         ~Node()
         {
-            std::cout << "Destroying " << this << std::endl;
             if (_type == VECTOR)
             {
                 for (auto v : *_vectorValue)
