@@ -34,9 +34,9 @@ int main()
         // Printing individual key-value pair
         auto v = root["root_map_value"].getStringValue();
         std::cout << "Value for key " << "root_map_value is: " << v << std::endl;
-        
+
         Server  server(config);
-        
+
         Runtime::instance().run();
     }
     catch (const char *e)
