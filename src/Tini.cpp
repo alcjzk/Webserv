@@ -20,7 +20,7 @@ enum e_ctx_state
     S_CBRACK,
 };
 
-enum e_parse_err
+enum e_printErr
 {
     E_UNEXP,
     E_BRACKC_LOW,
@@ -270,7 +270,7 @@ int chr_to_act_state(char c)
     return (-1);
 }
 
-void    parse_err(int err_type, int col, int row, std::string line)
+void    printErr(int err_type, int col, int row, std::string line)
 {
     for (int i = 0; i < col; ++i)
         std::cerr << " ";
@@ -300,7 +300,7 @@ void    parse_err(int err_type, int col, int row, std::string line)
     std::cerr << " at R: " << row + 1 << " C: " << col + 1 << "\n" << std::endl;
 }
 
-int validate_context(std::string ctx, int row)
+int validateContext(std::string ctx, int row)
 {
     std::map<int, std::vector<int> > state_transitions =
     {
@@ -322,7 +322,7 @@ int validate_context(std::string ctx, int row)
         {
             if (map_idx == state_transitions.end())
             {
-                parse_err(E_UNEXP, it - ctx.begin() + 1, row, ctx);
+                printErr(E_UNEXP, it - ctx.begin() + 1, row, ctx);
                 return (-1);
             }
             int good = 0;
@@ -333,7 +333,7 @@ int validate_context(std::string ctx, int row)
             }
             if (good != 1)
             {
-                parse_err(E_UNEXP, it - ctx.begin() + 1, row, ctx);
+                printErr(E_UNEXP, it - ctx.begin() + 1, row, ctx);
                 return (-1);
             }
         }
@@ -344,7 +344,7 @@ int validate_context(std::string ctx, int row)
                 ++balance;
                 if (balance > 2)
                 {
-                    parse_err(E_BRACKC_HIGH, it - ctx.begin(), row, ctx);
+                    printErr(E_BRACKC_HIGH, it - ctx.begin(), row, ctx);
                     return (-1);
                 }
                 break;
@@ -354,7 +354,7 @@ int validate_context(std::string ctx, int row)
                 --balance;
                 if (balance < 0)
                 {
-                    parse_err(E_BRACKC_LOW, it - ctx.begin(), row, ctx);
+                    printErr(E_BRACKC_LOW, it - ctx.begin(), row, ctx);
                     return (-1);
                 }
                 break;
@@ -365,13 +365,13 @@ int validate_context(std::string ctx, int row)
     }
     if (balance != 0)
     {
-        parse_err(E_BRACKBAL, ctx.size() - 1, row, ctx);
+        printErr(E_BRACKBAL, ctx.size() - 1, row, ctx);
         return (-1);
     }
     return (0);
 }
 
-int validate_action(std::string act, int row)
+int validateValue(std::string act, int row)
 {
     std::map<int, std::vector<int> > state_transitions =
     {
@@ -392,7 +392,7 @@ int validate_action(std::string act, int row)
         {
             if (map_idx == state_transitions.end())
             {
-                parse_err(E_UNEXP, it - act.begin() + 1, row, act);
+                printErr(E_UNEXP, it - act.begin() + 1, row, act);
                 return (-1);
             }
             int good = 0;
@@ -403,7 +403,7 @@ int validate_action(std::string act, int row)
             }
             if (good != 1)
             {
-                parse_err(E_UNEXP, it - act.begin() + 1, row, act);
+                printErr(E_UNEXP, it - act.begin() + 1, row, act);
                 return (-1);
             }
         }
@@ -411,7 +411,7 @@ int validate_action(std::string act, int row)
         {
             if (eq_visited)
             {
-                parse_err(E_EQCOUNT, act.size() - 1, row, act);
+                printErr(E_EQCOUNT, act.size() - 1, row, act);
                 return (-1);
             }
             eq_visited = true;
@@ -419,13 +419,13 @@ int validate_action(std::string act, int row)
     }
     if (!eq_visited)
     {
-        parse_err(E_NOEQ, act.size() - 1, row, act);
+        printErr(E_NOEQ, act.size() - 1, row, act);
         return (-1);
     }
     return (0);
 }
 
-int perform_context(std::string ctx, int row, ctx_state* state)
+int contextSwitch(std::string ctx, int row, ctx_state* state)
 {
     std::string processed;
     std::vector<std::string> map_ops;
@@ -469,7 +469,7 @@ int perform_context(std::string ctx, int row, ctx_state* state)
                 if (vec)
                 {
                     if (tmp->getType() != Node::VECTOR)
-                        throw "perform_context: Expected vector value";
+                        throw "contextSwitch: Expected vector value";
                     tmp->getVectorValue().push_back(new Node(Node::MAP));
                     tmp = tmp->getVectorValue().back();
                 }
@@ -490,34 +490,35 @@ int perform_context(std::string ctx, int row, ctx_state* state)
             }
         }
         else
-            throw "perform_context: Unexpected lone string in tree";
+            throw "contextSwitch: Unexpected lone string in tree";
     }
     return (0);
 }
 
-int perform_action(std::string act, int row, ctx_state* state)
+int valueInsertion(std::string act, int row, ctx_state* state)
 {
     std::vector<std::string> splitted = split(act, "=");
     switch (state->current->getType())
     {
         case Node::VECTOR:
-            throw "perform_action: Vector cannot act as endpoint";
+            throw "valueInsertion: Vector cannot act as endpoint";
             break;
         case Node::MAP:
             state->current->getMapValue()[splitted[0]] = new Node(splitted[1]);
             break;
         case Node::STRING:
-            throw "perform_action: String cannot act as endpoint";
+            throw "valueInsertion: String cannot act as endpoint";
             break;
         default:
-            throw "perform_action: Unknown action value";
+            throw "valueInsertion: Unknown action value";
     }
     return (0);
 }
 
-std::string remove_spaces(std::string i)
+std::string stripSpaces(std::string i)
 {
     std::string processed("");
+
     for ( std::string::iterator it = i.begin(); it != i.end(); ++it)
     {
         if (!(isspace(*it)))
@@ -526,32 +527,52 @@ std::string remove_spaces(std::string i)
     return processed;
 }
 
-Node* construct_tree(std::string input)
+int validateConfig(std::vector<std::string>& split_input)
 {
     int errc = 0;
-    int context_state = Node::MAP;
-    std::vector<std::string>    splitted_input = split(input, std::string("\n"));
-    Node* root = new Node(Node::MAP);
-    ctx_state state = {context_state, root, root};
 
-    for (int i = 0; i < splitted_input.size(); ++i)
+    for (int i = 0; i < split_input.size(); ++i)
     {
-        std::string no_space = remove_spaces(splitted_input[i]);
+        std::string no_space = stripSpaces(split_input[i]);
+        switch (match_input(split_input[i]))
+        {
+            case 1:
+                if (validateContext(no_space, i) == -1)
+                    ++errc;
+                break;
+            case 2:
+                if (validateValue(no_space, i) == -1)
+                    ++errc;
+                break;
+            default:
+                break;
+        }
+    }
+    if (errc)
+    {
+        std::cerr << "Found a total of " << errc << " errors in the configuration!" << std::endl;
+        return (-1);
+    }
+    return (0);
+}
+
+Node* constructTree(std::vector<std::string>& split_input)
+{
+    Node* root = new Node(Node::MAP);
+    ctx_state state = {Node::MAP, root, root};
+
+    for (int i = 0; i < split_input.size(); ++i)
+    {
+        std::string no_space = stripSpaces(split_input[i]);
         try
         {
-            switch (match_input(splitted_input[i]))
+            switch (match_input(split_input[i]))
             {
                 case 1:
-                    if (validate_context(no_space, i) == -1)
-                        ++errc;
-                    if (!errc)
-                        perform_context(no_space, i, &state);
+                    contextSwitch(no_space, i, &state);
                     break;
                 case 2:
-                    if (validate_action(no_space, i) == -1)
-                        ++errc;
-                    if (!errc)
-                        perform_action(no_space, i, &state);
+                    valueInsertion(no_space, i, &state);
                     break;
                 default:
                     break;
@@ -562,11 +583,6 @@ Node* construct_tree(std::string input)
             std::cout << e.what() << std::endl;
         }
     }
-    if (errc)
-    {
-        std::cerr << "Found a total of " << errc << " errors in the configuration!" << std::endl;
-        exit(1);
-    }
     return root;
 }
 
@@ -574,12 +590,14 @@ int main(void)
 {
     std::ifstream f("../config.tini");
     std::stringstream ss;
-    std::map<std::string, std::string> gobal_map;
     
     ss << f.rdbuf();
     std::string input_string = ss.str();
     
-    Node* root = construct_tree(input_string);
+    std::vector<std::string> split_input = split(input_string, "\n");
+    if (validateConfig(split_input) == -1)
+        return (1);
+    Node* root = constructTree(split_input);
     std::map<std::string, Node*> root_value = root->getMapValue();
     root->print_contents(0, std::string("root"));
     delete root;
