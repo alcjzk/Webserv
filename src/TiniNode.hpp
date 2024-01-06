@@ -1,5 +1,6 @@
 #include <map>
 #include <vector>
+#include <string>
 
 #ifndef TINI_NODE_H
 #define TINI_NODE_H

@@ -1,4 +1,6 @@
 #include <iostream>
+#include <string>
+#include <vector>
 
 #ifndef TINI_UTILS_HPP
 #define TINI_UTILS_HPP
