@@ -1,24 +1,27 @@
-#ifndef METHOD_H
-# define METHOD_H
+#pragma once
 
-# include <string>
+#include <string>
+#include <iostream>
 
 class Method {
     public:
+        Method() = default;
         Method(const std::string& str);
 
-        std::string             to_string() const;
-        static const Method     GET();
-        static const Method     POST();
-        static const Method     PUT();
+        std::string to_string() const;
 
+        bool operator==(const Method& other);
     private:
-        enum type
+        typedef enum Type
         {
-            _GET,
-            _POST,
-            _PUT
-        }   _type;
+            GET,
+            POST,
+            DELETE
+        }   Type;
+
+        static Type type_from(const std::string& str);
+
+        Type    _type;
 };
 
-#endif
+std::ostream& operator<<(std::ostream& os, const Method& method);

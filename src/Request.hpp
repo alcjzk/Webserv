@@ -1,29 +1,23 @@
-#ifndef REQUEST_H
-# define REQUEST_H
+#pragma once
 
-# include <vector>
-# include <stdint.h>
-# include <string>
-# include "Method.hpp"
+#include <vector>
+#include <string>
+#include "RequestLine.hpp"
+#include "Response.hpp"
+#include "Header.hpp"
 
-class Request {
+class Request
+{
     public:
-        Request(std::vector<uint8_t>& bytes);
+        Request() = default;
 
-        bool                        is_complete() const;
-        bool                        is_headers_complete() const;
-        void                        extend(const std::vector<uint8_t>& bytes);
-        std::vector<uint8_t>        body() const;
-        std::vector<std::string>    headers() const;
-        std::string                 url() const;
-        Method                      method() const;
+        const Method&                       method() const;
+        const URI&                          uri() const;
+        const HTTPVersion&                  http_version() const;
+        std::vector<Header>::const_iterator header(const std::string& name) const;
 
-    private:
-        std::vector<uint8_t>        _data;
-        std::vector<uint8_t>        _body;
-        std::vector<std::string>    _headers;
-        std::string                 _url;
-        Method                      _method;
+        Response*           into_response() const;
+
+        RequestLine         _request_line;
+        std::vector<Header> _headers;
 };
-
-#endif

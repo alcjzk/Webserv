@@ -1,22 +1,16 @@
+#pragma once
 
-#ifndef CONFIG_H
-# define CONFIG_H
-
-# include <vector>
-# include <string>
-
-using namespace std;
+#include <vector>
+#include <string>
 
 class Config {
     public:
         Config();
 
-        const vector<string>    &ports() const;
-        int                     backlog() const;
+        const std::vector<std::string>& ports() const;
+        int                             backlog() const;
 
     private:
-        vector<string>    _ports;
-        int               _backlog;
+        std::vector<std::string>    _ports;
+        int                         _backlog;
 };
-
-#endif
