@@ -45,15 +45,15 @@ class Node
         std::map<std::string, Node*>* _mapValue = nullptr;
         std::string* _stringValue = nullptr;
     public:
-        Node() : _type(STRING), _vectorValue(nullptr), _mapValue(nullptr), _stringValue(new std::string())
+        Node() : _type(STRING), _stringValue(new std::string())
         {
             
         }
-        Node(std::string s) : _type(STRING), _vectorValue(nullptr), _mapValue(nullptr), _stringValue(new std::string(s))
+        Node(std::string s) : _type(STRING), _stringValue(new std::string(s))
         {
             std::cout << "Created new string!" << std::endl;
         }
-        Node(NodeType type) : _type(type), _vectorValue(nullptr), _mapValue(nullptr), _stringValue(nullptr)
+        Node(NodeType type) : _type(type)
         {
             if (type == VECTOR)
             {
@@ -71,7 +71,7 @@ class Node
                 std::cout << "Created new string: " << this << std::endl;
             }
         }
-        Node(const Node& other) : _type(other._type), _vectorValue(nullptr), _mapValue(nullptr), _stringValue(nullptr)
+        Node(const Node& other) : _type(other._type)
         {
             if (other._type == VECTOR)
                 _vectorValue = new std::vector<Node*>(*other._vectorValue);
@@ -109,23 +109,17 @@ class Node
             if (_type == VECTOR)
             {
                 for (auto v : *_vectorValue)
-                {
                     delete v;
-                }
                 delete _vectorValue;
             }
             else if (_type == MAP)
             {
                 for (auto const& [key, val] : *_mapValue)
-                {
                     delete val;
-                }
                 delete _mapValue;
             }
             else if (_type == STRING)
-            {
                 delete _stringValue;
-            }
         }
         NodeType getType() const
         {
@@ -151,27 +145,19 @@ class Node
         }
         Node& fetch(std::string key)
         {
-            std::cout << "Fetching " << key << std::endl;
             if (_type == VECTOR)
             {
                 for (size_t i = 0; i < _vectorValue->size(); ++i)
                 {
                     if ((*_vectorValue)[i]->getType() == MAP && ((*_vectorValue)[i]->getMapValue().count(key) > 0))
-                    {
-                            std::cout << "Found key in vector\n";
                             return *((*_vectorValue)[i]->getMapValue()[key]);
-                    }
                 }
             }
             else if (_type == MAP)
             {
                 if (getMapValue().count(key) > 0)
-                {
-                    std::cout << "Found key in map\n";
                     return *(getMapValue()[key]);
-                }
             }
-            std::cout << "Not found returning " << this << std::endl;
             return *this;
         }
         void    print_contents(int depth, std::string name)
@@ -412,6 +398,7 @@ int validate_action(std::string act, int row)
     bool eq_visited = false;
     int next_state = S_NONE;
     std::map<int, std::vector<int> >::iterator map_idx;
+
     for (std::string::iterator it = act.begin(); it != act.end(); ++it)
     {
         cur_state = chr_to_act_state(*it);
@@ -458,7 +445,6 @@ int perform_context(std::string ctx, int row, ctx_state* state)
 {
     std::string processed;
     std::vector<std::string> map_ops;
-    std::cout << "Performing context switch on " << ctx << std::endl;
     bool vec = false;
     Node* tmp = nullptr;
 
@@ -473,17 +459,13 @@ int perform_context(std::string ctx, int row, ctx_state* state)
     state->current = state->root;
     for (size_t i = 0; i < map_ops.size(); ++i)
     {
-        std::cout << "i: " << i << " " << map_ops[i] << std::endl;
-        std::cout << "loop context: " << state->current << std::endl;
         if (state->current->getType() == Node::MAP || state->current->getType() == Node::VECTOR)
         {
             if (i == map_ops.size() - 1)
             {
-                std::cout << "Last element, which is: " << map_ops[i] << std::endl;
                 tmp = &state->current->fetch(map_ops[i]);
                 if (tmp == state->current)
                 {
-                    std::cout << map_ops[i] << " doesn't exist, creating it!\n";
                     if (vec)
                     {
                         if (state->current->getType() == Node::VECTOR)
@@ -504,22 +486,16 @@ int perform_context(std::string ctx, int row, ctx_state* state)
                 {
                     if (tmp->getType() != Node::VECTOR)
                         throw "perform_context: Expected vector value";
-                    std::cout << "pushing map to vector" << std::endl;
                     tmp->getVectorValue().push_back(new Node(Node::MAP));
                     tmp = tmp->getVectorValue().back();
-                    std::cout << "tmp is: " << tmp->getType() << " with tag: ";
-                    std::cout << "Changing current state to " << tmp << std::endl;
                 }
                 state->current = tmp;
             }
             else
             {
                 tmp = &state->current->fetch(map_ops[i]);
-                std::cout << "tmp:" << tmp << "   state->current: " << state->current << std::endl;
-                std::cout << "tmp.type:" << tmp->getType() << "   state->current->type: " << state->current->getType() << std::endl;
                 if (tmp == state->current)
                 {
-                    std::cout << map_ops[i] << " doesn't exist, creating it!\n";
                     if (state->current->getType() == Node::VECTOR)
                         state->current->getVectorValue().push_back(new Node(Node::MAP));
                     else
@@ -532,14 +508,12 @@ int perform_context(std::string ctx, int row, ctx_state* state)
         else
             throw "perform_context: Unexpected lone string in tree";
     }
-    std::cout << "Processed: " << processed << std::endl;
     return (0);
 }
 
 int perform_action(std::string act, int row, ctx_state* state)
 {
     std::vector<std::string> splitted = split(act, "=");
-    std::cout << "Performing action on " << act << " on map: " << state->current << std::endl;
     switch (state->current->getType())
     {
         case Node::VECTOR:
@@ -547,7 +521,6 @@ int perform_action(std::string act, int row, ctx_state* state)
             break;
         case Node::MAP:
             state->current->getMapValue()[splitted[0]] = new Node(splitted[1]);
-            std::cout << "Inserted " << splitted[1] << " into " << splitted[0] << " on map: " << state->current << std::endl;
             break;
         case Node::STRING:
             throw "perform_action: String cannot act as endpoint";
