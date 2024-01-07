@@ -30,4 +30,4 @@ namespace http
         }
         return true;
     }
-}
+} // namespace http

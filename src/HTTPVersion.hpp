@@ -11,10 +11,11 @@ class HTTPVersion
         HTTPVersion(const std::string& version);
         HTTPVersion(unsigned int major, unsigned int minor) throw();
 
-        unsigned int    major() const;
-        unsigned int    minor() const;
+        unsigned int major() const;
+        unsigned int minor() const;
 
-        bool is_compatible_with(const HTTPVersion& other) const;
+        bool         is_compatible_with(const HTTPVersion& other) const;
+
     private:
         unsigned int _major;
         unsigned int _minor;

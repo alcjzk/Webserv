@@ -6,3 +6,4 @@
 !*.hpp
 !.editorconfig
 !.github/workflows/*
+!.clang-format

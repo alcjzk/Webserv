@@ -3,7 +3,8 @@
 class Status
 {
     public:
-        typedef enum Code {
+        typedef enum Code
+        {
             BAD_REQUEST = 400,
             NOT_FOUND = 404,
             INTERNAL_SERVER_ERROR = 500,
@@ -17,5 +18,5 @@ class Status
         bool        is_error() const;
 
     private:
-        Code    _code;
+        Code _code;
 };

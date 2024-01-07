@@ -2,8 +2,8 @@
 #include "HTTPError.hpp"
 #include "RequestLine.hpp"
 
-using std::string;
 using std::ostream;
+using std::string;
 
 // TODO: Cleanup
 RequestLine::RequestLine(const string& line)

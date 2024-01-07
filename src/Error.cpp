@@ -1,10 +1,7 @@
 #include <cassert>
 #include "Error.hpp"
 
-Error::Error(Kind kind) : std::runtime_error(kind_str(kind)), _kind(kind)
-{
-
-}
+Error::Error(Kind kind) : std::runtime_error(kind_str(kind)), _kind(kind) {}
 
 const char* Error::what() const throw()
 {

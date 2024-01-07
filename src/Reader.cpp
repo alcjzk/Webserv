@@ -2,13 +2,13 @@
 #include <sys/types.h>
 #include "Reader.hpp"
 
-using std::vector;
-using std::string;
 using std::distance;
+using std::string;
+using std::vector;
 
-Reader::Reader(const vector<char>& buffer, size_t position) : _buffer(buffer), _head(_buffer.begin())
+Reader::Reader(const vector<char>& buffer, size_t position)
+    : _buffer(buffer), _head(_buffer.begin())
 {
-
 }
 
 Reader& Reader::trim(const std::string& charset) throw()
@@ -27,14 +27,15 @@ void Reader::trim_empty_lines()
         if (*_head == '\r')
         {
             if (next() == _buffer.end() || *next() == '\n')
-                break ;
+                break;
             std::advance(_head, 2);
         }
         else if (*_head == '\n')
         {
             std::advance(_head, 1);
         }
-        else break ;
+        else
+            break;
     }
 }
 
@@ -76,10 +77,7 @@ std::string Reader::line()
     throw ReaderException(ReaderException::NoLine);
 }
 
-ReaderException::ReaderException(Type type) throw() : _type(type)
-{
-
-}
+ReaderException::ReaderException(Type type) throw() : _type(type) {}
 
 ReaderException::Type ReaderException::type() const throw()
 {
@@ -101,7 +99,7 @@ vector<char> ReaderTests::buffer(const char* content)
 void ReaderTests::line_empty()
 {
     vector<char> buffer = ReaderTests::buffer("\n");
-    Reader reader(buffer);
+    Reader       reader(buffer);
 
     if (reader.line() != "")
         throw __FUNCTION__;
@@ -110,22 +108,26 @@ void ReaderTests::line_empty()
 void ReaderTests::line_noline()
 {
     vector<char> buffer = ReaderTests::buffer("aaaa");
-    Reader reader(buffer);
+    Reader       reader(buffer);
 
-    try {
+    try
+    {
         string line = reader.line();
         throw 0;
     }
-    catch (int) {
+    catch (int)
+    {
         throw __FUNCTION__;
     }
-    catch (...) {  }
+    catch (...)
+    {
+    }
 }
 
 void ReaderTests::line_one()
 {
     vector<char> buffer = ReaderTests::buffer("a\n");
-    Reader reader(buffer);
+    Reader       reader(buffer);
 
     if (reader.line() != "a")
         throw __FUNCTION__;
@@ -134,10 +136,10 @@ void ReaderTests::line_one()
 void ReaderTests::line_basic()
 {
     vector<char> buffer = ReaderTests::buffer("aa\nbb\r\n");
-    Reader reader(buffer);
+    Reader       reader(buffer);
 
-    string line1 = reader.line();
-    string line2 = reader.line();
+    string       line1 = reader.line();
+    string       line2 = reader.line();
 
     if (line1 != "aa" || line2 != "bb")
         throw __FUNCTION__;

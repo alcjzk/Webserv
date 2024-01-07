@@ -4,20 +4,26 @@
 #include "RequestLine.hpp"
 #include "Reader.hpp"
 
-
-
-using std::vector;
 using std::string;
+using std::vector;
 
 #define DELIM "\t "
 
-#define assert_throw(expression, exception_type) \
-    try { expression; assert(false); } \
-    catch (exception_type) { assert(true); }
+#define assert_throw(expression, exception_type)                                                   \
+    try                                                                                            \
+    {                                                                                              \
+        expression;                                                                                \
+        assert(false);                                                                             \
+    }                                                                                              \
+    catch (exception_type)                                                                         \
+    {                                                                                              \
+        assert(true);                                                                              \
+    }
 
 int main()
 {
-    try {
+    try
+    {
         ReaderTests::line_one();
         ReaderTests::line_noline();
         ReaderTests::line_empty();
@@ -26,10 +32,10 @@ int main()
         HTTPVersionTests::all();
 
         static const char content[] = "GET     \t\t\t   /\t\t      HTTP/1.1  \t\t\t\t    \r\n";
-        vector<char> buffer(content, content + sizeof(content) / sizeof(*content));
-        Reader reader(buffer);
+        vector<char>      buffer(content, content + sizeof(content) / sizeof(*content));
+        Reader            reader(buffer);
 
-        RequestLine line(reader.line());
+        RequestLine       line(reader.line());
 
         std::cout << line.method() << ' ' << line.uri() << ' ' << line.http_version() << '\n';
 
@@ -39,7 +45,8 @@ int main()
     {
         std::cerr << "Test failed: " << failed_test << '\n';
     }
-    catch (const std::string& failed_test) {
+    catch (const std::string& failed_test)
+    {
         std::cerr << "Test failed: " << failed_test << '\n';
     }
     catch (const std::exception& e)

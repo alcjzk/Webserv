@@ -2,18 +2,17 @@
 #include "HTTPError.hpp"
 #include "HTTPVersion.hpp"
 
-using std::string;
 using std::ostream;
+using std::string;
 
 HTTPVersion::HTTPVersion(unsigned int major, unsigned int minor) throw()
     : _major(major), _minor(minor)
 {
-
 }
 
 bool HTTPVersion::is_compatible_with(const HTTPVersion& other) const
 {
-    return (_major == other._major);
+    return _major == other._major;
 }
 
 HTTPVersion::HTTPVersion(const string& version)
@@ -59,19 +58,22 @@ void HTTPVersionTests::all()
 
 void HTTPVersionTests::basic()
 {
-    try {
+    try
+    {
         HTTPVersion version("HTTP/1.2");
         if (version.major() != 1 || version.minor() != 2)
             throw TESTFAIL;
     }
-    catch (...) {
+    catch (...)
+    {
         throw TESTFAIL;
     }
 }
 
 void HTTPVersionTests::compatible()
 {
-    try {
+    try
+    {
         HTTPVersion one_zero(1, 0);
         HTTPVersion one_one(1, 1);
         HTTPVersion two_zero(2, 0);
@@ -80,7 +82,8 @@ void HTTPVersionTests::compatible()
         if (HTTPVersion(2, 0).is_compatible_with(HTTPVersion(1, 0)))
             throw TESTFAIL;
     }
-    catch (...) {
+    catch (...)
+    {
         throw TESTFAIL;
     }
 }

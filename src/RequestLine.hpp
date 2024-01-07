@@ -13,9 +13,9 @@ class RequestLine
         RequestLine() = default;
         RequestLine(const std::string& line);
 
-        const Method&       method() const;
-        const URI&          uri() const;
-        const HTTPVersion&  http_version() const;
+        const Method&      method() const;
+        const URI&         uri() const;
+        const HTTPVersion& http_version() const;
 
     private:
         Method      _method;
