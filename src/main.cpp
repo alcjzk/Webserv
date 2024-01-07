@@ -9,12 +9,12 @@ int main()
 {
     try
     {
-        Config  config;
-        Server  server(config);
+        Config config;
+        Server server(config);
 
         Runtime::instance().run();
     }
-    catch (const char *e)
+    catch (const char* e)
     {
         ERR(e);
         return EXIT_FAILURE;

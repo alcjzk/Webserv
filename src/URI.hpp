@@ -10,6 +10,7 @@ class URI
         URI(std::string uri);
 
         const std::string& value() const;
+
     private:
         std::string _value;
 };

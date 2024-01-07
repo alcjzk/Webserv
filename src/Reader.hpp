@@ -13,7 +13,7 @@ class Reader
         /// @brief Advance the reader until a byte not present in charset.
         /// @param charset
         // TODO: Unused?
-        Reader& trim(const std::string& charset) throw();
+        Reader&     trim(const std::string& charset) throw();
 
         /// Extracts a line and advances the reader accordinly
         ///
@@ -28,17 +28,16 @@ class Reader
         /// If there are no empty lines at the current
         /// position or the reader has been exhausted, this function has no
         /// effect.
-        void trim_empty_lines();
+        void        trim_empty_lines();
 
-        void consume(size_t amount);
+        void        consume(size_t amount);
 
     private:
-
         /// Returns a constant iterator pointing to the next element in the reader.
-        std::vector<char>::const_iterator    next();
+        std::vector<char>::const_iterator next();
 
-        const std::vector<char>&             _buffer;
-        std::vector<char>::const_iterator    _head;
+        const std::vector<char>&          _buffer;
+        std::vector<char>::const_iterator _head;
 };
 
 class ReaderException : public std::exception
@@ -51,7 +50,7 @@ class ReaderException : public std::exception
 
         ReaderException(Type type) throw();
 
-        Type    type() const throw();
+        Type                type() const throw();
 
         virtual const char* what() const throw();
 
@@ -68,6 +67,7 @@ class ReaderTests : public Reader
         static void line_basic();
         static void line_one();
         static void line_noline();
+
     private:
         static std::vector<char> buffer(const char* content);
 };

@@ -11,7 +11,7 @@ bool Runtime::_is_interrupt_signaled = false;
 
 Runtime::~Runtime()
 {
-    vector<Task *>::iterator task = _tasks.begin();
+    vector<Task*>::iterator task = _tasks.begin();
     for (; task != _tasks.end(); task++)
     {
         delete *task;
@@ -19,21 +19,21 @@ Runtime::~Runtime()
     std::system("leaks -q webserv"); // FIXME: Make conditional
 }
 
-Runtime &Runtime::instance()
+Runtime& Runtime::instance()
 {
     static Runtime runtime;
 
     return runtime;
 }
 
-void Runtime::enqueue(Task *task)
+void Runtime::enqueue(Task* task)
 {
     instance()._tasks.push_back(task);
 }
 
-void Runtime::_dequeue(Task *task)
+void Runtime::_dequeue(Task* task)
 {
-    vector<Task *>::iterator it = std::find(_tasks.begin(), _tasks.end(), task);
+    vector<Task*>::iterator it = std::find(_tasks.begin(), _tasks.end(), task);
     _tasks.erase(it);
     delete task;
 }
@@ -44,9 +44,9 @@ void Runtime::run()
         throw "Failed to register handler for SIGINT";
     while (!_is_interrupt_signaled)
     {
-        vector<struct pollfd> pollfds;
+        vector<struct pollfd>   pollfds;
 
-        vector<Task *>::iterator task = _tasks.begin();
+        vector<Task*>::iterator task = _tasks.begin();
         for (; task != _tasks.end(); task++)
         {
             short events = 0;
@@ -54,10 +54,7 @@ void Runtime::run()
                 events = POLLIN;
             else if ((*task)->wait_for() == Task::Writable)
                 events = POLLOUT;
-            pollfds.push_back((struct pollfd){
-                .fd = (*task)->fd(),
-                .events = events,
-                .revents = 0});
+            pollfds.push_back((struct pollfd){.fd = (*task)->fd(), .events = events, .revents = 0});
         }
 
         // Don't throw when poll errors due to signal
@@ -69,7 +66,7 @@ void Runtime::run()
         {
             if (pollfd->revents)
             {
-                Task *task = _task(pollfd->fd);
+                Task* task = _task(pollfd->fd);
                 task->run();
                 if (task->is_complete())
                     _dequeue(task);
@@ -78,14 +75,14 @@ void Runtime::run()
     }
 }
 
-Task *Runtime::_task(int fd)
+Task* Runtime::_task(int fd)
 {
-    vector<Task *>::iterator task = _tasks.begin();
+    vector<Task*>::iterator task = _tasks.begin();
     for (; task != _tasks.end(); task++)
     {
         if (**task == fd)
         {
-            return (*task);
+            return *task;
         }
     }
     throw "Unknown task";

@@ -5,10 +5,7 @@
 using std::istream;
 using std::string;
 
-Method::Method(const std::string& str) : _type(type_from(str))
-{
-
-}
+Method::Method(const std::string& str) : _type(type_from(str)) {}
 
 Method::Type Method::type_from(const std::string& str)
 {

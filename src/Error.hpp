@@ -14,12 +14,13 @@ class Error : public std::runtime_error
 
         virtual const char* what() const throw();
 
-        bool    operator==(const Error& other) const;
-        bool    operator==(Kind other) const;
+        bool                operator==(const Error& other) const;
+        bool                operator==(Kind other) const;
 
-        Kind kind() const;
+        Kind                kind() const;
 
         static const char*  kind_str(Kind kind);
+
     private:
-        Kind    _kind;
+        Kind _kind;
 };

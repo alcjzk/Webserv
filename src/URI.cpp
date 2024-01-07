@@ -1,17 +1,11 @@
 #include "URI.hpp"
 
-using std::string;
 using std::ostream;
+using std::string;
 
-URI::URI()
-{
+URI::URI() {}
 
-}
-
-URI::URI(string value) : _value(value)
-{
-
-}
+URI::URI(string value) : _value(value) {}
 
 const string& URI::value() const
 {

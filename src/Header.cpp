@@ -4,9 +4,7 @@
 
 using std::string;
 
-Header::Header(string name, string value) :
-    _name(name),
-    _value(value) {}
+Header::Header(string name, string value) : _name(name), _value(value) {}
 
 Header::Header(const string& text)
 {
@@ -37,7 +35,7 @@ void Header::append(const string& value)
 
     if (end_pos == string::npos)
     {
-        return ; // Ignore appending empty values
+        return; // Ignore appending empty values
     }
     _value.append(1, http::SP);
     _value.append(value.substr(start_pos, end_pos - start_pos));
