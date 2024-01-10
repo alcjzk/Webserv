@@ -6,10 +6,11 @@
 #ifndef TINITREE_HPP
 #define TINITREE_HPP
 
+#define CONFIG_NAME "config.tini"
+
 class TiniTree {
 private:
   TiniNode *_current;
-  std::string _filename;
   TiniValidator _validator;
   std::vector<std::string> _split_input;
 
@@ -17,7 +18,7 @@ public:
   TiniNode *_root;
   TiniTree();
   ~TiniTree();
-  TiniTree(std::string config_location);
+  TiniTree(std::string config_location = CONFIG_NAME);
   TiniTree(const TiniTree &other) = delete;
   TiniTree &operator=(const TiniTree &other) = delete;
   TiniTree(TiniTree&& other) = delete;

@@ -3,9 +3,9 @@
 #include <sstream>
 #include <stdexcept>
 
-TiniTree::TiniTree() : _filename("config.tini") {
+TiniTree::TiniTree() {
   try {
-    std::ifstream f(_filename);
+    std::ifstream f(CONFIG_NAME);
     std::stringstream ss;
 
     ss << f.rdbuf();
@@ -21,9 +21,9 @@ TiniTree::TiniTree() : _filename("config.tini") {
     throw std::runtime_error("TiniTree: FATAL ");
 }
 
-TiniTree::TiniTree(std::string config_location) : _filename(config_location) {
+TiniTree::TiniTree(std::string config_location) {
   try {
-    std::ifstream f(_filename);
+    std::ifstream f(config_location);
     std::stringstream ss;
 
     ss << f.rdbuf();
