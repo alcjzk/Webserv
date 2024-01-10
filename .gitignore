@@ -4,6 +4,7 @@
 !Makefile
 !*.cpp
 !*.hpp
+!*.tini
 !.editorconfig
 !.github/workflows/*
 !.clang-format
