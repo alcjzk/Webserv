@@ -123,6 +123,71 @@ TiniNode::~TiniNode() {
   }
 }
 
+TiniNode::TiniNode(TiniNode&& other)
+{
+    if (this == &other)
+        return;
+    switch (other._type)
+    {
+        case T_VECTOR:
+            _type = T_VECTOR;
+            _vectorValue = other._vectorValue;
+            other._vectorValue = nullptr;
+            break;
+        case T_MAP:
+            _type = T_MAP;
+            _mapValue = other._mapValue;
+            other._mapValue = nullptr;
+            break;
+        case T_STRING:
+            _type = T_STRING;
+            _stringValue = other._stringValue;
+            other._stringValue = nullptr;
+            break;
+    }
+}
+
+TiniNode& TiniNode::operator=(TiniNode&& other)
+{
+    if (this == &other)
+        return *this;
+    switch (_type)
+    {
+        case T_VECTOR:
+            if (_vectorValue)
+                _vectorValue->clear();
+            delete _vectorValue;
+            break;
+        case T_MAP:
+            if (_mapValue)
+                _mapValue->clear();
+            delete _mapValue;
+            break;
+        case T_STRING:
+            delete _stringValue;
+            break;
+    }
+    if (other._type == T_STRING)
+    {
+        _type = T_STRING;
+        _stringValue = other._stringValue;
+        other._stringValue = nullptr;
+    }
+    if (other._type == T_VECTOR)
+    {
+        _type = T_VECTOR;
+        _vectorValue = other._vectorValue;
+        other._vectorValue = nullptr;
+    }
+    if (other._type == T_MAP)
+    {
+        _type = T_MAP;
+        _mapValue = other._mapValue;
+        other._mapValue = nullptr;
+    }
+    return *this;
+}
+
 TiniNode::TiniNodeType TiniNode::getType() const { return _type; }
 
 TiniNode &TiniNode::fetchTiniNode(std::string key) {
