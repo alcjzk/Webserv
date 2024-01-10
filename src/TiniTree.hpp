@@ -19,8 +19,8 @@ public:
   TiniTree();
   ~TiniTree();
   TiniTree(std::string config_location);
-  TiniTree(const TiniTree &other) = default;
-  TiniTree &operator=(const TiniTree &other) = default;
+  TiniTree(const TiniTree &other) = delete;
+  TiniTree &operator=(const TiniTree &other) = delete;
 
   void constructTree();
   int contextSwitch(std::string ctx, int row);
