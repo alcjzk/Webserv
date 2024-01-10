@@ -11,11 +11,11 @@
 class TiniTree {
 private:
   TiniNode *_current;
+  TiniNode *_root;
   TiniValidator _validator;
   std::vector<std::string> _split_input;
 
 public:
-  TiniNode *_root;
   TiniTree();
   ~TiniTree();
   TiniTree(std::string config_location = CONFIG_NAME);

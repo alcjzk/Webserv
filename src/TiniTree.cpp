@@ -3,7 +3,7 @@
 #include <sstream>
 #include <stdexcept>
 
-TiniTree::TiniTree() {
+TiniTree::TiniTree() : _root(nullptr), _current(nullptr) {
   try {
     std::ifstream f(CONFIG_NAME);
     std::stringstream ss;
@@ -21,7 +21,8 @@ TiniTree::TiniTree() {
     throw std::runtime_error("TiniTree: FATAL ");
 }
 
-TiniTree::TiniTree(std::string config_location) {
+TiniTree::TiniTree(std::string config_location)
+    : _root(nullptr), _current(nullptr) {
   try {
     std::ifstream f(config_location);
     std::stringstream ss;
