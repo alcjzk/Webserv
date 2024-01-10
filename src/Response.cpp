@@ -7,7 +7,7 @@
 
 bool Response::send(int fd)
 {
-    ssize_t     bytes_sent;
+    ssize_t bytes_sent;
 
     bytes_sent = ::send(fd, buffer_head(), buffer_bytes_left(), 0);
     if (bytes_sent == -1)
@@ -19,12 +19,8 @@ bool Response::send(int fd)
     return false;
 }
 
-TextResponse::TextResponse(std::string text)
-:   Response(),
-    _text(text),
-    _bytes_left(_text.length())
+TextResponse::TextResponse(std::string text) : Response(), _text(text), _bytes_left(_text.length())
 {
-
 }
 
 const void* TextResponse::buffer_head() const throw()

@@ -19,15 +19,15 @@ class Response
 
     protected:
         /// Returns a pointer to the current position in the send buffer.
-        virtual const void*   buffer_head() const throw() = 0;
+        virtual const void* buffer_head() const throw() = 0;
 
         /// Returns the amount of bytes remaining in the send buffer.
-        virtual size_t  buffer_bytes_left() const throw() = 0;
+        virtual size_t      buffer_bytes_left() const throw() = 0;
 
         /// Advances the current position in the send buffer by the given amount.
         ///
         /// @param bytes_count Amount of bytes to advance the buffer by.
-        virtual void    buffer_advance(size_t bytes_count) throw() = 0;
+        virtual void        buffer_advance(size_t bytes_count) throw() = 0;
 };
 
 #include <string>

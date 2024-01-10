@@ -16,7 +16,8 @@
 
 using std::string;
 
-Server::Server(const Config &config) : _config(config), _port(config.ports().front().c_str()), _fd(-1)
+Server::Server(const Config& config)
+    : _config(config), _port(config.ports().front().c_str()), _fd(-1)
 {
     struct addrinfo hints;
     int             status;
@@ -63,7 +64,6 @@ int Server::fd()
 ServerSendResponseTask::ServerSendResponseTask(int fd, Response* response)
     : Task(fd, Writable), _response(response)
 {
-
 }
 
 ServerSendResponseTask::~ServerSendResponseTask()
@@ -76,26 +76,24 @@ void ServerSendResponseTask::run()
     try
     {
         if (!_response->send(_fd))
-            return ;
+            return;
     }
     catch (const std::runtime_error& error)
     {
         ERR(error.what());
     }
-    catch (...) { assert(false); }
+    catch (...)
+    {
+        assert(false);
+    }
     _is_complete = true;
     (void)close(_fd);
 }
 
-ServerReceiveRequestTask::ServerReceiveRequestTask(int fd) :
-    Task(fd, Readable),
-    _expect(REQUEST_LINE),
-    _bytes_received_total(0),
-    _buffer(_header_buffer_size),
-    _reader(_buffer),
-    _is_partial_data(true)
+ServerReceiveRequestTask::ServerReceiveRequestTask(int fd)
+    : Task(fd, Readable), _expect(REQUEST_LINE), _bytes_received_total(0),
+      _buffer(_header_buffer_size), _reader(_buffer), _is_partial_data(true)
 {
-
 }
 
 size_t ServerReceiveRequestTask::buffer_size_available()
@@ -110,7 +108,7 @@ char* ServerReceiveRequestTask::buffer_head()
 
 void ServerReceiveRequestTask::fill_buffer()
 {
-    ssize_t                 bytes_received = 0;
+    ssize_t bytes_received = 0;
 
     bytes_received = recv(_fd, buffer_head(), buffer_size_available(), 0);
     if (bytes_received == 0)
@@ -164,7 +162,7 @@ void ServerReceiveRequestTask::receive_headers()
                 Response* response = _request.into_response();
                 Runtime::enqueue(new ServerSendResponseTask(_fd, response));
                 _is_complete = true;
-                return ;
+                return;
             }
             // Append to pre-existing headers when header is prefixed by SP/HT
             if ((line[0] == http::SP || line[0] == http::HT) && !_request._headers.empty())
@@ -200,10 +198,10 @@ void ServerReceiveRequestTask::run()
             {
                 case REQUEST_LINE:
                     receive_start_line();
-                    continue ;
+                    continue;
                 case HEADERS:
                     receive_headers();
-                    continue ;
+                    continue;
                 default:
                     assert(false);
             }
@@ -233,20 +231,13 @@ void ServerReceiveRequestTask::run()
     }
 }
 
-ServerReceiveRequestTask::~ServerReceiveRequestTask()
-{
+ServerReceiveRequestTask::~ServerReceiveRequestTask() {}
 
-}
-
-ServerAcceptTask::ServerAcceptTask(Server& server)
-    : Task(server.fd(), Readable), _server(server)
-{
-
-}
+ServerAcceptTask::ServerAcceptTask(Server& server) : Task(server.fd(), Readable), _server(server) {}
 
 void ServerAcceptTask::run()
 {
-    int         fd;
+    int fd;
 
     try
     {
@@ -269,7 +260,4 @@ void ServerAcceptTask::run()
     }
 }
 
-ServerAcceptTask::~ServerAcceptTask()
-{
-
-}
+ServerAcceptTask::~ServerAcceptTask() {}

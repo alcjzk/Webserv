@@ -17,22 +17,22 @@ class Server
     public:
         ~Server();
 
-        Server(const Config &config);
+        Server(const Config& config);
         Server(const Server&) = delete;
         Server(Server&&) = delete;
 
-        Server& operator=(const Server&) = delete;
-        Server& operator=(Server&&) = delete;
+        Server&                  operator=(const Server&) = delete;
+        Server&                  operator=(Server&&) = delete;
 
-        int fd();
+        int                      fd();
 
         static const HTTPVersion http_version();
 
     private:
-        const Config            &_config;
-        const char*             _port;
-        struct addrinfo         *_address_info;
-        int                     _fd;
+        const Config&    _config;
+        const char*      _port;
+        struct addrinfo* _address_info;
+        int              _fd;
 };
 
 class ServerSendResponseTask : public Task
@@ -47,7 +47,7 @@ class ServerSendResponseTask : public Task
         ServerSendResponseTask& operator=(const ServerSendResponseTask&) = delete;
         ServerSendResponseTask& operator=(ServerSendResponseTask&&) = delete;
 
-        virtual void run() override;
+        virtual void            run() override;
 
     private:
         Response* _response;
@@ -65,7 +65,7 @@ class ServerReceiveRequestTask : public Task
         ServerReceiveRequestTask& operator=(const ServerReceiveRequestTask&) = delete;
         ServerReceiveRequestTask& operator=(ServerReceiveRequestTask&&) = delete;
 
-        virtual void run() override;
+        virtual void              run() override;
 
     private:
         typedef enum Expect
@@ -75,14 +75,14 @@ class ServerReceiveRequestTask : public Task
         } Expect;
 
         // State impl
-        void        receive_start_line();
-        void        receive_headers();
+        void                receive_start_line();
+        void                receive_headers();
         // TODO: void receive_body()
 
         // Util
-        void        fill_buffer();
-        char*       buffer_head();
-        size_t      buffer_size_available();
+        void                fill_buffer();
+        char*               buffer_head();
+        size_t              buffer_size_available();
 
         // TODO: Use value from config + expanding buffersize?
         static const size_t _header_buffer_size = 4096;
@@ -107,7 +107,7 @@ class ServerAcceptTask : public Task
         ServerAcceptTask& operator=(const ServerAcceptTask&) = delete;
         ServerAcceptTask& operator=(ServerAcceptTask&&) = delete;
 
-        virtual void run() override;
+        virtual void      run() override;
 
     private:
         Server& _server;

@@ -7,3 +7,4 @@
 !*.tini
 !.editorconfig
 !.github/workflows/*
+!.clang-format

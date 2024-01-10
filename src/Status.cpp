@@ -1,10 +1,7 @@
 #include <cassert>
 #include "Status.hpp"
 
-Status::Status(Code code) : _code(code)
-{
-
-}
+Status::Status(Code code) : _code(code) {}
 
 Status::Code Status::code() const
 {

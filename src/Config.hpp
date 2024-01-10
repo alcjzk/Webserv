@@ -3,7 +3,8 @@
 #include <vector>
 #include <string>
 
-class Config {
+class Config
+{
     public:
         Config();
 
@@ -11,6 +12,6 @@ class Config {
         int                             backlog() const;
 
     private:
-        std::vector<std::string>    _ports;
-        int                         _backlog;
+        std::vector<std::string> _ports;
+        int                      _backlog;
 };

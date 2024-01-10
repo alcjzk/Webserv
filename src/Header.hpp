@@ -31,7 +31,7 @@ class Header
         /// removed.
         ///
         /// @param value field-content to append
-        void append(const std::string& value);
+        void        append(const std::string& value);
 
         std::string _name;
         std::string _value;

@@ -27,11 +27,6 @@ const HTTPVersion& Request::http_version() const
 
 vector<Header>::const_iterator Request::header(const string& name) const
 {
-    return std::find_if(
-        _headers.begin(),
-        _headers.end(),
-        [name] (const Header& header) {
-            return header._name == name;
-        }
-    );
+    return std::find_if(_headers.begin(), _headers.end(),
+                        [name](const Header& header) { return header._name == name; });
 }

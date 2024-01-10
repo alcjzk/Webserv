@@ -11,5 +11,5 @@ class HTTPError : public std::exception
         virtual const char* what() const throw();
 
     private:
-        Status  _status;
+        Status _status;
 };
