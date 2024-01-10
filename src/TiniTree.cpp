@@ -136,7 +136,6 @@ void TiniTree::constructTree() {
     std::cerr << e.what() << std::endl;
     throw std::runtime_error("TiniTree: constructTree: FATAL");
   }
-  _ctx = TiniNode::T_MAP;
   _current = _root;
 
   for (unsigned long i = 0; i < _split_input.size(); ++i) {

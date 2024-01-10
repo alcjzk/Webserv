@@ -8,7 +8,6 @@
 
 class TiniTree {
 private:
-  int _ctx;
   TiniNode *_current;
   std::string _filename;
   TiniValidator _validator;
