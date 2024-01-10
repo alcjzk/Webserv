@@ -117,9 +117,7 @@ TiniNode::~TiniNode()
         for (auto v : *_vectorValue)
         {
             delete v;
-            v = nullptr;
         }
-        _vectorValue->clear();
         delete _vectorValue;
         _vectorValue = nullptr;
     }
@@ -129,7 +127,6 @@ TiniNode::~TiniNode()
         {
             delete val;
         }
-        _mapValue->clear();
         delete _mapValue;
         _mapValue = nullptr;
     }
@@ -171,13 +168,17 @@ TiniNode& TiniNode::operator=(TiniNode&& other)
     switch (_type)
     {
         case T_VECTOR:
-            if (_vectorValue)
-                _vectorValue->clear();
+            for (auto v : *_vectorValue)
+            {
+                delete v;
+            }
             delete _vectorValue;
             break;
         case T_MAP:
-            if (_mapValue)
-                _mapValue->clear();
+            for (const auto& [key, val] : *_mapValue)
+            {
+                delete val;
+            }
             delete _mapValue;
             break;
         case T_STRING:
@@ -311,3 +312,12 @@ void TiniNode::printContents(int depth, std::string name) const
             break;
     }
 }
+
+#ifdef TESTS
+
+void TiniNodeTests::all()
+{
+
+}
+
+#endif

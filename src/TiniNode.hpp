@@ -70,4 +70,17 @@ class TiniNode
         void                              deepCopyChildren(const TiniNode& other);
 };
 
+#ifdef TESTS
+
+class TiniNodeTests : public TiniNode
+{
+    public:
+        static void all();
+
+        static void basic();
+        static void compatible();
+};
+
+#endif
+
 #endif
