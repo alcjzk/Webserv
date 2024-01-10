@@ -49,8 +49,8 @@ public:
   TiniNode(TiniNodeType type);
   TiniNode(const TiniNode &other);
   TiniNode &operator=(const TiniNode &other);
-  TiniNode(TiniNode&& other);
-  TiniNode& operator=(TiniNode&& other);
+  TiniNode(TiniNode &&other);
+  TiniNode &operator=(TiniNode &&other);
   TiniNode(std::string s);
   TiniNode operator[](size_t i) const;
   TiniNode &operator[](size_t i);
