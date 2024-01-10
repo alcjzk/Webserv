@@ -206,9 +206,12 @@ TiniNode& TiniNode::operator=(TiniNode&& other)
     return *this;
 }
 
-TiniNode::TiniNodeType TiniNode::getType() const { return _type; }
+TiniNode::TiniNodeType TiniNode::getType() const
+{
+    return _type;
+}
 
-TiniNode&              TiniNode::fetchTiniNode(std::string key)
+TiniNode& TiniNode::fetchTiniNode(std::string key)
 {
     if (_type == T_VECTOR)
     {
@@ -315,9 +318,6 @@ void TiniNode::printContents(int depth, std::string name) const
 
 #ifdef TESTS
 
-void TiniNodeTests::all()
-{
-
-}
+void TiniNodeTests::all() {}
 
 #endif

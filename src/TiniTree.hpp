@@ -7,15 +7,14 @@
 #ifndef TINITREE_HPP
 #define TINITREE_HPP
 
-
 class TiniTree
 {
     private:
         static constexpr const char* _CONFIG_NAME = "config.tini";
-        TiniNode*                _current;
-        TiniNode*                _root;
-        TiniValidator            _validator;
-        std::vector<std::string> _split_input;
+        TiniNode*                    _current;
+        TiniNode*                    _root;
+        TiniValidator                _validator;
+        std::vector<std::string>     _split_input;
 
     public:
         TiniTree();

@@ -186,4 +186,7 @@ void TiniTree::constructTree()
     }
 }
 
-TiniNode& TiniTree::getRoot() { return *_root; }
+TiniNode& TiniTree::getRoot()
+{
+    return *_root;
+}
