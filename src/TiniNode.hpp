@@ -1,6 +1,6 @@
 #include <map>
-#include <vector>
 #include <string>
+#include <vector>
 
 #ifndef TINI_NODE_H
 #define TINI_NODE_H
@@ -50,8 +50,8 @@ public:
   TiniNode(const TiniNode &other);
   TiniNode &operator=(const TiniNode &other);
   TiniNode(std::string s);
-  TiniNode operator[](int i) const;
-  TiniNode &operator[](int i);
+  TiniNode operator[](size_t i) const;
+  TiniNode &operator[](size_t i);
   TiniNode operator[](const std::string &s) const;
   TiniNode &operator[](const std::string &s);
   TiniNode &fetchTiniNode(std::string key);
@@ -60,6 +60,7 @@ public:
   std::map<std::string, TiniNode *> &getMapValue() const;
   std::string &getStringValue() const;
   void printContents(int depth, std::string name) const;
+  void deepCopyChildren(const TiniNode &other);
 };
 
 #endif

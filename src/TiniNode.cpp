@@ -20,15 +20,6 @@ TiniNode::TiniNode(TiniNodeType type) : _type(type) {
     _stringValue = new std::string;
 }
 
-TiniNode::TiniNode(const TiniNode &other) : _type(other._type) {
-  if (other._type == T_VECTOR)
-    _vectorValue = new std::vector<TiniNode *>(*other._vectorValue);
-  else if (other._type == T_MAP)
-    _mapValue = new std::map<std::string, TiniNode *>(*other._mapValue);
-  else if (other._type == T_STRING)
-    _stringValue = new std::string(*other._stringValue);
-}
-
 TiniNode &TiniNode::operator=(const TiniNode &other) {
   if (this != &other) {
     if (_type == T_VECTOR)
@@ -41,28 +32,43 @@ TiniNode &TiniNode::operator=(const TiniNode &other) {
     _vectorValue = nullptr;
     _mapValue = nullptr;
     _stringValue = nullptr;
-    if (other._type == T_VECTOR)
-      _vectorValue = new std::vector<TiniNode *>(*other._vectorValue);
-    else if (other._type == T_MAP)
-      _mapValue = new std::map<std::string, TiniNode *>(*other._mapValue);
-    else if (other._type == T_STRING)
-      _stringValue = new std::string(*other._stringValue);
+    deepCopyChildren(other);
   }
   return *this;
 }
 
-TiniNode TiniNode::operator[](int i) const {
-  if (_type != T_VECTOR ||
-      static_cast<unsigned long>(i) >= this->getVectorValue().size())
+TiniNode::TiniNode(const TiniNode &other)
+    : _type(other._type), _vectorValue(nullptr), _mapValue(nullptr),
+      _stringValue(nullptr) {
+  deepCopyChildren(other);
+}
+
+void TiniNode::deepCopyChildren(const TiniNode &other) {
+  if (other._type == T_VECTOR) {
+    _vectorValue = new std::vector<TiniNode *>();
+    for (const TiniNode *element : *other._vectorValue) {
+      _vectorValue->push_back(new TiniNode(*element));
+    }
+  } else if (other._type == T_MAP) {
+    _mapValue = new std::map<std::string, TiniNode *>();
+    for (const auto &pair : *other._mapValue) {
+      _mapValue->insert({pair.first, new TiniNode(*pair.second)});
+    }
+  } else if (other._type == T_STRING) {
+    _stringValue = new std::string(*other._stringValue);
+  }
+}
+
+TiniNode TiniNode::operator[](size_t i) const {
+  if (_type != T_VECTOR || i >= this->getVectorValue().size())
     throw std::runtime_error(
         "TiniNode: Vector indexing operation error with key " +
         std::to_string(i));
   return *(this->getVectorValue()[i]);
 }
 
-TiniNode &TiniNode::operator[](int i) {
-  if (_type != T_VECTOR ||
-      static_cast<unsigned long>(i) >= this->getVectorValue().size())
+TiniNode &TiniNode::operator[](size_t i) {
+  if (_type != T_VECTOR || i >= this->getVectorValue().size())
     throw std::runtime_error(
         "TiniNode: Vector indexing operation error with key " +
         std::to_string(i));
@@ -101,12 +107,14 @@ TiniNode::~TiniNode() {
       delete v;
       v = nullptr;
     }
+    _vectorValue->clear();
     delete _vectorValue;
     _vectorValue = nullptr;
   } else if (_type == T_MAP) {
     for (auto const &[key, val] : *_mapValue) {
       delete val;
     }
+    _mapValue->clear();
     delete _mapValue;
     _mapValue = nullptr;
   } else if (_type == T_STRING) {
