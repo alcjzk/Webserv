@@ -7,11 +7,11 @@
 #ifndef TINITREE_HPP
 #define TINITREE_HPP
 
-#define CONFIG_NAME "config.tini"
 
 class TiniTree
 {
     private:
+        static constexpr const char* _CONFIG_NAME = "config.tini";
         TiniNode*                _current;
         TiniNode*                _root;
         TiniValidator            _validator;

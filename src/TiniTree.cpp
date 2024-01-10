@@ -8,7 +8,7 @@ TiniTree::TiniTree() : _current(nullptr), _root(nullptr)
 {
     try
     {
-        std::ifstream     f(CONFIG_NAME);
+        std::ifstream     f(_CONFIG_NAME);
         std::stringstream ss;
 
         ss << f.rdbuf();
