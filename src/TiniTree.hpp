@@ -18,11 +18,11 @@ private:
 public:
   TiniTree();
   ~TiniTree();
-  TiniTree(std::string config_location = CONFIG_NAME);
+  TiniTree(std::string config_location);
   TiniTree(const TiniTree &other) = delete;
   TiniTree &operator=(const TiniTree &other) = delete;
-  TiniTree(TiniTree&& other) = delete;
-  TiniTree& operator=(TiniTree&& other) = delete;
+  TiniTree(TiniTree &&other) = delete;
+  TiniTree &operator=(TiniTree &&other) = delete;
 
   void constructTree();
   int contextSwitch(std::string ctx, int row);
