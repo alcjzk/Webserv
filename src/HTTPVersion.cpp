@@ -5,14 +5,14 @@
 using std::ostream;
 using std::string;
 
-HTTPVersion::HTTPVersion(unsigned int major, unsigned int minor) throw()
-    : _major(major), _minor(minor)
-{
-}
-
 bool HTTPVersion::is_compatible_with(const HTTPVersion& other) const
 {
     return _major == other._major;
+}
+
+string HTTPVersion::to_string() const
+{
+    return PREFIX + std::to_string(_major) + DELIMITER + std::to_string(_minor);
 }
 
 HTTPVersion::HTTPVersion(const string& version)
@@ -45,7 +45,8 @@ unsigned int HTTPVersion::minor() const
 
 ostream& operator<<(ostream& os, const HTTPVersion& version)
 {
-    return os << "HTTP/" << version.major() << '.' << version.minor();
+    return os << HTTPVersion::PREFIX << version.major() << HTTPVersion::DELIMITER
+              << version.minor();
 }
 
 #ifdef TESTS
