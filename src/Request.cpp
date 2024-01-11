@@ -15,8 +15,8 @@ Response* Request::into_response(const Server& server) const
 
     INFO(_request_line.request_target());
 
-    auto host = header("Host");
-    if (host == _headers.end())
+    const Header* host = header("Host");
+    if (!host)
     {
         throw HTTPError(Status::BAD_REQUEST);
     }
@@ -60,8 +60,10 @@ const HTTPVersion& Request::http_version() const
     return _request_line.http_version();
 }
 
-vector<Header>::const_iterator Request::header(const string& name) const
+const Header* Request::header(const string& name) const
 {
-    return std::find_if(_headers.begin(), _headers.end(),
-                        [name](const Header& header) { return header._name == name; });
+    auto header = std::find_if(_headers.cbegin(), _headers.cend(),
+                               [name](const Header& header) { return header._name == name; });
+
+    return header != _headers.cend() ? &(*header) : nullptr;
 }
