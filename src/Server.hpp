@@ -4,12 +4,15 @@
 #include <iostream>
 #include <sys/socket.h>
 #include <fcntl.h>
+#include <filesystem>
+#include <utility>
 #include "Task.hpp"
 #include "Config.hpp"
 #include "HTTPVersion.hpp"
 #include "RequestLine.hpp"
 #include "Runtime.hpp"
 #include "Response.hpp"
+#include "Route.hpp"
 #include "Request.hpp"
 
 class Server
@@ -21,18 +24,21 @@ class Server
         Server(const Server&) = delete;
         Server(Server&&) = delete;
 
-        Server&                  operator=(const Server&) = delete;
-        Server&                  operator=(Server&&) = delete;
+        Server&                   operator=(const Server&) = delete;
+        Server&                   operator=(Server&&) = delete;
 
-        int                      fd();
+        int                       fd() const;
 
-        static const HTTPVersion http_version();
+        const std::vector<Route>& routes() const;
+
+        static const HTTPVersion  http_version();
 
     private:
-        const Config&    _config;
-        const char*      _port;
-        struct addrinfo* _address_info;
-        int              _fd;
+        const Config&      _config;
+        const char*        _port;
+        struct addrinfo*   _address_info;
+        int                _fd;
+        std::vector<Route> _routes;
 };
 
 class ServerSendResponseTask : public Task
@@ -58,7 +64,7 @@ class ServerReceiveRequestTask : public Task
     public:
         virtual ~ServerReceiveRequestTask() override;
 
-        ServerReceiveRequestTask(int fd);
+        ServerReceiveRequestTask(const Server& server, int fd);
         ServerReceiveRequestTask(const ServerReceiveRequestTask&) = delete;
         ServerReceiveRequestTask(ServerReceiveRequestTask&&) = delete;
 
@@ -92,6 +98,7 @@ class ServerReceiveRequestTask : public Task
         Reader              _reader;
         Request             _request;
         bool                _is_partial_data;
+        const Server&       _server;
 };
 
 class ServerAcceptTask : public Task
@@ -99,7 +106,7 @@ class ServerAcceptTask : public Task
     public:
         virtual ~ServerAcceptTask() override;
 
-        ServerAcceptTask(Server& server);
+        ServerAcceptTask(const Server& server);
 
         ServerAcceptTask(const ServerAcceptTask&) = delete;
         ServerAcceptTask(ServerAcceptTask&&) = delete;
@@ -110,5 +117,5 @@ class ServerAcceptTask : public Task
         virtual void      run() override;
 
     private:
-        Server& _server;
+        const Server& _server;
 };
