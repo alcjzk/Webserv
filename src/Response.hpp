@@ -44,5 +44,5 @@ class Response
         std::vector<Header> _headers;
         std::vector<char>   _body;
 
-        void build();
+        void                build();
 };
