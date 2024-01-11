@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <cassert>
 #include <sstream>
+#include <cstring>
 #include <errno.h>
 #include "http.hpp"
 #include "Response.hpp"
