@@ -1,50 +1,48 @@
 #pragma once
 
 #include <cstddef>
+#include <vector>
+#include "Status.hpp"
+#include "Header.hpp"
 
-/// An abstract Response that can be sent.
-///
-/// The response class provides the member function send(), using the derived
-/// definitions for buffer_head(), buffer_bytes_left() and buffer_advance().
 class Response
 {
     public:
-        virtual ~Response() = default;
+        virtual ~Response();
+
+        Response(Status = Status::OK);
+        Response(Response&&) = delete;
+        Response(const Response&) = delete;
+
+        Response&                  operator=(Response&& other) = delete;
+        Response&                  operator=(const Response& other) = delete;
 
         /// Sends the response using SEND(3).
         ///
         /// @throw std::runtime_error
         /// @return true if the message was fully sent, false otherwise.
-        bool send(int fd);
+        bool                       send(int fd);
 
-    protected:
-        /// Returns a pointer to the current position in the send buffer.
-        virtual const void* buffer_head() const throw() = 0;
+        void                       header(const Header& header);
+        void                       header(Header&& header);
 
-        /// Returns the amount of bytes remaining in the send buffer.
-        virtual size_t      buffer_bytes_left() const throw() = 0;
+        const std::vector<Header>& headers() const;
 
-        /// Advances the current position in the send buffer by the given amount.
-        ///
-        /// @param bytes_count Amount of bytes to advance the buffer by.
-        virtual void        buffer_advance(size_t bytes_count) throw() = 0;
-};
+        void                       body(std::vector<char>&& body);
+        void                       body(const std::vector<char>& body);
 
-#include <string>
+        const std::vector<char>&   body() const;
 
-/// An example definition of a derived response to respond with an arbitraty
-/// string.
-class TextResponse : public Response
-{
-    public:
-        TextResponse(std::string text);
-
-    protected:
-        virtual const void* buffer_head() const throw() override;
-        virtual size_t      buffer_bytes_left() const throw() override;
-        virtual void        buffer_advance(size_t bytes_count) throw() override;
+        void                       content_length(size_t content_length);
 
     private:
-        std::string _text;
-        size_t      _bytes_left;
+        Status              _status;
+        char*               _buffer;
+        size_t              _size;
+        size_t              _size_remaining;
+        bool                _is_built;
+        std::vector<Header> _headers;
+        std::vector<char>   _body;
+
+        void build();
 };
