@@ -13,6 +13,7 @@
 #include "Runtime.hpp"
 #include "Response.hpp"
 #include "Route.hpp"
+#include "Reader.hpp"
 #include "Request.hpp"
 
 class Server

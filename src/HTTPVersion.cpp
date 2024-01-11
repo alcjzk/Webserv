@@ -17,7 +17,7 @@ string HTTPVersion::to_string() const
 
 HTTPVersion::HTTPVersion(const string& version)
 {
-    if (version.find("HTTP/") != 0)
+    if (version.find(PREFIX) != 0)
         throw HTTPError(Status::BAD_REQUEST);
     if (version.length() != 8)
         throw HTTPError(Status::BAD_REQUEST);
@@ -25,7 +25,7 @@ HTTPVersion::HTTPVersion(const string& version)
     if (!std::isdigit(*major_str.c_str()))
         throw HTTPError(Status::BAD_REQUEST);
     _major = std::strtoul(major_str.c_str(), NULL, 10);
-    if (version.at(6) != '.')
+    if (version.at(6) != DELIMITER)
         throw HTTPError(Status::BAD_REQUEST);
     string minor_str = version.substr(7, 1);
     if (!std::isdigit(*minor_str.c_str()))

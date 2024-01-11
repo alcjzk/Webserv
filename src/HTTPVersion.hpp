@@ -2,7 +2,6 @@
 
 #include <string>
 #include <ostream>
-#include "Reader.hpp"
 
 class HTTPVersion
 {
