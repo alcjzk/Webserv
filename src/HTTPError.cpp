@@ -9,3 +9,8 @@ const char* HTTPError::what() const throw()
 {
     return _status.text();
 }
+
+Status HTTPError::status() const
+{
+    return _status;
+}
