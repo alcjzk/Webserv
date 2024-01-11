@@ -2,7 +2,6 @@
 
 #include <ostream>
 #include "Method.hpp"
-#include "URI.hpp"
 #include "HTTPVersion.hpp"
 
 // GET / HTTP/1.1

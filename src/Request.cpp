@@ -3,6 +3,7 @@
 #include "Server.hpp"
 #include "FileResponse.hpp"
 #include "HTTPError.hpp"
+#include "URI.hpp"
 #include "Request.hpp"
 
 using std::string;
