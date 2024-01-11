@@ -32,6 +32,10 @@ class Server
 
         const std::vector<Route>& routes() const;
 
+        // FIXME: This currently returns first partial match for route, without prioritizing better
+        // matches
+        const Route*              route(const std::string& uri_path) const;
+
         static const HTTPVersion  http_version();
 
     private:

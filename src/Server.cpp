@@ -6,6 +6,7 @@
 #include <netdb.h>
 #include <stdexcept>
 #include <cassert>
+#include <algorithm>
 #include "Reader.hpp"
 #include "Error.hpp"
 #include "RequestLine.hpp"
@@ -101,6 +102,14 @@ void ServerSendResponseTask::run()
 const std::vector<Route>& Server::routes() const
 {
     return _routes;
+}
+
+const Route* Server::route(const std::string& uri_path) const
+{
+    auto route = std::find_if(_routes.cbegin(), _routes.cend(),
+                              [uri_path](const auto& route) { return route.match(uri_path); });
+
+    return route != _routes.cend() ? &(*route) : nullptr;
 }
 
 ServerReceiveRequestTask::ServerReceiveRequestTask(const Server& server, int fd)

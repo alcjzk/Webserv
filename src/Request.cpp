@@ -11,38 +11,27 @@ using std::vector;
 
 Response* Request::into_response(const Server& server) const
 {
-    auto routes = server.routes();
-
-    INFO(_request_line.request_target());
-
     const Header* host = header("Host");
     if (!host)
     {
         throw HTTPError(Status::BAD_REQUEST);
     }
 
-    URI request_uri(_request_line.request_target(), host->_value);
-
-    INFO(request_uri.path());
-
-    auto route =
-        std::find_if(routes.cbegin(), routes.cend(),
-                     [request_uri](const Route& route) { return route.match(request_uri.path()); });
-
-    if (route == routes.cend())
+    URI          request_uri(_request_line.request_target(), host->_value);
+    const Route* route = server.route(request_uri.path());
+    if (!route)
     {
         throw HTTPError(Status::BAD_REQUEST);
     }
 
     auto target = route->map(request_uri.path());
-    INFO("Target resource: " << target);
+    auto file_type = std::filesystem::status(target).type();
 
-    auto status = std::filesystem::status(target);
-    if (status.type() == std::filesystem::file_type::not_found)
+    if (file_type == std::filesystem::file_type::not_found)
     {
         throw HTTPError(Status::NOT_FOUND);
     }
-    if (status.type() != std::filesystem::file_type::regular)
+    if (file_type != std::filesystem::file_type::regular)
     {
         throw HTTPError(Status::FORBIDDEN);
     }
