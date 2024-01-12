@@ -40,25 +40,25 @@ const std::filesystem::path& Route::fs_path() const
 
 bool Route::operator<(const Route& rhs) const
 {
-    return _priority < rhs._priority;
+    return rhs._priority < _priority;
 }
 
 bool Route::operator>(const Route& rhs) const
 {
-    return _priority > rhs._priority;
+    return rhs._priority > _priority;
 }
 
 bool Route::operator==(const Route& rhs) const
 {
-    return _priority == rhs._priority;
+    return rhs._priority == _priority;
 }
 
 bool Route::operator<=(const Route& rhs) const
 {
-    return _priority <= rhs._priority;
+    return rhs._priority <= _priority;
 }
 
 bool Route::operator>=(const Route& rhs) const
 {
-    return _priority >= rhs._priority;
+    return rhs._priority >= _priority;
 }
