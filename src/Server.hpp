@@ -12,7 +12,7 @@
 #include "RequestLine.hpp"
 #include "Runtime.hpp"
 #include "Response.hpp"
-#include "Route.hpp"
+#include "Routes.hpp"
 #include "Reader.hpp"
 #include "Request.hpp"
 
@@ -25,25 +25,19 @@ class Server
         Server(const Server&) = delete;
         Server(Server&&) = delete;
 
-        Server&                   operator=(const Server&) = delete;
-        Server&                   operator=(Server&&) = delete;
+        Server&                  operator=(const Server&) = delete;
+        Server&                  operator=(Server&&) = delete;
 
-        int                       fd() const;
-
-        const std::vector<Route>& routes() const;
-
-        // FIXME: This currently returns first partial match for route, without prioritizing better
-        // matches
-        const Route*              route(const std::string& uri_path) const;
-
-        static const HTTPVersion  http_version();
+        int                      fd() const;
+        const Route*             route(const std::string& uri_path) const;
+        static const HTTPVersion http_version();
 
     private:
-        const Config&      _config;
-        const char*        _port;
-        struct addrinfo*   _address_info;
-        int                _fd;
-        std::vector<Route> _routes;
+        const Config&    _config;
+        const char*      _port;
+        struct addrinfo* _address_info;
+        int              _fd;
+        Routes           _routes;
 };
 
 class ServerSendResponseTask : public Task

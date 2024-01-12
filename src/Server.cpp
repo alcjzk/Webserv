@@ -42,7 +42,7 @@ Server::Server(const Config& config)
         throw std::runtime_error(strerror(errno));
     try
     {
-        _routes.push_back(Route("/", "www"));
+        _routes.push(Route("/", "www"));
     }
     catch (const std::runtime_error& error)
     {
@@ -99,17 +99,9 @@ void ServerSendResponseTask::run()
     (void)close(_fd);
 }
 
-const std::vector<Route>& Server::routes() const
-{
-    return _routes;
-}
-
 const Route* Server::route(const std::string& uri_path) const
 {
-    auto route = std::find_if(_routes.cbegin(), _routes.cend(),
-                              [uri_path](const auto& route) { return route.match(uri_path); });
-
-    return route != _routes.cend() ? &(*route) : nullptr;
+    return _routes.find(uri_path);
 }
 
 ServerReceiveRequestTask::ServerReceiveRequestTask(const Server& server, int fd)
