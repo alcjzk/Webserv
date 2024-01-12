@@ -10,6 +10,7 @@ Route::Route(std::filesystem::path uri_path, std::filesystem::path fs_path) : _u
     try
     {
         _fs_path = std::filesystem::canonical(fs_path);
+        _priority = std::distance(_uri_path.begin(), _uri_path.end());
     }
     catch (const std::exception& error)
     {
@@ -35,4 +36,29 @@ std::filesystem::path Route::map(std::filesystem::path uri_path) const
 const std::filesystem::path& Route::fs_path() const
 {
     return _fs_path;
+}
+
+bool Route::operator<(const Route& rhs) const
+{
+    return _priority < rhs._priority;
+}
+
+bool Route::operator>(const Route& rhs) const
+{
+    return _priority > rhs._priority;
+}
+
+bool Route::operator==(const Route& rhs) const
+{
+    return _priority == rhs._priority;
+}
+
+bool Route::operator<=(const Route& rhs) const
+{
+    return _priority <= rhs._priority;
+}
+
+bool Route::operator>=(const Route& rhs) const
+{
+    return _priority >= rhs._priority;
 }

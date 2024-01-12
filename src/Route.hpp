@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <filesystem>
 
 class Route
@@ -12,7 +13,14 @@ class Route
 
         const std::filesystem::path& fs_path() const;
 
+        bool                         operator<(const Route& rhs) const;
+        bool                         operator>(const Route& rhs) const;
+        bool                         operator==(const Route& rhs) const;
+        bool                         operator<=(const Route& rhs) const;
+        bool                         operator>=(const Route& rhs) const;
+
     private:
         std::filesystem::path _uri_path;
         std::filesystem::path _fs_path;
+        ptrdiff_t             _priority;
 };
