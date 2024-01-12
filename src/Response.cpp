@@ -80,7 +80,6 @@ void Response::build()
     std::stringstream   headers_stream;
     std::streambuf*     headers_rdbuf;
     size_t              headers_size;
-    size_t              file_size;
     std::vector<char>   body;
     std::vector<Header> headers;
 
