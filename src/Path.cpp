@@ -1,4 +1,5 @@
 #include <system_error>
+#include <stdexcept>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -10,13 +11,32 @@ using std::string;
 
 Path::Path(const string& path)
 {
-    // TODO:
+    size_t start = 0;
+    size_t end;
+
+    if (path.empty())
+        throw std::runtime_error("Empty paths are not yet supported");
+
+    if (path[0] == '/')
+    {
+        _segments.push_back("/");
+        start = 1;
+    }
+
+    while (true)
+    {
+        end = path.find_first_of('/', start);
+        if (end == string::npos)
+        {
+            _segments.push_back(path.substr(start));
+            break;
+        }
+        _segments.push_back(path.substr(start, end - start));
+        start = end + 1;
+    }
 }
 
-Path::Path(const char* path)
-{
-    // TODO:
-}
+Path::Path(const char* path) : Path(string(path)) {}
 
 Path::iterator Path::begin() noexcept
 {
@@ -49,14 +69,25 @@ Path::Type Path::type()
 
 Path::operator string() const
 {
-    // TODO:
-    return string();
+    string         path;
+    const_iterator begin = cbegin();
+    const_iterator end = cend();
+
+    if (begin != end && *begin == "/")
+    {
+        begin++;
+    }
+    std::for_each(begin, end, [&path](const string& segment) { path = path + '/' + segment; });
+    return path;
 }
 
 Path Path::operator+(const Path& rhs) const
 {
-    // TODO:
-    return Path();
+    Path path(*this);
+
+    path._segments.reserve(rhs._segments.size());
+    path._segments.insert(path.end(), rhs.cbegin(), rhs.cend());
+    return path;
 }
 
 Path Path::relative(const Path& path, const Path& base)
@@ -73,8 +104,7 @@ Path Path::canonical(const Path& path)
 
 ostream& operator<<(ostream& os, const Path& path)
 {
-    // TODO:
-    return os;
+    return os << static_cast<string>(path);
 }
 
 Path::Type Path::fetch_type() const
