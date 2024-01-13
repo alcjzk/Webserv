@@ -5,9 +5,7 @@ using std::filebuf;
 using std::ifstream;
 using std::vector;
 
-namespace fs = std::filesystem;
-
-FileResponse::FileResponse(const fs::path& path, Status status) : Response(status)
+FileResponse::FileResponse(const Path& path, Status status) : Response(status)
 {
     filebuf*     file_rdbuf;
     size_t       file_size;

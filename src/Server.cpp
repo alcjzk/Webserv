@@ -15,7 +15,7 @@
 #include "http.hpp"
 #include "Server.hpp"
 
-using std::string, std::pair, std::filesystem::path;
+using std::string, std::pair;
 
 Server::Server(const Config& config)
     : _config(config), _port(config.ports().front().c_str()), _fd(-1)

@@ -24,14 +24,13 @@ Response* Request::into_response(const Server& server) const
         throw HTTPError(Status::BAD_REQUEST);
     }
 
-    auto target = route->map(request_uri.path());
-    auto file_type = std::filesystem::status(target).type();
+    Path target = route->map(request_uri.path());
 
-    if (file_type == std::filesystem::file_type::not_found)
+    if (target.type() == Path::Type::NOT_FOUND)
     {
         throw HTTPError(Status::NOT_FOUND);
     }
-    if (file_type != std::filesystem::file_type::regular)
+    if (target.type() != Path::Type::REGULAR)
     {
         throw HTTPError(Status::FORBIDDEN);
     }
