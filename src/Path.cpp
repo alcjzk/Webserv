@@ -23,6 +23,9 @@ Path::Path(const string& path)
         start = 1;
     }
 
+    if (path.size() == 1)
+        return ;
+
     while (true)
     {
         end = path.find_first_of('/', start);
@@ -37,6 +40,8 @@ Path::Path(const string& path)
 }
 
 Path::Path(const char* path) : Path(string(path)) {}
+
+Path::Path(const_iterator first, const_iterator last) : _segments(first, last) {}
 
 Path::iterator Path::begin() noexcept
 {
@@ -73,11 +78,11 @@ Path::operator string() const
     const_iterator begin = cbegin();
     const_iterator end = cend();
 
-    if (begin != end && *begin == "/")
-    {
-        begin++;
-    }
-    std::for_each(begin, end, [&path](const string& segment) { path = path + '/' + segment; });
+    if (begin == end)
+        return path;
+    if (*begin != "/")
+        path = *begin;
+    std::for_each(begin + 1, end, [&path](const string& segment) { path = path + '/' + segment; });
     return path;
 }
 
@@ -92,14 +97,23 @@ Path Path::operator+(const Path& rhs) const
 
 Path Path::relative(const Path& path, const Path& base)
 {
-    // TODO:
-    return Path();
+    auto pair = std::mismatch(path.cbegin(), path.cend(), base.cbegin(), base.cend());
+    if (pair.second != base.cend())
+    {
+        throw std::runtime_error("Path is not relative to base");
+    }
+    if (pair.first == path.cend())
+    {
+        return Path("/");
+    }
+    auto result = Path(pair.first, path.cend());
+    return result;
 }
 
 Path Path::canonical(const Path& path)
 {
-    // TODO:
-    return Path();
+    // FIXME: Not implemented
+    return Path(path);
 }
 
 ostream& operator<<(ostream& os, const Path& path)
@@ -112,7 +126,7 @@ Path::Type Path::fetch_type() const
     struct stat buffer;
     mode_t      mode;
 
-    if (stat("", &buffer) != 0)
+    if (stat(static_cast<string>(*this).c_str(), &buffer) != 0)
     {
         if (errno != ENOENT && errno != ENOTDIR)
         {

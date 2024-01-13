@@ -27,6 +27,7 @@ class Path
         Path() = default;
         Path(const std::string& path);
         Path(const char* path);
+        Path(const_iterator first, const_iterator last);
 
         iterator       begin() noexcept;
         iterator       end() noexcept;
