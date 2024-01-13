@@ -25,7 +25,7 @@ Path::Path(const string& path)
     }
 
     if (path.size() == 1)
-        return ;
+        return;
 
     while (true)
     {

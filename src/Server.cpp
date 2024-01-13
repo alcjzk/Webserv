@@ -37,7 +37,8 @@ Server::Server(const Config& config)
         throw std::runtime_error(strerror(errno));
     if (fcntl(_fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
         throw std::runtime_error(strerror(errno));
-    setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &sockopt_value, sizeof(sockopt_value)); // TODO: Could warn on error here
+    setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &sockopt_value,
+               sizeof(sockopt_value)); // TODO: Could warn on error here
     if (bind(_fd, _address_info->ai_addr, _address_info->ai_addrlen) == -1)
         throw std::runtime_error(strerror(errno));
     if (listen(_fd, _config.backlog()) == -1)
