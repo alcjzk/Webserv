@@ -10,7 +10,7 @@ on:
 
 jobs:
   fail-for-blocked:
-    if: contains(github.event.pull_request.labels.*.name, 'b-')
+    if: startsWith(github.event.pull_request.labels.*.name, 'b-')
     runs-on: ubuntu-latest
     steps:
       - name: Fail if PR is labeled as blocked
