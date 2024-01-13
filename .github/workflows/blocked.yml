@@ -1,0 +1,19 @@
+name: Check Blocked
+
+on:
+  pull_request:
+
+    types:
+      - opened
+      - labeled
+      - unlabeled
+
+jobs:
+  fail-for-blocked:
+    if: contains(github.event.pull_request.labels.*.name, 'b-')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if PR is labeled as blocked
+        run: |
+          echo "This PR is currently blocked."
+          exit 1
