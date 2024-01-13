@@ -1,3 +1,8 @@
+#include <system_error>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <errno.h>
 #include "Path.hpp"
 
 using std::ostream;
@@ -33,9 +38,12 @@ Path::const_iterator Path::cend() const noexcept
     return _segments.cend();
 }
 
-Path::Type Path::type() const
+Path::Type Path::type()
 {
-    // TODO:
+    if (_type == NONE)
+    {
+        _type = fetch_type();
+    }
     return _type;
 }
 
@@ -67,4 +75,37 @@ ostream& operator<<(ostream& os, const Path& path)
 {
     // TODO:
     return os;
+}
+
+Path::Type Path::fetch_type() const
+{
+    struct stat buffer;
+    mode_t      mode;
+
+    if (stat("", &buffer) != 0)
+    {
+        if (errno != ENOENT && errno != ENOTDIR)
+        {
+            throw std::system_error(errno, std::system_category());
+        }
+        return NOT_FOUND;
+    }
+
+    mode = buffer.st_mode;
+    if (S_ISREG(mode))
+        return REGULAR;
+    if (S_ISDIR(mode))
+        return DIRECTORY;
+    if (S_ISCHR(mode))
+        return CHARACTER;
+    if (S_ISBLK(mode))
+        return BLOCK;
+    if (S_ISFIFO(mode))
+        return FIFO;
+    if (S_ISLNK(mode))
+        return LINK;
+    if (S_ISSOCK(mode))
+        return SOCKET;
+
+    return UNKNOWN;
 }

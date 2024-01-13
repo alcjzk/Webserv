@@ -21,6 +21,7 @@ class Path
             FIFO,
             LINK,
             SOCKET,
+            UNKNOWN,
         };
 
         Path() = default;
@@ -31,7 +32,7 @@ class Path
         iterator       end() noexcept;
         const_iterator cbegin() const noexcept;
         const_iterator cend() const noexcept;
-        Type           type() const;
+        Type           type();
 
         operator std::string() const;
 
@@ -41,6 +42,8 @@ class Path
         static Path canonical(const Path& path);
 
     private:
+        Type                     fetch_type() const;
+
         std::vector<std::string> _segments;
         Type                     _type = NONE;
 };
