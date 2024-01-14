@@ -2,16 +2,19 @@
 
 #include <vector>
 #include <string>
+#include "TiniTree.hpp"
 
 class Config
 {
     public:
         Config();
+        Config(std::string port);
+        Config(TiniNode& node);
 
-        const std::vector<std::string>& ports() const;
+        const std::string& port() const;
         int                             backlog() const;
 
     private:
-        std::vector<std::string> _ports;
+        std::string _port;
         int                      _backlog;
 };
