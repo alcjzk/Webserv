@@ -53,7 +53,7 @@ void Runtime::run()
                 events = POLLIN;
             else if ((*task)->wait_for() == Task::Writable)
                 events = POLLOUT;
-            pollfds.push_back({.fd = (*task)->fd(), .events = events, .revents = 0});
+            pollfds.push_back({(*task)->fd(), events, 0});
         }
 
         // Don't throw when poll errors due to signal
