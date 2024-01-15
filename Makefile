@@ -4,6 +4,7 @@
 # - release (build release version)
 # - t/test (build and run unit tests)
 # - r/run (build and run)
+# - fmt (run clang-format on sources)
 # + fclean, clean, re, all (default)
 
 NAME = webserv
@@ -142,6 +143,10 @@ run: $(RUN_TARGET)
 	./$<
 .PHONY: r
 r: run
+
+.PHONY: fmt
+fmt:
+	clang-format -i $(SRC_DIR)/*.cpp $(SRC_DIR)/*.hpp test/*.cpp test/*.hpp
 
 vpath %.cpp $(SRC_DIR) test
 -include $(SRCS:%.cpp=$(OBJ_DIR)/debug/%.d)
