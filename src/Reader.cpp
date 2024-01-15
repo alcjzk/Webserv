@@ -125,7 +125,9 @@ void ReaderTest::line_noline_test()
     {
         if (error.type() != ReaderException::NoLine)
             throw error;
+        return;
     }
+    EXPECT(false);
 
     END
 }
