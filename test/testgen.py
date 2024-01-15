@@ -14,7 +14,7 @@ def collect_tests(name):
             if res:
                 class_name = res.group(1)
         else:
-            res = re.search("\s?([^();\s]+_test)\(", line)
+            res = re.search("\\s?([^();\\s]+_test)\\(", line)
             if res:
                 symbol = str(class_name + "::" + res.group(1))
                 symbols.append(symbol)
