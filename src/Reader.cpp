@@ -105,12 +105,6 @@ void ReaderTest::line_empty_test()
     vector<char> buffer = ReaderTest::buffer("\n");
     Reader       reader(buffer);
 
-    try
-    {
-        throw "hello";
-    }
-    catch (...) {}
-
     EXPECT(reader.line() == "");
 
     END

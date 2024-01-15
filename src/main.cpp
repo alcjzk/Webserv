@@ -53,9 +53,9 @@ int main()
         return EXIT_FAILURE;
     }
 
-    #ifdef TEST
+#ifdef TEST
     system("leaks debug");
-    #endif
+#endif
 
     return EXIT_SUCCESS;
 }

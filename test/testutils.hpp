@@ -7,9 +7,16 @@
 #define FAIL                                                                                       \
     std::cerr << "\nExpectation failed: " << __FUNCTION__ << " in " << __FILE__ << " line "        \
               << __LINE__
-#define PASS      std::cout << "."
+#define PASS std::cout << "."
 
-#define EXPECT(x) if (x) PASS; else {FAIL; exit(1); };
+#define EXPECT(x)                                                                                  \
+    if (x)                                                                                         \
+        PASS;                                                                                      \
+    else                                                                                           \
+    {                                                                                              \
+        FAIL;                                                                                      \
+        exit(1);                                                                                   \
+    };
 #define BEGIN                                                                                      \
     try                                                                                            \
     {
@@ -26,4 +33,6 @@
                   << __LINE__;                                                                     \
     }
 
-#define SKIP std::cout << "S"; return;
+#define SKIP                                                                                       \
+    std::cout << "S";                                                                              \
+    return;
