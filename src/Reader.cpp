@@ -89,60 +89,79 @@ const char* ReaderException::what() const throw()
     return "No line in buffer\n";
 }
 
-#ifdef TESTS
+#ifdef TEST
 
-vector<char> ReaderTests::buffer(const char* content)
+#include "testutils.hpp"
+
+vector<char> ReaderTest::buffer(const char* content)
 {
     return vector<char>(content, content + std::strlen(content));
 }
 
-void ReaderTests::line_empty()
+void ReaderTest::line_empty_test()
 {
-    vector<char> buffer = ReaderTests::buffer("\n");
+    BEGIN
+
+    vector<char> buffer = ReaderTest::buffer("\n");
     Reader       reader(buffer);
 
-    if (reader.line() != "")
-        throw __FUNCTION__;
+    try
+    {
+        throw "hello";
+    }
+    catch (...) {}
+
+    EXPECT(reader.line() == "");
+
+    END
 }
 
-void ReaderTests::line_noline()
+void ReaderTest::line_noline_test()
 {
-    vector<char> buffer = ReaderTests::buffer("aaaa");
+    BEGIN
+
+    vector<char> buffer = ReaderTest::buffer("aaaa");
     Reader       reader(buffer);
 
     try
     {
         string line = reader.line();
-        throw 0;
     }
-    catch (int)
+    catch (const ReaderException& error)
     {
-        throw __FUNCTION__;
+        if (error.type() != ReaderException::NoLine)
+            throw error;
     }
-    catch (...)
-    {
-    }
+
+    END
 }
 
-void ReaderTests::line_one()
+void ReaderTest::line_one_test()
 {
-    vector<char> buffer = ReaderTests::buffer("a\n");
+    BEGIN
+
+    vector<char> buffer = ReaderTest::buffer("a\n");
     Reader       reader(buffer);
 
-    if (reader.line() != "a")
-        throw __FUNCTION__;
+    EXPECT(reader.line() == "a");
+
+    END
 }
 
-void ReaderTests::line_basic()
+void ReaderTest::line_basic_test()
 {
-    vector<char> buffer = ReaderTests::buffer("aa\nbb\r\n");
+    BEGIN
+
+    vector<char> buffer = ReaderTest::buffer("aa\nbb\r\n");
     Reader       reader(buffer);
 
     string       line1 = reader.line();
     string       line2 = reader.line();
 
-    if (line1 != "aa" || line2 != "bb")
-        throw __FUNCTION__;
+    EXPECT(line1 == "aa");
+    EXPECT(line2 == "bb");
+
+    END
 }
 
 #endif
