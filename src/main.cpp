@@ -52,5 +52,10 @@ int main()
         ERR(e.what());
         return EXIT_FAILURE;
     }
+
+    #ifdef TEST
+    system("leaks debug");
+    #endif
+
     return EXIT_SUCCESS;
 }

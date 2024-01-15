@@ -24,7 +24,7 @@ Server::Server(const Config& config)
     int             status;
     int             sockopt_value = 1;
 
-    hints = (struct addrinfo){};
+    hints = {};
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_family = AF_UNSPEC;
     hints.ai_flags = AI_PASSIVE;
