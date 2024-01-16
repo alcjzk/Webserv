@@ -14,7 +14,7 @@ void Reader::trim_empty_lines()
     {
         if (*_head == '\r')
         {
-            if (std::next(_head) == _buffer.end() || *std::next(_head) == '\n')
+            if (std::next(_head) == _buffer.end() || *std::next(_head) != '\n')
                 break;
             std::advance(_head, 2);
         }
@@ -171,6 +171,23 @@ void ReaderTest::line_strip_bare_cr_test()
     EXPECT(reader.line() == "  multi  cr2  ");
     EXPECT(reader.line() == "  multi  cr3  ");
     EXPECT(reader.line() == "  multi  cr4  ");
+
+    END
+}
+
+void ReaderTest::trim_empty_lines_test()
+{
+    BEGIN
+
+    const char* content = "\r\nline1\r\n"
+                          "\r\nline2\r\n";
+    Reader      reader(buffer(content));
+
+    EXPECT(reader.line() == "");
+    EXPECT(reader.line() == "line1");
+
+    reader.trim_empty_lines();
+    EXPECT(reader.line() == "line2");
 
     END
 }
