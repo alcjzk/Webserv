@@ -79,8 +79,7 @@ void ReaderTest::line_empty_test()
 {
     BEGIN
 
-    vector<char> buffer = ReaderTest::buffer("\n");
-    Reader       reader(buffer);
+    Reader reader(buffer("\r\n"));
 
     EXPECT(reader.line() == "");
 
@@ -91,23 +90,10 @@ void ReaderTest::line_noline_test()
 {
     BEGIN
 
-    vector<char>     buffer = ReaderTest::buffer("aaaa");
-    Reader           reader(buffer);
+    Reader reader(buffer("\naaaa"));
 
-    optional<string> line = reader.line();
-    EXPECT(!line);
-
-    END
-}
-
-void ReaderTest::line_one_test()
-{
-    BEGIN
-
-    vector<char> buffer = ReaderTest::buffer("a\n");
-    Reader       reader(buffer);
-
-    EXPECT(reader.line() == "a");
+    EXPECT(reader.line());
+    EXPECT(!reader.line());
 
     END
 }
@@ -116,8 +102,7 @@ void ReaderTest::line_basic_test()
 {
     BEGIN
 
-    vector<char> buffer = ReaderTest::buffer("aa\nbb\r\n");
-    Reader       reader(buffer);
+    Reader reader(buffer("aa\nbb\r\n"));
 
     EXPECT(reader.line() == "aa");
     EXPECT(reader.line() == "bb");

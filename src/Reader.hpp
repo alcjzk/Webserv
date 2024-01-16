@@ -42,7 +42,6 @@ class ReaderTest : public Reader
     public:
         static void line_empty_test();
         static void line_basic_test();
-        static void line_one_test();
         static void line_noline_test();
         static void line_strip_bare_cr_test();
         static void trim_empty_lines_test();
