@@ -58,15 +58,15 @@ class ReaderException : public std::exception
         Type _type;
 };
 
-#ifdef TESTS
+#ifdef TEST
 
-class ReaderTests : public Reader
+class ReaderTest : public Reader
 {
     public:
-        static void line_empty();
-        static void line_basic();
-        static void line_one();
-        static void line_noline();
+        static void line_empty_test();
+        static void line_basic_test();
+        static void line_one_test();
+        static void line_noline_test();
 
     private:
         static std::vector<char> buffer(const char* content);

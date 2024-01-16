@@ -8,3 +8,5 @@
 !.editorconfig
 !.github/workflows/*
 !.clang-format
+test/testmain.cpp
+!testgen.py

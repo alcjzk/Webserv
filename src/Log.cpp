@@ -3,11 +3,11 @@
 #include <iostream>
 #include "Log.hpp"
 
-#define RED              "\e[0;31m"
-#define YELLOW           "\e[0;33m"
-#define CYAN             "\e[0;36m"
-#define NORMAL           "\e[0m"
-#define PURPLE_UNDERLINE "\e[4;35m"
+#define RED              "\033[0;31m"
+#define YELLOW           "\033[0;33m"
+#define CYAN             "\033[0;36m"
+#define NORMAL           "\033[0m"
+#define PURPLE_UNDERLINE "\033[4;35m"
 
 using std::cerr;
 using std::cout;
