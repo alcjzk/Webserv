@@ -9,17 +9,17 @@ bool Task::operator==(int fd)
     return _fd == fd;
 }
 
-int Task::fd()
+int Task::fd() const
 {
     return _fd;
 }
 
-bool Task::is_complete()
+bool Task::is_complete() const
 {
     return _is_complete;
 }
 
-Task::WaitFor Task::wait_for()
+Task::WaitFor Task::wait_for() const
 {
     return _wait_for;
 }

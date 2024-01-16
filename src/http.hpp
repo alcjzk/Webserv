@@ -1,10 +1,13 @@
 #pragma once
 
 #include <string>
+#include "HTTPVersion.hpp"
 
 /// HTTP related utilities and constants
 namespace http
 {
+    const HTTPVersion VERSION(1, 1);
+
     /// Horizontal tab
     const char        HT = '\t';
 
@@ -22,6 +25,8 @@ namespace http
 
     /// Linear whitespace
     const std::string LWS(" \t");
+
+    const char* const CRLF = "\r\n";
 
     /// Separators (RFC 2616 3.6)
     const std::string SEPARATORS("()<>@,;:\\\"/[]?={} \t");

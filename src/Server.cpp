@@ -6,6 +6,7 @@
 #include <netdb.h>
 #include <stdexcept>
 #include <cassert>
+#include <algorithm>
 #include "Reader.hpp"
 #include "Error.hpp"
 #include "RequestLine.hpp"
@@ -14,13 +15,14 @@
 #include "http.hpp"
 #include "Server.hpp"
 
-using std::string;
+using std::string, std::pair;
 
 Server::Server(const Config& config)
     : _config(config), _port(config.ports().front().c_str()), _fd(-1)
 {
     struct addrinfo hints;
     int             status;
+    int             sockopt_value = 1;
 
     hints = (struct addrinfo){};
     hints.ai_socktype = SOCK_STREAM;
@@ -35,10 +37,20 @@ Server::Server(const Config& config)
         throw std::runtime_error(strerror(errno));
     if (fcntl(_fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
         throw std::runtime_error(strerror(errno));
+    setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &sockopt_value,
+               sizeof(sockopt_value)); // TODO: Could warn on error here
     if (bind(_fd, _address_info->ai_addr, _address_info->ai_addrlen) == -1)
         throw std::runtime_error(strerror(errno));
     if (listen(_fd, _config.backlog()) == -1)
         throw std::runtime_error(strerror(errno));
+    try
+    {
+        _routes.push(Route("/", "www"));
+    }
+    catch (const std::runtime_error& error)
+    {
+        WARN(error.what());
+    }
     INFO("Listening on " << _fd);
     Runtime::enqueue(new ServerAcceptTask(*this));
 }
@@ -56,7 +68,7 @@ Server::~Server()
     INFO("Graceful exit");
 }
 
-int Server::fd()
+int Server::fd() const
 {
     return _fd;
 }
@@ -90,9 +102,14 @@ void ServerSendResponseTask::run()
     (void)close(_fd);
 }
 
-ServerReceiveRequestTask::ServerReceiveRequestTask(int fd)
+const Route* Server::route(const std::string& uri_path) const
+{
+    return _routes.find(uri_path);
+}
+
+ServerReceiveRequestTask::ServerReceiveRequestTask(const Server& server, int fd)
     : Task(fd, Readable), _expect(REQUEST_LINE), _bytes_received_total(0),
-      _buffer(_header_buffer_size), _reader(_buffer), _is_partial_data(true)
+      _buffer(_header_buffer_size), _reader(_buffer), _is_partial_data(true), _server(server)
 {
 }
 
@@ -159,7 +176,7 @@ void ServerReceiveRequestTask::receive_headers()
             if (line.empty())
             {
                 INFO("End of headers");
-                Response* response = _request.into_response();
+                Response* response = _request.into_response(_server);
                 Runtime::enqueue(new ServerSendResponseTask(_fd, response));
                 _is_complete = true;
                 return;
@@ -219,8 +236,7 @@ void ServerReceiveRequestTask::run()
     {
         WARN(error.what());
         // TODO: Replace with proper error response
-        Response* response = new TextResponse(string(error.what()) + '\n');
-        Runtime::enqueue(new ServerSendResponseTask(_fd, response));
+        Runtime::enqueue(new ServerSendResponseTask(_fd, new Response(error.status())));
         _is_complete = true;
     }
     catch (const std::exception& error)
@@ -233,7 +249,10 @@ void ServerReceiveRequestTask::run()
 
 ServerReceiveRequestTask::~ServerReceiveRequestTask() {}
 
-ServerAcceptTask::ServerAcceptTask(Server& server) : Task(server.fd(), Readable), _server(server) {}
+ServerAcceptTask::ServerAcceptTask(const Server& server)
+    : Task(server.fd(), Readable), _server(server)
+{
+}
 
 void ServerAcceptTask::run()
 {
@@ -252,7 +271,7 @@ void ServerAcceptTask::run()
             throw std::runtime_error(strerror(errno));
         }
         INFO("Client connected on fd " << fd);
-        Runtime::enqueue(new ServerReceiveRequestTask(fd));
+        Runtime::enqueue(new ServerReceiveRequestTask(_server, fd));
     }
     catch (const std::runtime_error& error)
     {

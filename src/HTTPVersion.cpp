@@ -5,19 +5,19 @@
 using std::ostream;
 using std::string;
 
-HTTPVersion::HTTPVersion(unsigned int major, unsigned int minor) throw()
-    : _major(major), _minor(minor)
-{
-}
-
 bool HTTPVersion::is_compatible_with(const HTTPVersion& other) const
 {
     return _major == other._major;
 }
 
+string HTTPVersion::to_string() const
+{
+    return PREFIX + std::to_string(_major) + DELIMITER + std::to_string(_minor);
+}
+
 HTTPVersion::HTTPVersion(const string& version)
 {
-    if (version.find("HTTP/") != 0)
+    if (version.find(PREFIX) != 0)
         throw HTTPError(Status::BAD_REQUEST);
     if (version.length() != 8)
         throw HTTPError(Status::BAD_REQUEST);
@@ -25,7 +25,7 @@ HTTPVersion::HTTPVersion(const string& version)
     if (!std::isdigit(*major_str.c_str()))
         throw HTTPError(Status::BAD_REQUEST);
     _major = std::strtoul(major_str.c_str(), NULL, 10);
-    if (version.at(6) != '.')
+    if (version.at(6) != DELIMITER)
         throw HTTPError(Status::BAD_REQUEST);
     string minor_str = version.substr(7, 1);
     if (!std::isdigit(*minor_str.c_str()))
@@ -45,7 +45,8 @@ unsigned int HTTPVersion::minor() const
 
 ostream& operator<<(ostream& os, const HTTPVersion& version)
 {
-    return os << "HTTP/" << version.major() << '.' << version.minor();
+    return os << HTTPVersion::PREFIX << version.major() << HTTPVersion::DELIMITER
+              << version.minor();
 }
 
 #ifdef TESTS

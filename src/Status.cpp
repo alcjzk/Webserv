@@ -1,5 +1,8 @@
 #include <cassert>
+#include "http.hpp"
 #include "Status.hpp"
+
+using std::string, std::ostream;
 
 Status::Status(Code code) : _code(code) {}
 
@@ -12,8 +15,12 @@ const char* Status::text() const
 {
     switch (_code)
     {
+        case OK:
+            return "200 OK";
         case BAD_REQUEST:
             return "400 Bad Request";
+        case FORBIDDEN:
+            return "403 Forbidden";
         case NOT_FOUND:
             return "404 Not Found";
         case INTERNAL_SERVER_ERROR:
@@ -30,4 +37,14 @@ bool Status::is_error() const
     if (_code >= 400)
         return true;
     return false;
+}
+
+string Status::as_status_line() const
+{
+    return http::VERSION.to_string() + ' ' + text();
+}
+
+ostream& operator<<(ostream& os, Status status)
+{
+    return os << status.text();
 }

@@ -25,7 +25,7 @@ RequestLine::RequestLine(const string& line)
     end = line.find_first_of(http::LWS, head);
     if (end == string::npos)
         throw HTTPError(Status::BAD_REQUEST);
-    _uri = URI(line.substr(head, end - head));
+    _request_target = line.substr(head, end - head);
 
     head = line.find_first_not_of(http::LWS, end);
     if (head == string::npos)
@@ -42,9 +42,9 @@ const Method& RequestLine::method() const
     return _method;
 }
 
-const URI& RequestLine::uri() const
+const string& RequestLine::request_target() const
 {
-    return _uri;
+    return _request_target;
 }
 
 const HTTPVersion& RequestLine::http_version() const
@@ -54,5 +54,5 @@ const HTTPVersion& RequestLine::http_version() const
 
 ostream& operator<<(ostream& os, const RequestLine& line)
 {
-    return os << line.method() << ' ' << line.uri() << ' ' << line.http_version();
+    return os << line.method() << ' ' << line.request_target() << ' ' << line.http_version();
 }

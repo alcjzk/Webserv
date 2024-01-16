@@ -2,19 +2,24 @@
 
 #include <string>
 #include <ostream>
-#include "Reader.hpp"
 
 class HTTPVersion
 {
     public:
+        static constexpr const char* const PREFIX = "HTTP/";
+        static const char                  DELIMITER = '.';
+
         HTTPVersion() = default;
         HTTPVersion(const std::string& version);
-        HTTPVersion(unsigned int major, unsigned int minor) throw();
+        constexpr HTTPVersion(unsigned int major, unsigned int minor) : _major(major), _minor(minor)
+        {
+        }
 
         unsigned int major() const;
         unsigned int minor() const;
 
         bool         is_compatible_with(const HTTPVersion& other) const;
+        std::string  to_string() const;
 
     private:
         unsigned int _major;

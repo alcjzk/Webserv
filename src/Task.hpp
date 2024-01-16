@@ -14,9 +14,9 @@ class Task
 
         virtual ~Task() = default;
 
-        int          fd();
-        bool         is_complete();
-        WaitFor      wait_for();
+        int          fd() const;
+        bool         is_complete() const;
+        WaitFor      wait_for() const;
 
         bool         operator==(int fd);
 
