@@ -2,14 +2,13 @@
 
 #include <vector>
 #include <string>
-#include <limits>
 #include <exception>
 
 class Reader
 {
     public:
-        Reader(const std::vector<char>& buffer, size_t position = 0);
-        Reader(std::vector<char>&& buffer, size_t position = 0);
+        Reader(const std::vector<char>& buffer);
+        Reader(std::vector<char>&& buffer);
 
         /// Extracts a line and advances the reader accordinly
         ///
@@ -26,7 +25,6 @@ class Reader
         /// effect.
         void        trim_empty_lines();
 
-        void        consume(size_t amount);
         char*       data();
 
     private:
@@ -42,11 +40,11 @@ class ReaderException : public std::exception
             NoLine
         } Type;
 
-        ReaderException(Type type) throw();
+        ReaderException(Type type) noexcept;
 
-        Type                type() const throw();
+        Type                type() const noexcept;
 
-        virtual const char* what() const throw();
+        virtual const char* what() const noexcept;
 
     private:
         Type _type;

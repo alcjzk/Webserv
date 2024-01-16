@@ -1,21 +1,12 @@
-#include <cstring>
 #include <iterator>
-#include <sys/types.h>
 #include "Reader.hpp"
 
-using std::distance;
 using std::string;
 using std::vector;
 
-Reader::Reader(const vector<char>& buffer, size_t position)
-    : _buffer(buffer), _head(_buffer.begin())
-{
-}
+Reader::Reader(const vector<char>& buffer) : _buffer(buffer), _head(_buffer.begin()) {}
 
-Reader::Reader(vector<char>&& buffer, size_t position)
-    : _buffer(std::move(buffer)), _head(_buffer.begin())
-{
-}
+Reader::Reader(vector<char>&& buffer) : _buffer(std::move(buffer)), _head(_buffer.begin()) {}
 
 void Reader::trim_empty_lines()
 {
@@ -34,13 +25,6 @@ void Reader::trim_empty_lines()
         else
             break;
     }
-}
-
-void Reader::consume(size_t amount)
-{
-    if (std::distance(_head, _buffer.end()) > (ssize_t)amount)
-        throw "Out of bounds";
-    _head += amount;
 }
 
 char* Reader::data()
@@ -80,20 +64,21 @@ std::string Reader::line()
     throw ReaderException(ReaderException::NoLine);
 }
 
-ReaderException::ReaderException(Type type) throw() : _type(type) {}
+ReaderException::ReaderException(Type type) noexcept : _type(type) {}
 
-ReaderException::Type ReaderException::type() const throw()
+ReaderException::Type ReaderException::type() const noexcept
 {
     return _type;
 }
 
-const char* ReaderException::what() const throw()
+const char* ReaderException::what() const noexcept
 {
     return "No line in buffer\n";
 }
 
 #ifdef TEST
 
+#include <cstring>
 #include "testutils.hpp"
 
 vector<char> ReaderTest::buffer(const char* content)
