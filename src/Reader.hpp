@@ -7,9 +7,16 @@
 class Reader
 {
     public:
+        /// Constructs the reader by copying a buffer.
         Reader(const std::vector<char>& buffer);
+
+        /// Constructs the reader by moving a buffer.
         Reader(std::vector<char>&& buffer);
 
+        /// Extracts a line from the buffer, advancing the reader accordinly.
+        ///
+        /// Any CR not followed by a LF is converted to a SP. The terminating CRLF/LF is removed
+        /// from the returned line.
         std::optional<std::string> line();
 
         /// Advances the reader from the current position, skipping any empty
@@ -20,6 +27,7 @@ class Reader
         /// effect.
         void                       trim_empty_lines();
 
+        /// Returns a raw pointer to the internal buffer.
         char*                      data();
 
     private:
