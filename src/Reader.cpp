@@ -28,7 +28,7 @@ void Reader::trim_empty_lines()
     }
 }
 
-char* Reader::data()
+char* Reader::data() noexcept
 {
     return _buffer.data();
 }

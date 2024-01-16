@@ -28,7 +28,7 @@ class Reader
         void                       trim_empty_lines();
 
         /// Returns a raw pointer to the internal buffer.
-        char*                      data();
+        char*                      data() noexcept;
 
     private:
         std::vector<char>           _buffer;
