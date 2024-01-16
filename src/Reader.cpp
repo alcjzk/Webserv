@@ -51,7 +51,7 @@ vector<char>::const_iterator Reader::next()
 
 void Reader::consume(size_t amount)
 {
-    if (std::distance(_head, _buffer.cend()) > (ssize_t)amount)
+    if (std::distance(_head, _buffer.end()) > (ssize_t)amount)
         throw "Out of bounds";
     _head += amount;
 }
@@ -65,24 +65,32 @@ char* Reader::data()
 // Throws no line, if the buffer does not contain a line
 std::string Reader::line()
 {
-    vector<char>::const_iterator start = _head;
-    vector<char>::const_iterator end = _head;
+    vector<char>::iterator start = _head;
+    vector<char>::iterator pos = _head;
 
-    while (end != _buffer.end())
+    while (pos != _buffer.end())
     {
-        if (*end == '\n')
+        if (*pos == '\r')
         {
-            if (start == end)
+            pos++;
+            if (pos == _buffer.end())
             {
-                _head = end + 1;
-                return string();
+                throw ReaderException(ReaderException::NoLine);
             }
-            _head = end + 1;
-            if (*(end - 1) == '\r')
-                end -= 1;
-            return string(start, end);
+            if (*pos == '\n')
+            {
+                _head = pos + 1;
+                return string(start, pos - 1);
+            }
+            pos[-1] = ' ';
+            continue;
         }
-        end++;
+        if (*pos == '\n')
+        {
+            _head = pos + 1;
+            return string(start, pos);
+        }
+        pos++;
     }
     throw ReaderException(ReaderException::NoLine);
 }
@@ -174,25 +182,25 @@ void ReaderTest::line_strip_bare_cr_test()
 {
     BEGIN
 
-    const char* content = "\rbare  cr1  \r\n" // One beginning
-                          "  bare\rcr2  \r\n" // One middle
-                          "  bare  cr3\r\r\n" // One end
-                          "\rbare\rcr4\r\r\n" // One each
-                          "\r\rmulti11    cr    \r\n" // Multiple beginning
-                          "    multi12\r\rcr    \r\n" // Multiple middle
-                          "    multi13    cr\r\r\r\n" // Multiple end
-                          "\r\rmulti14\r\rcr\r\r\r\n"; // Multiple each
+    const char* content = "\rbare cr1 \r\n"           // One beginning
+                          " bare\rcr2 \r\n"           // One middle
+                          " bare cr3\r\r\n"           // One end
+                          "\rbare\rcr4\r\r\n"         // One each
+                          "\r\rmulti  cr1  \r\n"      // Multiple beginning
+                          "  multi\r\rcr2  \r\n"      // Multiple middle
+                          "  multi  cr3\r\r\r\n"      // Multiple end
+                          "\r\rmulti\r\rcr4\r\r\r\n"; // Multiple each
 
-    Reader      reader(buffer(content));
+    Reader reader(buffer(content));
 
-    EXPECT(reader.line() == "  bare  cr1  ");
-    EXPECT(reader.line() == "  bare  cr2  ");
-    EXPECT(reader.line() == "  bare  cr3  ");
-    EXPECT(reader.line() == "  bare  cr4  ");
-    EXPECT(reader.line() == "    multi    cr1    ");
-    EXPECT(reader.line() == "    multi    cr2    ");
-    EXPECT(reader.line() == "    multi    cr3    ");
-    EXPECT(reader.line() == "    multi    cr4    ");
+    EXPECT(reader.line() == " bare cr1 ");
+    EXPECT(reader.line() == " bare cr2 ");
+    EXPECT(reader.line() == " bare cr3 ");
+    EXPECT(reader.line() == " bare cr4 ");
+    EXPECT(reader.line() == "  multi  cr1  ");
+    EXPECT(reader.line() == "  multi  cr2  ");
+    EXPECT(reader.line() == "  multi  cr3  ");
+    EXPECT(reader.line() == "  multi  cr4  ");
 
     END
 }
