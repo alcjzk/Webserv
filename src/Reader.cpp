@@ -65,18 +65,6 @@ optional<string> Reader::line()
     return std::nullopt;
 }
 
-ReaderException::ReaderException(Type type) noexcept : _type(type) {}
-
-ReaderException::Type ReaderException::type() const noexcept
-{
-    return _type;
-}
-
-const char* ReaderException::what() const noexcept
-{
-    return "No line in buffer\n";
-}
-
 #ifdef TEST
 
 #include <cstring>

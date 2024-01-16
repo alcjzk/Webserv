@@ -3,7 +3,6 @@
 #include <vector>
 #include <string>
 #include <optional>
-#include <exception>
 
 class Reader
 {
@@ -26,24 +25,6 @@ class Reader
     private:
         std::vector<char>           _buffer;
         std::vector<char>::iterator _head;
-};
-
-class ReaderException : public std::exception
-{
-    public:
-        typedef enum Type
-        {
-            NoLine
-        } Type;
-
-        ReaderException(Type type) noexcept;
-
-        Type                type() const noexcept;
-
-        virtual const char* what() const noexcept;
-
-    private:
-        Type _type;
 };
 
 #ifdef TEST
