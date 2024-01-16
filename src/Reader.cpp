@@ -17,15 +17,6 @@ Reader::Reader(vector<char>&& buffer, size_t position)
 {
 }
 
-Reader& Reader::trim(const std::string& charset) throw()
-{
-    while (_head != _buffer.end() && charset.find(*_head) != string::npos)
-    {
-        _head++;
-    }
-    return *this;
-}
-
 void Reader::trim_empty_lines()
 {
     while (_head != _buffer.end())

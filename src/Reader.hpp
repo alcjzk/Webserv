@@ -11,11 +11,6 @@ class Reader
         Reader(const std::vector<char>& buffer, size_t position = 0);
         Reader(std::vector<char>&& buffer, size_t position = 0);
 
-        /// @brief Advance the reader until a byte not present in charset.
-        /// @param charset
-        // TODO: Unused?
-        Reader&     trim(const std::string& charset) throw();
-
         /// Extracts a line and advances the reader accordinly
         ///
         /// @throw ReaderException::Type::NoLine
