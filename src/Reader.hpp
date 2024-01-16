@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <optional>
 #include <exception>
 
 class Reader
@@ -10,11 +11,7 @@ class Reader
         Reader(const std::vector<char>& buffer);
         Reader(std::vector<char>&& buffer);
 
-        /// Extracts a line and advances the reader accordinly
-        ///
-        /// @throw ReaderException::Type::NoLine
-        /// @return The extracted line without CR/LF
-        std::string line();
+        std::optional<std::string> line();
 
         /// Advances the reader from the current position, skipping any empty
         /// lines (CRLF/LF).
@@ -22,9 +19,9 @@ class Reader
         /// If there are no empty lines at the current
         /// position or the reader has been exhausted, this function has no
         /// effect.
-        void        trim_empty_lines();
+        void                       trim_empty_lines();
 
-        char*       data();
+        char*                      data();
 
     private:
         std::vector<char>           _buffer;

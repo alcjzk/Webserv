@@ -1,6 +1,7 @@
 #include <iterator>
 #include "Reader.hpp"
 
+using std::optional;
 using std::string;
 using std::vector;
 
@@ -32,7 +33,7 @@ char* Reader::data()
     return _buffer.data();
 }
 
-std::string Reader::line()
+optional<string> Reader::line()
 {
     vector<char>::iterator start = _head;
     vector<char>::iterator pos = _head;
@@ -44,7 +45,7 @@ std::string Reader::line()
             std::advance(pos, 1);
             if (pos == _buffer.end())
             {
-                throw ReaderException(ReaderException::NoLine);
+                return std::nullopt;
             }
             if (*pos == '\n')
             {
@@ -61,7 +62,7 @@ std::string Reader::line()
         }
         std::advance(pos, 1);
     }
-    throw ReaderException(ReaderException::NoLine);
+    return std::nullopt;
 }
 
 ReaderException::ReaderException(Type type) noexcept : _type(type) {}
@@ -102,20 +103,11 @@ void ReaderTest::line_noline_test()
 {
     BEGIN
 
-    vector<char> buffer = ReaderTest::buffer("aaaa");
-    Reader       reader(buffer);
+    vector<char>     buffer = ReaderTest::buffer("aaaa");
+    Reader           reader(buffer);
 
-    try
-    {
-        string line = reader.line();
-    }
-    catch (const ReaderException& error)
-    {
-        if (error.type() != ReaderException::NoLine)
-            throw error;
-        return;
-    }
-    EXPECT(false);
+    optional<string> line = reader.line();
+    EXPECT(!line);
 
     END
 }
@@ -139,11 +131,8 @@ void ReaderTest::line_basic_test()
     vector<char> buffer = ReaderTest::buffer("aa\nbb\r\n");
     Reader       reader(buffer);
 
-    string       line1 = reader.line();
-    string       line2 = reader.line();
-
-    EXPECT(line1 == "aa");
-    EXPECT(line2 == "bb");
+    EXPECT(reader.line() == "aa");
+    EXPECT(reader.line() == "bb");
 
     END
 }
