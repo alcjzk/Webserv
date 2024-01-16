@@ -92,7 +92,6 @@ class ServerReceiveRequestTask : public Task
         static const size_t _header_buffer_size = 4096;
         Expect              _expect;
         size_t              _bytes_received_total;
-        std::vector<char>   _buffer;
         Reader              _reader;
         Request             _request;
         bool                _is_partial_data;

@@ -9,6 +9,7 @@ class Reader
 {
     public:
         Reader(const std::vector<char>& buffer, size_t position = 0);
+        Reader(std::vector<char>&& buffer, size_t position = 0);
 
         /// @brief Advance the reader until a byte not present in charset.
         /// @param charset
@@ -31,12 +32,13 @@ class Reader
         void        trim_empty_lines();
 
         void        consume(size_t amount);
+        char*       data();
 
     private:
         /// Returns a constant iterator pointing to the next element in the reader.
         std::vector<char>::const_iterator next();
 
-        const std::vector<char>&          _buffer;
+        std::vector<char>                 _buffer;
         std::vector<char>::const_iterator _head;
 };
 

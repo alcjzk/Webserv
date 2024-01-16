@@ -11,6 +11,11 @@ Reader::Reader(const vector<char>& buffer, size_t position)
 {
 }
 
+Reader::Reader(vector<char>&& buffer, size_t position)
+    : _buffer(std::move(buffer)), _head(_buffer.begin())
+{
+}
+
 Reader& Reader::trim(const std::string& charset) throw()
 {
     while (_head != _buffer.end() && charset.find(*_head) != string::npos)
@@ -46,9 +51,14 @@ vector<char>::const_iterator Reader::next()
 
 void Reader::consume(size_t amount)
 {
-    if (std::distance(_head, _buffer.end()) > (ssize_t)amount)
+    if (std::distance(_head, _buffer.cend()) > (ssize_t)amount)
         throw "Out of bounds";
     _head += amount;
+}
+
+char* Reader::data()
+{
+    return _buffer.data();
 }
 
 // Return a line from the internal buffer
