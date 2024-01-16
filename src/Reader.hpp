@@ -69,6 +69,7 @@ class ReaderTest : public Reader
         static void line_basic_test();
         static void line_one_test();
         static void line_noline_test();
+        static void line_strip_bare_cr_test();
 
     private:
         static std::vector<char> buffer(const char* content);

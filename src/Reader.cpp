@@ -170,4 +170,31 @@ void ReaderTest::line_basic_test()
     END
 }
 
+void ReaderTest::line_strip_bare_cr_test()
+{
+    BEGIN
+
+    const char* content = "\rbare  cr1  \r\n" // One beginning
+                          "  bare\rcr2  \r\n" // One middle
+                          "  bare  cr3\r\r\n" // One end
+                          "\rbare\rcr4\r\r\n" // One each
+                          "\r\rmulti11    cr    \r\n" // Multiple beginning
+                          "    multi12\r\rcr    \r\n" // Multiple middle
+                          "    multi13    cr\r\r\r\n" // Multiple end
+                          "\r\rmulti14\r\rcr\r\r\r\n"; // Multiple each
+
+    Reader      reader(buffer(content));
+
+    EXPECT(reader.line() == "  bare  cr1  ");
+    EXPECT(reader.line() == "  bare  cr2  ");
+    EXPECT(reader.line() == "  bare  cr3  ");
+    EXPECT(reader.line() == "  bare  cr4  ");
+    EXPECT(reader.line() == "    multi    cr1    ");
+    EXPECT(reader.line() == "    multi    cr2    ");
+    EXPECT(reader.line() == "    multi    cr3    ");
+    EXPECT(reader.line() == "    multi    cr4    ");
+
+    END
+}
+
 #endif
