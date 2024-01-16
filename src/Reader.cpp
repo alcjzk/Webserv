@@ -1,4 +1,5 @@
 #include <cstring>
+#include <iterator>
 #include <sys/types.h>
 #include "Reader.hpp"
 
@@ -31,7 +32,7 @@ void Reader::trim_empty_lines()
     {
         if (*_head == '\r')
         {
-            if (next() == _buffer.end() || *next() == '\n')
+            if (std::next(_head) == _buffer.end() || *std::next(_head) == '\n')
                 break;
             std::advance(_head, 2);
         }
@@ -42,11 +43,6 @@ void Reader::trim_empty_lines()
         else
             break;
     }
-}
-
-vector<char>::const_iterator Reader::next()
-{
-    return _head + 1;
 }
 
 void Reader::consume(size_t amount)
@@ -61,8 +57,6 @@ char* Reader::data()
     return _buffer.data();
 }
 
-// Return a line from the internal buffer
-// Throws no line, if the buffer does not contain a line
 std::string Reader::line()
 {
     vector<char>::iterator start = _head;
@@ -72,25 +66,25 @@ std::string Reader::line()
     {
         if (*pos == '\r')
         {
-            pos++;
+            std::advance(pos, 1);
             if (pos == _buffer.end())
             {
                 throw ReaderException(ReaderException::NoLine);
             }
             if (*pos == '\n')
             {
-                _head = pos + 1;
-                return string(start, pos - 1);
+                _head = std::next(pos);
+                return string(start, std::prev(pos));
             }
-            pos[-1] = ' ';
+            *std::prev(pos) = ' ';
             continue;
         }
         if (*pos == '\n')
         {
-            _head = pos + 1;
+            _head = std::next(pos);
             return string(start, pos);
         }
-        pos++;
+        std::advance(pos, 1);
     }
     throw ReaderException(ReaderException::NoLine);
 }

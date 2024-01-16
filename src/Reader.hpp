@@ -35,11 +35,8 @@ class Reader
         char*       data();
 
     private:
-        /// Returns a constant iterator pointing to the next element in the reader.
-        std::vector<char>::const_iterator next();
-
-        std::vector<char>                 _buffer;
-        std::vector<char>::iterator       _head;
+        std::vector<char>           _buffer;
+        std::vector<char>::iterator _head;
 };
 
 class ReaderException : public std::exception
