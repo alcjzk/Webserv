@@ -15,7 +15,9 @@
 #include "http.hpp"
 #include "Server.hpp"
 
-using std::string, std::pair;
+using std::optional;
+using std::string;
+using std::vector;
 
 Server::Server(const Config& config)
     : _config(config), _port(config.ports().front().c_str()), _fd(-1)
@@ -109,7 +111,7 @@ const Route* Server::route(const std::string& uri_path) const
 
 ServerReceiveRequestTask::ServerReceiveRequestTask(const Server& server, int fd)
     : Task(fd, Readable), _expect(REQUEST_LINE), _bytes_received_total(0),
-      _buffer(_header_buffer_size), _reader(_buffer), _is_partial_data(true), _server(server)
+      _reader(vector<char>(_header_buffer_size)), _is_partial_data(true), _server(server)
 {
 }
 
@@ -120,7 +122,7 @@ size_t ServerReceiveRequestTask::buffer_size_available()
 
 char* ServerReceiveRequestTask::buffer_head()
 {
-    return _buffer.data() + _bytes_received_total;
+    return _reader.data() + _bytes_received_total;
 }
 
 void ServerReceiveRequestTask::fill_buffer()
@@ -150,7 +152,7 @@ void ServerReceiveRequestTask::receive_start_line()
     try
     {
         _reader.trim_empty_lines();
-        _request._request_line = RequestLine(_reader.line());
+        _request._request_line = RequestLine(_reader.line().value());
         if (!_request.http_version().is_compatible_with(Server::http_version()))
         {
             throw HTTPError(Status::HTTP_VERSION_NOT_SUPPORTED);
@@ -158,25 +160,26 @@ void ServerReceiveRequestTask::receive_start_line()
         INFO(_request._request_line);
         _expect = HEADERS;
     }
-    catch (const ReaderException& error)
+    catch (const std::bad_optional_access&)
     {
-        // No line in buffer, we can just try to read again.
-        assert(error.type() == ReaderException::NoLine);
         _is_partial_data = true;
     }
 }
 
 void ServerReceiveRequestTask::receive_headers()
 {
+    string    line;
+    Response* response;
+
     try
     {
         while (true)
         {
-            string line = _reader.line();
+            line = _reader.line().value();
             if (line.empty())
             {
                 INFO("End of headers");
-                Response* response = _request.into_response(_server);
+                response = _request.into_response(_server);
                 Runtime::enqueue(new ServerSendResponseTask(_fd, response));
                 _is_complete = true;
                 return;
@@ -193,10 +196,8 @@ void ServerReceiveRequestTask::receive_headers()
             INFO(_request._headers.back());
         }
     }
-    catch (const ReaderException& error)
+    catch (const std::bad_optional_access&)
     {
-        // No line in buffer, we can just try to read again.
-        assert(error.type() == ReaderException::NoLine);
         _is_partial_data = true;
     }
 }

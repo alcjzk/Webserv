@@ -1,24 +1,13 @@
-#include <cstring>
-#include <sys/types.h>
+#include <iterator>
 #include "Reader.hpp"
 
-using std::distance;
+using std::optional;
 using std::string;
 using std::vector;
 
-Reader::Reader(const vector<char>& buffer, size_t position)
-    : _buffer(buffer), _head(_buffer.begin())
-{
-}
+Reader::Reader(const vector<char>& buffer) : _buffer(buffer), _head(_buffer.begin()) {}
 
-Reader& Reader::trim(const std::string& charset) throw()
-{
-    while (_head != _buffer.end() && charset.find(*_head) != string::npos)
-    {
-        _head++;
-    }
-    return *this;
-}
+Reader::Reader(vector<char>&& buffer) : _buffer(std::move(buffer)), _head(_buffer.begin()) {}
 
 void Reader::trim_empty_lines()
 {
@@ -26,7 +15,7 @@ void Reader::trim_empty_lines()
     {
         if (*_head == '\r')
         {
-            if (next() == _buffer.end() || *next() == '\n')
+            if (std::next(_head) == _buffer.end() || *std::next(_head) != '\n')
                 break;
             std::advance(_head, 2);
         }
@@ -39,58 +28,46 @@ void Reader::trim_empty_lines()
     }
 }
 
-vector<char>::const_iterator Reader::next()
+char* Reader::data() noexcept
 {
-    return _head + 1;
+    return _buffer.data();
 }
 
-void Reader::consume(size_t amount)
+optional<string> Reader::line()
 {
-    if (std::distance(_head, _buffer.end()) > (ssize_t)amount)
-        throw "Out of bounds";
-    _head += amount;
-}
+    vector<char>::iterator start = _head;
+    vector<char>::iterator pos = _head;
 
-// Return a line from the internal buffer
-// Throws no line, if the buffer does not contain a line
-std::string Reader::line()
-{
-    vector<char>::const_iterator start = _head;
-    vector<char>::const_iterator end = _head;
-
-    while (end != _buffer.end())
+    while (pos != _buffer.end())
     {
-        if (*end == '\n')
+        if (*pos == '\r')
         {
-            if (start == end)
+            std::advance(pos, 1);
+            if (pos == _buffer.end())
             {
-                _head = end + 1;
-                return string();
+                return std::nullopt;
             }
-            _head = end + 1;
-            if (*(end - 1) == '\r')
-                end -= 1;
-            return string(start, end);
+            if (*pos == '\n')
+            {
+                _head = std::next(pos);
+                return string(start, std::prev(pos));
+            }
+            *std::prev(pos) = ' ';
+            continue;
         }
-        end++;
+        if (*pos == '\n')
+        {
+            _head = std::next(pos);
+            return string(start, pos);
+        }
+        std::advance(pos, 1);
     }
-    throw ReaderException(ReaderException::NoLine);
-}
-
-ReaderException::ReaderException(Type type) throw() : _type(type) {}
-
-ReaderException::Type ReaderException::type() const throw()
-{
-    return _type;
-}
-
-const char* ReaderException::what() const throw()
-{
-    return "No line in buffer\n";
+    return std::nullopt;
 }
 
 #ifdef TEST
 
+#include <cstring>
 #include "testutils.hpp"
 
 vector<char> ReaderTest::buffer(const char* content)
@@ -102,8 +79,7 @@ void ReaderTest::line_empty_test()
 {
     BEGIN
 
-    vector<char> buffer = ReaderTest::buffer("\n");
-    Reader       reader(buffer);
+    Reader reader(buffer("\r\n"));
 
     EXPECT(reader.line() == "");
 
@@ -114,32 +90,10 @@ void ReaderTest::line_noline_test()
 {
     BEGIN
 
-    vector<char> buffer = ReaderTest::buffer("aaaa");
-    Reader       reader(buffer);
+    Reader reader(buffer("\naaaa"));
 
-    try
-    {
-        string line = reader.line();
-    }
-    catch (const ReaderException& error)
-    {
-        if (error.type() != ReaderException::NoLine)
-            throw error;
-        return;
-    }
-    EXPECT(false);
-
-    END
-}
-
-void ReaderTest::line_one_test()
-{
-    BEGIN
-
-    vector<char> buffer = ReaderTest::buffer("a\n");
-    Reader       reader(buffer);
-
-    EXPECT(reader.line() == "a");
+    EXPECT(reader.line());
+    EXPECT(!reader.line());
 
     END
 }
@@ -148,14 +102,54 @@ void ReaderTest::line_basic_test()
 {
     BEGIN
 
-    vector<char> buffer = ReaderTest::buffer("aa\nbb\r\n");
-    Reader       reader(buffer);
+    Reader reader(buffer("aa\nbb\r\n"));
 
-    string       line1 = reader.line();
-    string       line2 = reader.line();
+    EXPECT(reader.line() == "aa");
+    EXPECT(reader.line() == "bb");
 
-    EXPECT(line1 == "aa");
-    EXPECT(line2 == "bb");
+    END
+}
+
+void ReaderTest::line_strip_bare_cr_test()
+{
+    BEGIN
+
+    const char* content = "\rbare cr1 \r\n"           // One beginning
+                          " bare\rcr2 \r\n"           // One middle
+                          " bare cr3\r\r\n"           // One end
+                          "\rbare\rcr4\r\r\n"         // One each
+                          "\r\rmulti  cr1  \r\n"      // Multiple beginning
+                          "  multi\r\rcr2  \r\n"      // Multiple middle
+                          "  multi  cr3\r\r\r\n"      // Multiple end
+                          "\r\rmulti\r\rcr4\r\r\r\n"; // Multiple each
+
+    Reader reader(buffer(content));
+
+    EXPECT(reader.line() == " bare cr1 ");
+    EXPECT(reader.line() == " bare cr2 ");
+    EXPECT(reader.line() == " bare cr3 ");
+    EXPECT(reader.line() == " bare cr4 ");
+    EXPECT(reader.line() == "  multi  cr1  ");
+    EXPECT(reader.line() == "  multi  cr2  ");
+    EXPECT(reader.line() == "  multi  cr3  ");
+    EXPECT(reader.line() == "  multi  cr4  ");
+
+    END
+}
+
+void ReaderTest::trim_empty_lines_test()
+{
+    BEGIN
+
+    const char* content = "\r\nline1\r\n"
+                          "\r\nline2\r\n";
+    Reader      reader(buffer(content));
+
+    EXPECT(reader.line() == "");
+    EXPECT(reader.line() == "line1");
+
+    reader.trim_empty_lines();
+    EXPECT(reader.line() == "line2");
 
     END
 }
