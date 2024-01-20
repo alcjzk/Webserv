@@ -133,6 +133,8 @@ int TiniTree::valueInsertion(std::string act, int row)
             throw std::runtime_error("TiniTree: valueInsertion: Vector cannot act as endpoint");
             break;
         case TiniNode::T_MAP:
+            if (_current->getMapValue().count(pair[0]))
+                throw std::runtime_error("TiniTree: valueInsertion: Duplicate key error!");
             _current->getMapValue()[pair[0]] = new TiniNode(pair[1]);
             break;
         case TiniNode::T_STRING:
