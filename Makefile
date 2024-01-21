@@ -39,7 +39,8 @@ Route.cpp			\
 FileResponse.cpp	\
 Routes.cpp			\
 Path.cpp			\
-main.cpp
+HostAttributes.cpp  \
+main.cpp			\
 
 SRCS_TEST = test/testmain.cpp
 
