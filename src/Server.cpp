@@ -15,7 +15,6 @@
 #include "http.hpp"
 #include "Server.hpp"
 
-using std::optional;
 using std::string;
 using std::vector;
 
