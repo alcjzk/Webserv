@@ -20,7 +20,7 @@ using std::string;
 using std::vector;
 
 Server::Server(const Config& config)
-    : _config(config), _port(config.port().c_str()), _fd(-1)
+    : _config(config), _port(config.port().c_str()), _fd(-1), _attributes(config.attrs())
 {
     struct addrinfo hints;
     int             status;
@@ -45,14 +45,6 @@ Server::Server(const Config& config)
         throw std::runtime_error(strerror(errno));
     if (listen(_fd, _config.backlog()) == -1)
         throw std::runtime_error(strerror(errno));
-    try
-    {
-        _routes.push(Route("/", "www"));
-    }
-    catch (const std::runtime_error& error)
-    {
-        WARN(error.what());
-    }
     INFO("Listening on " << _fd);
     Runtime::enqueue(new ServerAcceptTask(*this));
 }
@@ -104,9 +96,18 @@ void ServerSendResponseTask::run()
     (void)close(_fd);
 }
 
-const Route* Server::route(const std::string& uri_path) const
+const Route* Server::route(const std::string& uri_path, const std::string& host) const
 {
-    return _routes.find(uri_path);
+    std::cout << "Finding " << host << " from routes for port " << _config.port() << std::endl;
+    const auto attr = std::find_if(_attributes.begin(), _attributes.end(),
+                                   [host](HostAttributes a) { return (a.hostname() == host); });
+    if (attr == _attributes.end())
+    {
+        if ((*_attributes.end()).hostname() == host)
+            return (*_attributes.end()).routes().find(uri_path);
+        return (*_attributes.begin()).routes().find(uri_path);
+    }
+    return ((*attr).routes().find(uri_path));
 }
 
 ServerReceiveRequestTask::ServerReceiveRequestTask(const Server& server, int fd)

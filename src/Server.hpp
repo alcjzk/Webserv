@@ -14,6 +14,7 @@
 #include "Routes.hpp"
 #include "Reader.hpp"
 #include "Request.hpp"
+#include "HostAttributes.hpp"
 
 class Server
 {
@@ -28,15 +29,16 @@ class Server
         Server&                  operator=(Server&&) = delete;
 
         int                      fd() const;
-        const Route*             route(const std::string& uri_path) const;
+        const Route*             route(const std::string& uri_path, const std::string& host) const;
         static const HTTPVersion http_version();
 
     private:
-        const Config&    _config;
-        const char*      _port;
-        struct addrinfo* _address_info;
-        int              _fd;
-        Routes           _routes;
+        const Config&                      _config;
+        const char*                        _port;
+        struct addrinfo*                   _address_info;
+        int                                _fd;
+        Routes                             _routes;
+        const std::vector<HostAttributes>& _attributes;
 };
 
 class ServerSendResponseTask : public Task
