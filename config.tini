@@ -1,15 +1,14 @@
 [servers.alpha]
     host=127.0.0.1
-    port=8000
-    [servers.alpha.first.routes]
+    [servers.alpha.bravo.routes]
         /=www:GET-ACCEPT
-    [servers.alpha.second.routes]
+    [servers.alpha.hotel.routes]
         /=www2:GET-ACCEPT
+    [servers.alpha.india.routes]
+        /=www3:GET-ACCEPT
 
 [servers.beta]
     host=127.0.0.1
-    port=8001
-    [servers.beta.first.routes]
-        /=www3:GET-ACCEPT
-    [servers.beta.second.routes]
-        /=www4:GET-ACCEPT
+    port=8080
+    [servers.beta.localhost.routes]
+        /=.:GET-ACCEPT
