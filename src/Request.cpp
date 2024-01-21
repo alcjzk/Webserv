@@ -5,6 +5,7 @@
 #include "HTTPError.hpp"
 #include "URI.hpp"
 #include "Request.hpp"
+#include "TiniUtils.hpp"
 
 using std::string;
 using std::vector;
@@ -16,9 +17,8 @@ Response* Request::into_response(const Server& server) const
     {
         throw HTTPError(Status::BAD_REQUEST);
     }
-
     URI          request_uri(_request_line.request_target(), host->_value);
-    const Route* route = server.route(request_uri.path());
+    const Route* route = server.route(request_uri.path(), split(host->_value, ":")[0]);
     if (!route)
     {
         throw HTTPError(Status::BAD_REQUEST);
