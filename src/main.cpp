@@ -9,6 +9,14 @@
 #include <stdexcept>
 #include <set>
 
+void cleanup(std::vector<Server*> s, std::vector<Config*> c)
+{
+        for (auto e : s)
+            delete e;
+        for (auto e : c)
+            delete e;
+}
+
 int main()
 {
     std::vector<Server*>  v_servers;
@@ -36,27 +44,18 @@ int main()
             v_servers.push_back(new Server(*v_configs.back()));
         }
         Runtime::instance().run();
-        for (auto e : v_servers)
-            delete e;
-        for (auto e : v_configs)
-            delete e;
+        cleanup(v_servers, v_configs);
     }
     catch (const char* e)
     {
         ERR(e);
-        for (auto e : v_servers)
-            delete e;
-        for (auto e : v_configs)
-            delete e;
+        cleanup(v_servers, v_configs);
         return EXIT_FAILURE;
     }
     catch (const std::exception& e)
     {
         ERR(e.what());
-        for (auto e : v_servers)
-            delete e;
-        for (auto e : v_configs)
-            delete e;
+        cleanup(v_servers, v_configs);
         return EXIT_FAILURE;
     }
 
