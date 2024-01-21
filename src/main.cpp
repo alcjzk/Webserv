@@ -6,50 +6,35 @@
 #include <cstdlib>
 #include <exception>
 #include <iostream>
+#include <stdexcept>
+#include <set>
 
 int main()
 {
+    std::vector<Server*>  v_servers;
+    std::vector<Config*>  v_configs;
+    std::set<std::string> opened_ports;
     try
     {
         TiniTree  tree;
         TiniNode& root = tree.getRoot();
-        TiniNode  servers = root["servers"];
-        std::vector<Server *> v_servers;
-        std::vector<Config *> v_configs;
+        TiniNode* servers = root.getMapValue()["servers"];
 
-        for (const auto& [key, val] : servers.getMapValue())
+        if (!servers)
+            throw std::runtime_error("\"servers\" not found in the root map");
+        for (const auto& [key, val] : servers->getMapValue())
         {
-            v_configs.push_back(new Config(*val));
+            Config* cfg = new Config(val->getMapValue(), root.getMapValue());
+
+            if (cfg && opened_ports.find(cfg->port()) != opened_ports.end())
+            {
+                delete cfg;
+                throw std::runtime_error("Port already defined");
+            }
+            opened_ports.insert(cfg->port());
+            v_configs.push_back(cfg);
             v_servers.push_back(new Server(*v_configs.back()));
         }
-        // root.printContents(0, "");
-        // std::map<std::string, TiniNode *> server_maps = servers.getMapValue();
-        // for ( const auto &myPair : server_maps ) {
-        //     
-        // }
-        // INFO("Printing the copied test");
-        // test.printContents(0, "");
-
-        // INFO("Printing the whole tree");
-        // root.printContents(0, "");
-
-        // std::cout << "\n\n\n";
-        // INFO("Printing a nested map");
-        // root["a"]["b"]["c"].printContents(0, "");
-
-        // std::cout << "\n\n\n";
-        // INFO("Printing the server listing");
-        // for (auto n : root["http"]["servers"].getVectorValue())
-        //     n->printContents(0, "");
-
-        // std::cout << "\n\n\n";
-        // INFO("Printing an individual key value pair");
-        // auto v = root["root_map_value"].getStringValue();
-        // std::cout << "Value for key "
-        //           << "root_map_value is: " << v << std::endl;
-
-        // Server server(config);
-        // Server server_two(config_two);
         Runtime::instance().run();
         for (auto e : v_servers)
             delete e;
@@ -59,11 +44,19 @@ int main()
     catch (const char* e)
     {
         ERR(e);
+        for (auto e : v_servers)
+            delete e;
+        for (auto e : v_configs)
+            delete e;
         return EXIT_FAILURE;
     }
     catch (const std::exception& e)
     {
         ERR(e.what());
+        for (auto e : v_servers)
+            delete e;
+        for (auto e : v_configs)
+            delete e;
         return EXIT_FAILURE;
     }
 
