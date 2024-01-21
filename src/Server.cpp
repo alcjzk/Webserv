@@ -66,6 +66,11 @@ int Server::fd() const
     return _fd;
 }
 
+const Config& Server::config() const
+{
+    return _config;
+}
+
 ServerSendResponseTask::ServerSendResponseTask(int fd, Response* response)
     : Task(fd, Writable), _response(response)
 {
@@ -97,7 +102,6 @@ void ServerSendResponseTask::run()
 
 const Route* Server::route(const std::string& uri_path, const std::string& host) const
 {
-    std::cout << "Finding " << host << " from routes for port " << _config.port() << std::endl;
     const auto attr = std::find_if(_attributes.begin(), _attributes.end(),
                                    [host](const HostAttributes& a) { return (a.hostname() == host); });
     if (attr == _attributes.end())
@@ -107,13 +111,13 @@ const Route* Server::route(const std::string& uri_path, const std::string& host)
 
 ServerReceiveRequestTask::ServerReceiveRequestTask(const Server& server, int fd)
     : Task(fd, Readable), _expect(REQUEST_LINE), _bytes_received_total(0),
-      _reader(vector<char>(_header_buffer_size)), _is_partial_data(true), _server(server)
+      _reader(vector<char>(server.config().header_buffsize())), _is_partial_data(true), _server(server)
 {
 }
 
 size_t ServerReceiveRequestTask::buffer_size_available()
 {
-    return _header_buffer_size - _bytes_received_total;
+    return _server.config().header_buffsize() - _bytes_received_total;
 }
 
 char* ServerReceiveRequestTask::buffer_head()

@@ -31,6 +31,7 @@ class Server
         int                      fd() const;
         const Route*             route(const std::string& uri_path, const std::string& host) const;
         static const HTTPVersion http_version();
+        const Config&            config() const;
 
     private:
         const Config&                      _config;
@@ -91,7 +92,6 @@ class ServerReceiveRequestTask : public Task
         size_t              buffer_size_available();
 
         // TODO: Use value from config + expanding buffersize?
-        static const size_t _header_buffer_size = 4096;
         Expect              _expect;
         size_t              _bytes_received_total;
         Reader              _reader;
