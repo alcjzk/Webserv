@@ -1,6 +1,7 @@
 #include "Config.hpp"
 #include "HostAttributes.hpp"
 #include "Log.hpp"
+#include "Server.hpp"
 #include <stdexcept>
 
 using std::string;
@@ -9,6 +10,7 @@ Config::Config(std::map<std::string, TiniNode*>& server, std::map<std::string, T
     : _port(string("8000")), _backlog(128), _body_size(4096) // OSX capped value for listen(2)
 {
     TiniNode* body_size = root["body_size"];
+    TiniNode* header_buffer_size = root["header_buffer_size"];
     TiniNode* port = server["port"];
 
     try
@@ -24,6 +26,13 @@ Config::Config(std::map<std::string, TiniNode*>& server, std::map<std::string, T
         throw std::runtime_error("Server is not defined as map!");
     }
 
+    if (!header_buffer_size || header_buffer_size->getType() != TiniNode::T_STRING)
+    {
+        _header_buffer_size = 4096;
+        INFO("Header buffer size not specified or invalid type, defaulting to 4096");
+    }
+    else
+        _header_buffer_size = stoi(header_buffer_size->getStringValue());
     if (!body_size || body_size->getType() != TiniNode::T_STRING)
     {
         INFO("Body size not specified or invalid type, defaulting to 4096");
@@ -51,4 +60,9 @@ int Config::backlog() const
 const std::vector<HostAttributes>& Config::attrs() const
 {
     return _attrs;
+}
+
+size_t                             Config::header_buffsize() const
+{
+    return _header_buffer_size;
 }
