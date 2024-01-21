@@ -5,6 +5,9 @@
 #include "Log.hpp"
 #include "Route.hpp"
 
+const std::map<std::string, Route::Method> _method_map = {
+    {"GET-ACCEPT", Route::GET}, {"POST-ACCEPT", Route::POST}, {"DELETE-ACCEPT", Route::DELETE}};
+
 Route::Route(Path uri_path, Path fs_path) : _uri_path(uri_path)
 {
     try
