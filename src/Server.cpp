@@ -102,11 +102,7 @@ const Route* Server::route(const std::string& uri_path, const std::string& host)
     const auto attr = std::find_if(_attributes.begin(), _attributes.end(),
                                    [host](HostAttributes a) { return (a.hostname() == host); });
     if (attr == _attributes.end())
-    {
-        if ((*_attributes.end()).hostname() == host)
-            return (*_attributes.end()).routes().find(uri_path);
         return (*_attributes.begin()).routes().find(uri_path);
-    }
     return ((*attr).routes().find(uri_path));
 }
 
