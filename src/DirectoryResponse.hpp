@@ -7,8 +7,8 @@
 class DirectoryResponse : public Response
 {
     public:
-        DirectoryResponse(const Path& path, Status status = Status::OK);
+        DirectoryResponse(const Path& target_path, const Path& request_path, Status status = Status::OK);
     private:
         std::string last_uri_elem() const;
-        std::string last_uri_segment(Path& full_path) const;
+        std::string last_uri_segment(const Path& full_path) const;
 };

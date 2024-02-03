@@ -48,12 +48,12 @@ Response* Request::into_response(const Server& server) const
         {
             INFO("Configured default file doesn't exist!");
             if (server.map_attributes(hostname).dirlist())
-                return new DirectoryResponse(target);
+                return new DirectoryResponse(target, request_uri.path());
             throw HTTPError(Status::NOT_FOUND);
         }
         if (!server.map_attributes(hostname).dirlist())
             throw HTTPError(Status::FORBIDDEN);
-        return new DirectoryResponse(target);
+        return new DirectoryResponse(target, request_uri.path());
     }
     return new FileResponse(target);
 }

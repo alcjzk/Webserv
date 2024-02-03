@@ -10,9 +10,10 @@ using std::filebuf;
 using std::ifstream;
 using std::vector;
 
-DirectoryResponse::DirectoryResponse(const Path& path, Status status) : Response(status)
+// DirectoryResponse::DirectoryResponse(const Path& path, Status status) : Response(status)
+DirectoryResponse::DirectoryResponse(const Path& target_path, const Path& request_path, Status status) : Response(status)
 {
-    std::string       cwd_path(static_cast<std::string>(path));
+    std::string       cwd_path(static_cast<std::string>(target_path));
     const char*       cwd_cstr = cwd_path.c_str();
     DIR*              cwd_dirobj = opendir(cwd_cstr);
     struct dirent*    cwd_entry = readdir(cwd_dirobj);
@@ -23,14 +24,13 @@ DirectoryResponse::DirectoryResponse(const Path& path, Status status) : Response
     body << " </h1>\n<hr>\n<ul>\n";
     while (cwd_entry)
     {
-        Path full_path = Path::canonical(path);
+        Path full_path = Path::canonical(target_path);
 
-        INFO("Path: " << path);
+        INFO("Target path: " << target_path);
+        INFO("Request Path: " << request_path);
         body << "  <li><a href=\"";
-        if (static_cast<std::string>(full_path).back() != '/')
-            body << last_uri_segment(full_path) << "/";
-        else
-            body << "./";
+        if (static_cast<std::string>(request_path).back() != '/')
+            body << last_uri_segment(request_path) << "/";
         body << cwd_entry->d_name << "\">";
         body << cwd_entry->d_name << "</a></li>\n";
         cwd_entry = readdir(cwd_dirobj);
@@ -42,13 +42,14 @@ DirectoryResponse::DirectoryResponse(const Path& path, Status status) : Response
     this->body(std::move(body_vec));
 }
 
-std::string DirectoryResponse::last_uri_segment(Path& full_path) const
+std::string DirectoryResponse::last_uri_segment(const Path& relative_path) const
 {
-    auto end = full_path.end() - 1;
-    for (; end > full_path.begin(); --end)
+    auto end = relative_path.cend() - 1;
+    for (; end > relative_path.cbegin(); --end)
     {
-        if ((*end).length())
+        if ((*end).length() && *end != "/")
             break;
     }
+    INFO("End: " << *end);
     return (*end);
 }
