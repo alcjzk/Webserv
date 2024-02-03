@@ -28,14 +28,6 @@ Response* Request::into_response(const Server& server) const
 
     Path target = route->map(request_uri.path());
 
-    if (route->default_file().has_value())
-    {
-        INFO("This has value!")
-    }
-    else
-    {
-        INFO("Doesn't freaking have value")
-    }
     if (target.type() == Path::Type::NOT_FOUND)
     {
         throw HTTPError(Status::NOT_FOUND);

@@ -37,10 +37,6 @@ HostAttributes::HostAttributes(const std::string& hostname, const TiniNode* node
         if (value->getStringValue().find(':') != std::string::npos)
         {
             const std::vector<std::string>& route_values = split(value->getStringValue(), ":");
-            for (const auto& el : route_values)
-            {
-                INFO("Element " << el);
-            }
             switch(route_values.size())
             {
                 case 2:
