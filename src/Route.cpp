@@ -4,11 +4,13 @@
 #include <sstream>
 #include "Log.hpp"
 #include "Route.hpp"
+#include <iostream>
 
 const std::map<std::string, Route::Method> _method_map = {
     {"GET-ACCEPT", Route::GET}, {"POST-ACCEPT", Route::POST}, {"DELETE-ACCEPT", Route::DELETE}};
 
-Route::Route(Path uri_path, Path fs_path) : _uri_path(uri_path)
+Route::Route(Path uri_path, Path fs_path, std::optional<std::string> default_file)
+    : _uri_path(uri_path), _default_file(default_file)
 {
     try
     {
@@ -65,4 +67,9 @@ bool Route::operator<=(const Route& rhs) const
 bool Route::operator>=(const Route& rhs) const
 {
     return rhs._priority >= _priority;
+}
+
+const std::optional<std::string>& Route::default_file() const
+{
+    return _default_file;
 }
