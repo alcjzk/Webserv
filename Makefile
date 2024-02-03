@@ -14,33 +14,34 @@ SRC_DIR = src
 BIN_DIR = bin
 
 SRCS =\
-Config.cpp			\
-Server.cpp			\
-Runtime.cpp			\
-Task.cpp			\
-Reader.cpp			\
-Method.cpp			\
-HTTPVersion.cpp		\
-URI.cpp				\
-RequestLine.cpp		\
-Error.cpp			\
-Status.cpp			\
-HTTPError.cpp		\
-Response.cpp		\
-Log.cpp				\
-Request.cpp			\
-Header.cpp			\
-http.cpp			\
-TiniNode.cpp		\
-TiniTree.cpp		\
-TiniUtils.cpp		\
-TiniValidator.cpp	\
-Route.cpp			\
-FileResponse.cpp	\
-Routes.cpp			\
-Path.cpp			\
-HostAttributes.cpp  \
-main.cpp			\
+Config.cpp			   \
+Server.cpp			   \
+Runtime.cpp			   \
+Task.cpp			   \
+Reader.cpp			   \
+Method.cpp			   \
+HTTPVersion.cpp		   \
+URI.cpp				   \
+RequestLine.cpp		   \
+Error.cpp			   \
+Status.cpp			   \
+HTTPError.cpp		   \
+Response.cpp		   \
+Log.cpp				   \
+Request.cpp			   \
+Header.cpp			   \
+http.cpp			   \
+TiniNode.cpp		   \
+TiniTree.cpp		   \
+TiniUtils.cpp		   \
+TiniValidator.cpp	   \
+Route.cpp			   \
+FileResponse.cpp	   \
+Routes.cpp			   \
+Path.cpp			   \
+HostAttributes.cpp     \
+DirectoryResponse.cpp  \
+main.cpp			   \
 
 SRCS_TEST = test/testmain.cpp
 
@@ -55,7 +56,7 @@ CC		= c++
 STD		= c++17
 SHELL	= /bin/sh
 
-$(DEBUG_TARGET) $(TEST_TARGET): CFLAGS = $(STD:%=-std=%) -MP -MMD -Wall -Wextra -Werror -g -Wno-unused-variable -Wno-unused-parameter -O0 -D TEST -I$(SRC_DIR) -Itest -D LOG_ENABLE -D LOGLEVEL_INFO
+$(DEBUG_TARGET) $(TEST_TARGET): CFLAGS = $(STD:%=-std=%) -MP -MMD -Wall -Wextra -Werror -static -g -Wno-unused-variable -Wno-unused-parameter -O0 -D TEST -I$(SRC_DIR) -Itest -D LOG_ENABLE -D LOGLEVEL_INFO
 $(RELEASE_TARGET): CFLAGS = $(STD:%=-std=%) -MP -MMD -Wall -Wextra -Werror -Wpedantic -Wno-unused-variable -Wno-unused-parameter -O3 -I$(SRC_DIR) -D LOG_ENABLE -D LOGLEVEL_ERR
 
 OBJS_DEBUG = $(SRCS:%.cpp=$(OBJ_DIR)/debug/%.o)
