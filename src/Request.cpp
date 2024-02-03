@@ -2,6 +2,7 @@
 #include "Log.hpp"
 #include "Server.hpp"
 #include "FileResponse.hpp"
+#include "DirectoryResponse.hpp"
 #include "HTTPError.hpp"
 #include "URI.hpp"
 #include "Request.hpp"
@@ -17,8 +18,9 @@ Response* Request::into_response(const Server& server) const
     {
         throw HTTPError(Status::BAD_REQUEST);
     }
+    std::string  hostname = split(host->_value, ":")[0];
     URI          request_uri(_request_line.request_target(), host->_value);
-    const Route* route = server.route(request_uri.path(), split(host->_value, ":")[0]);
+    const Route* route = server.route(request_uri.path(), hostname);
     if (!route)
     {
         throw HTTPError(Status::BAD_REQUEST);
@@ -26,15 +28,41 @@ Response* Request::into_response(const Server& server) const
 
     Path target = route->map(request_uri.path());
 
+    if (route->default_file().has_value())
+    {
+        INFO("This has value!")
+    }
+    else
+    {
+        INFO("Doesn't freaking have value")
+    }
     if (target.type() == Path::Type::NOT_FOUND)
     {
         throw HTTPError(Status::NOT_FOUND);
     }
-    if (target.type() != Path::Type::REGULAR)
+    if (target.type() != Path::Type::REGULAR && target.type() != Path::Type::DIRECTORY)
     {
         throw HTTPError(Status::FORBIDDEN);
     }
 
+    if (target.type() == Path::Type::DIRECTORY)
+    {
+        try
+        {
+            if (route->default_file().has_value())
+                return new FileResponse(target + Path("index.html"));
+        }
+        catch (...)
+        {
+            INFO("Configured default file doesn't exist!");
+            if (server.map_attributes(hostname).dirlist())
+                return new DirectoryResponse(target);
+            throw HTTPError(Status::NOT_FOUND);
+        }
+        if (!server.map_attributes(hostname).dirlist())
+            throw HTTPError(Status::FORBIDDEN);
+        return new DirectoryResponse(target);
+    }
     return new FileResponse(target);
 }
 
