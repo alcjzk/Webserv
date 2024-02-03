@@ -71,6 +71,16 @@ const Config& Server::config() const
     return _config;
 }
 
+const HostAttributes& Server::map_attributes(std::string host_name) const
+{
+    const auto& attr =
+        std::find_if(_attributes.begin(), _attributes.end(),
+                     [host_name](const auto& a) { return a.hostname() == host_name; });
+    if (attr == _attributes.end())
+        return _attributes.front();
+    return *attr;
+}
+
 ServerSendResponseTask::ServerSendResponseTask(int fd, Response* response)
     : Task(fd, Writable), _response(response)
 {
@@ -102,8 +112,9 @@ void ServerSendResponseTask::run()
 
 const Route* Server::route(const std::string& uri_path, const std::string& host) const
 {
-    const auto attr = std::find_if(_attributes.begin(), _attributes.end(),
-                                   [host](const HostAttributes& a) { return (a.hostname() == host); });
+    const auto attr =
+        std::find_if(_attributes.begin(), _attributes.end(),
+                     [host](const HostAttributes& a) { return (a.hostname() == host); });
     if (attr == _attributes.end())
         return (*_attributes.begin()).routes().find(uri_path);
     return ((*attr).routes().find(uri_path));
@@ -111,7 +122,8 @@ const Route* Server::route(const std::string& uri_path, const std::string& host)
 
 ServerReceiveRequestTask::ServerReceiveRequestTask(const Server& server, int fd)
     : Task(fd, Readable), _expect(REQUEST_LINE), _bytes_received_total(0),
-      _reader(vector<char>(server.config().header_buffsize())), _is_partial_data(true), _server(server)
+      _reader(vector<char>(server.config().header_buffsize())), _is_partial_data(true),
+      _server(server)
 {
 }
 

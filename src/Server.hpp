@@ -32,6 +32,7 @@ class Server
         const Route*             route(const std::string& uri_path, const std::string& host) const;
         static const HTTPVersion http_version();
         const Config&            config() const;
+        const HostAttributes&    map_attributes(std::string host_name) const;
 
     private:
         const Config&                      _config;
