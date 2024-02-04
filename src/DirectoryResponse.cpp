@@ -24,8 +24,6 @@ DirectoryResponse::DirectoryResponse(const Path& target_path, const Path& reques
     body << " </h1>\n<hr>\n<ul>\n";
     while (cwd_entry)
     {
-        INFO("Target path: " << target_path);
-        INFO("Request Path: " << request_path);
         body << "  <li><a href=\"";
         if (static_cast<std::string>(request_path).back() != '/')
             body << last_uri_segment(request_path) << "/";
