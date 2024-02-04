@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <iostream>
 #include "Path.hpp"
+#include "Log.hpp"
 
 using std::ostream;
 using std::string;
@@ -85,10 +86,7 @@ Path::operator string() const
     if (*begin != "/")
         path = *begin;
     std::for_each(begin + 1, end, [&path](const string& segment) { path = path + '/' + segment; });
-    std::string result;
-    std::unique_copy(path.begin(), path.end(), std::back_inserter(result),
-                     [](char a, char b) { return a == '/' && b == '/'; });
-    return result;
+    return path;
 }
 
 Path Path::operator+(const Path& rhs) const
