@@ -15,9 +15,6 @@ Path::Path(const string& path)
     size_t start = 0;
     size_t end;
 
-    if (path.empty())
-        throw std::runtime_error("Empty paths are not yet supported");
-
     if (path[0] == '/')
     {
         _is_root = true;
