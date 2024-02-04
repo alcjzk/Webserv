@@ -75,6 +75,11 @@ bool Path::is_root() const noexcept
     return _is_root;
 }
 
+void Path::is_root(bool value) noexcept
+{
+    _is_root = value;
+}
+
 Path::operator string() const
 {
     string         path;
@@ -101,6 +106,16 @@ Path Path::operator+(const Path& rhs) const
     return path;
 }
 
+bool Path::operator==(const Path& rhs) const
+{
+    if (_is_root != rhs._is_root)
+        return false;
+    auto pair = std::mismatch(cbegin(), cend(), rhs.cbegin(), rhs.cend());
+    if (pair.first != cend() || pair.second != rhs.cend())
+        return false;
+    return true;
+}
+
 Path Path::relative(const Path& path, const Path& base)
 {
     auto pair = std::mismatch(path.cbegin(), path.cend(), base.cbegin(), base.cend());
@@ -118,8 +133,31 @@ Path Path::relative(const Path& path, const Path& base)
 
 Path Path::canonical(const Path& path)
 {
-    // FIXME: Not implemented
-    return Path(path);
+    Path result;
+
+    result.is_root(path.is_root());
+    for (auto it = path.cbegin(); it != path.cend(); it++)
+    {
+        if (*it != "." && *it != "..")
+        {
+            auto next = std::next(it);
+            while (next != path.cend() && *next == ".")
+            {
+                next = std::next(next);
+            }
+            if (next == path.cend())
+            {
+                result._segments.push_back(*it);
+                return result;
+            }
+            if (*next != "..")
+            {
+                result._segments.push_back(*it);
+                it = std::next(next);
+            }
+        }
+    }
+    return result;
 }
 
 ostream& operator<<(ostream& os, const Path& path)
@@ -159,3 +197,31 @@ Path::Type Path::fetch_type() const
 
     return UNKNOWN;
 }
+
+#ifdef TEST
+
+#include "testutils.hpp"
+
+void PathTest::canonical_test()
+{
+    BEGIN
+
+    EXPECT((Path::canonical(Path("/foo/../bar")) == Path("/bar")));
+    EXPECT((Path::canonical(Path("/.././.././../foo")) == Path("/foo")));
+    EXPECT((Path::canonical(Path("foo/bar/././../baz/")) == Path("foo/baz")));
+    EXPECT((Path::canonical(Path("foo/bar/././../baz/../.")) == Path("foo/")));
+
+    END
+}
+
+void PathTest::repeated_delim_test()
+{
+    BEGIN
+
+    EXPECT((Path("//////") == Path("/")));
+    EXPECT((Path("a////b") == Path("a/b")));
+
+    END
+}
+
+#endif
