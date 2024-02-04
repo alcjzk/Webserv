@@ -5,9 +5,11 @@
 #include "HTTPError.hpp"
 #include "URI.hpp"
 #include "Request.hpp"
+#include "CGIResponse.hpp"
 
 using std::string;
 using std::vector;
+using std::string;
 
 Response* Request::into_response(const Server& server) const
 {
@@ -34,6 +36,10 @@ Response* Request::into_response(const Server& server) const
     {
         throw HTTPError(Status::FORBIDDEN);
     }
+
+    // suffix == .py? -> create CGIResponse
+    if (static_cast<std::string>(target).substr(static_cast<std::string>(target).size() - 3) == ".py")
+        return new CGIResponse(target);
 
     return new FileResponse(target);
 }
