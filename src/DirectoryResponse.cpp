@@ -24,8 +24,6 @@ DirectoryResponse::DirectoryResponse(const Path& target_path, const Path& reques
     body << " </h1>\n<hr>\n<ul>\n";
     while (cwd_entry)
     {
-        Path full_path = Path::canonical(target_path);
-
         INFO("Target path: " << target_path);
         INFO("Request Path: " << request_path);
         body << "  <li><a href=\"";
