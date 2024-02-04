@@ -30,7 +30,7 @@ HostAttributes::HostAttributes(const std::string& hostname, const TiniNode* node
             INFO("Directory list of " << hostname << " is not string type");
         }
     }
-    std::map<std::string, TiniNode*>& routes_map = routes->getMapValue();
+    const std::map<std::string, TiniNode*>& routes_map = routes->getMapValue();
 
     for (const auto& [key, value] : routes_map)
     {
