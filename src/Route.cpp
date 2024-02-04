@@ -6,24 +6,12 @@
 #include "Route.hpp"
 #include <iostream>
 
-const std::map<std::string, Route::Method> _method_map = {
-    {"GET-ACCEPT", Route::GET}, {"POST-ACCEPT", Route::POST}, {"DELETE-ACCEPT", Route::DELETE}};
+const static std::map<std::string, Route::Method> _method_map = {
+    {"GET", Route::GET}, {"POST", Route::POST}, {"DELETE", Route::DELETE}};
 
-Route::Route(Path uri_path, Path fs_path, std::optional<std::string> default_file)
-    : _uri_path(uri_path), _default_file(default_file)
+Route::Route(Path uri_path) : _uri_path(uri_path)
 {
-    try
-    {
-        _fs_path = Path::canonical(fs_path);
-        _priority = std::distance(_uri_path.begin(), _uri_path.end());
-    }
-    catch (const std::exception& error)
-    {
-        std::stringstream message;
-
-        message << "Invalid route " << uri_path << " => " << fs_path << ": " << error.what();
-        throw std::runtime_error(message.str());
-    }
+    _priority = std::distance(_uri_path.begin(), _uri_path.end());
 }
 
 bool Route::match(Path uri_path) const
