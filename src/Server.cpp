@@ -144,6 +144,7 @@ void ServerReceiveRequestTask::fill_buffer()
     bytes_received = recv(_fd, buffer_head(), buffer_size_available(), 0);
     if (bytes_received == 0)
     {
+        // TODO: Why is this checking for value under zero, when the value is unsigned?
         if (buffer_size_available() <= 0)
         {
             // Out of buffer
