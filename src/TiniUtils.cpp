@@ -36,7 +36,7 @@ int match_input(std::string input)
 
 int chr_to_ctx_state(char c)
 {
-    if (isalpha(c))
+    if (isalpha(c) || c == '/')
         return TiniNode::S_ALPHA;
     switch (c)
     {
