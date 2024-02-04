@@ -42,6 +42,7 @@ Path.cpp			      \
 HostAttributes.cpp        \
 DirectoryResponse.cpp     \
 RedirectionResponse.cpp   \
+CGIResponse.cpp		\
 main.cpp			      \
 
 SRCS_TEST = test/testmain.cpp

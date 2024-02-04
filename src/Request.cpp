@@ -7,8 +7,12 @@
 #include "HTTPError.hpp"
 #include "URI.hpp"
 #include "Request.hpp"
+#include "CGIResponse.hpp"
 #include "TiniUtils.hpp"
+#include "CGIResponse.hpp"
 
+using std::string;
+using std::vector;
 using std::string;
 
 Response* Request::into_response(const Server& server) const
@@ -57,7 +61,12 @@ Response* Request::into_response(const Server& server) const
     }
     if (!server.map_attributes(hostname).dirlist())
         throw HTTPError(Status::FORBIDDEN);
-    return new DirectoryResponse(target, request_uri.path());
+
+    // suffix == .py? -> create CGIResponse
+    if (static_cast<std::string>(target).substr(static_cast<std::string>(target).size() - 3) == ".py")
+        return new CGIResponse(target);
+
+    return new FileResponse(target);
 }
 
 const Method& Request::method() const
