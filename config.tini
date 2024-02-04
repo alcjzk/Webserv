@@ -1,24 +1,18 @@
 [servers.alpha]
-    host=127.0.0.1
-    port=8001
-    [servers.alpha.bravo]
+    host = 127.0.0.1
+    port = 8080
+    [servers.alpha.localhost]
         directory_listing = true
-        [servers.alpha.bravo.routes]
-            /=www : GET : index.html
-            /source=src : GET : index.html
-            /hidden=hidden : GET : index.html
-    [servers.alpha.hotel]
-        directory_listing = true
-        [servers.alpha.hotel.routes]
-            /=www2 : GET
-    [servers.alpha.india]
-        directory_listing = false
-        [servers.alpha.india.routes]
-            /=www3 : GET
-
-[servers.beta]
-    host=127.0.0.1
-    port=8080
-    [servers.beta.localhost]
-        [servers.beta.localhost.routes]
-            /=./ : GET
+        [servers.alpha.localhost.routes./]
+            type = normal
+            path = www/
+            methods = GET, POST, DELETE
+            upload = www/uploads/
+            default_file = index.html
+        [servers.alpha.localhost.routes./source]
+            type = normal
+            path = src/
+            methods = GET
+        [servers.alpha.localhost.routes./forbidden]
+            type = redirection
+            path = ./
