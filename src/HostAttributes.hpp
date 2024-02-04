@@ -14,6 +14,8 @@ class HostAttributes
         std::string _hostname;
         Routes      _routes;
         Path        _directory_file;
+        typedef std::map<std::string, Route::Method> MethodMap;
+        static MethodMap _method_map;
 
     public:
         HostAttributes() = delete;

@@ -2,12 +2,16 @@
 #include "Log.hpp"
 #include <algorithm>
 
+HostAttributes::MethodMap HostAttributes::_method_map = {
+    {"GET", Route::GET}, {"POST", Route::POST}, {"DELETE", Route::DELETE}};
+
 HostAttributes::HostAttributes(const std::string& hostname, const TiniNode* node)
     : _directory_listing(false), _hostname(hostname)
 {
     std::map<std::string, TiniNode*>& n = node->getMapValue();
     TiniNode*                         routes = n["routes"];
     TiniNode*                         dirlist = n["directory_listing"];
+
     if (!routes)
         throw std::runtime_error("Routes not in node");
     if (!dirlist)
@@ -34,24 +38,62 @@ HostAttributes::HostAttributes(const std::string& hostname, const TiniNode* node
 
     for (const auto& [key, value] : routes_map)
     {
-        if (value->getStringValue().find(':') != std::string::npos)
+        Route     route = Route(Path(key));
+
+        TiniNode* path = value->getMapValue()["path"];
+        if (!path || path->getType() != TiniNode::T_STRING)
         {
-            const std::vector<std::string>& route_values = split(value->getStringValue(), ":");
-            switch(route_values.size())
-            {
-                case 2:
-                    _routes.push(Route(Path(key), route_values[0], std::nullopt));
-                    break;
-                case 3:
-                    _routes.push(Route(Path(key), route_values[0], route_values[1]));
-                    break;
-                default:
-                    throw(std::runtime_error("Unknown parameter count"));
-                    break;
-            }
+            ERR("Path not defined for " << key << " skipping route definition")
+            continue ;
+        }
+        route._fs_path = path->getStringValue();
+
+        TiniNode* methods = value->getMapValue()["methods"];
+        if (!methods || methods->getType() != TiniNode::T_STRING)
+        {
+            ERR("Methods not defined for " << key << " skipping route definition")
+            continue ;
+        }
+        const std::vector<std::string>& map_values = split(methods->getStringValue(), ",");
+        if (!map_values.size())
+        {
+            ERR("Zero methods for " << key << " skipping route definition")
+            continue ;
+        }
+        for (const auto& str : map_values)
+        {
+            if (_method_map.find(str) != _method_map.end())
+                route._methods[_method_map[str]] = true;
+            else
+                route._methods[_method_map[str]] = false;
+        }
+
+        TiniNode* type = value->getMapValue()["type"];
+        route._type = Route::NORMAL;
+        if (!type || type->getType() != TiniNode::T_STRING)
+        {
+            INFO("Type not defined for route " << key << ", defaulting to normal");
         }
         else
-            _routes.push(Route(Path(key), value->getStringValue(), std::nullopt));
+        {
+            if (type->getStringValue() != "redirection")
+            {
+                INFO("Unknown type for route " << key << ", defaulting to normal");
+            }
+            else
+                route._type = Route::REDIRECTION;
+        }
+
+        TiniNode* upload = value->getMapValue()["upload"];
+        route._upload_directory = std::nullopt;
+        if (upload && upload->getType() == TiniNode::T_STRING)
+            route._upload_directory = upload->getStringValue();
+
+        TiniNode* default_file = value->getMapValue()["default_file"];
+        route._default_file = std::nullopt;
+        if (default_file && default_file->getType() == TiniNode::T_STRING)
+            route._default_file = default_file->getStringValue();
+        _routes.push(route);
     }
 }
 
