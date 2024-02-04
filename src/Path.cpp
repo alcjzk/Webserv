@@ -20,23 +20,20 @@ Path::Path(const string& path)
 
     if (path[0] == '/')
     {
-        _segments.push_back("/");
-        start = 1;
+        _is_root = true;
+        start = path.find_first_not_of('/', 1);
     }
 
-    if (path.size() == 1)
-        return;
-
-    while (true)
+    while (start != string::npos)
     {
-        end = path.find_first_of('/', start);
+        end = path.find_first_of('/', start + 1);
         if (end == string::npos)
         {
             _segments.push_back(path.substr(start));
-            break;
+            return;
         }
         _segments.push_back(path.substr(start, end - start));
-        start = end + 1;
+        start = path.find_first_not_of('/', end + 1);
     }
 }
 
@@ -73,16 +70,24 @@ Path::Type Path::type()
     return _type;
 }
 
+bool Path::is_root() const noexcept
+{
+    return _is_root;
+}
+
 Path::operator string() const
 {
     string         path;
     const_iterator begin = cbegin();
     const_iterator end = cend();
 
+    if (_is_root)
+    {
+        path = '/';
+    }
     if (begin == end)
         return path;
-    if (*begin != "/")
-        path = *begin;
+    path += *begin;
     std::for_each(begin + 1, end, [&path](const string& segment) { path = path + '/' + segment; });
     return path;
 }

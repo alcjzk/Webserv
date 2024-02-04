@@ -34,6 +34,7 @@ class Path
         const_iterator cbegin() const noexcept;
         const_iterator cend() const noexcept;
         Type           type();
+        bool           is_root() const noexcept;
 
         operator std::string() const;
 
@@ -46,6 +47,7 @@ class Path
         Type                     fetch_type() const;
 
         std::vector<std::string> _segments;
+        bool                     _is_root = false;
         Type                     _type = NONE;
 };
 
