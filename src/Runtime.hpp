@@ -20,6 +20,8 @@ class Runtime
         static Runtime& instance();
 
     private:
+        static const int    POLL_TIMEOUT_MILLIS = 1000;
+
         Runtime() = default;
 
         static void        _handle_interrupt(int);

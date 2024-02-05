@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <system_error>
 #include <errno.h>
 #include <signal.h>
 #include <string.h>
@@ -56,9 +57,12 @@ void Runtime::run()
             pollfds.push_back({(*task)->fd(), events, 0});
         }
 
-        // Don't throw when poll errors due to signal
-        if (poll(pollfds.data(), pollfds.size(), -1) == -1 && errno != EINTR)
-            throw strerror(errno);
+        if (poll(pollfds.data(), pollfds.size(), POLL_TIMEOUT_MILLIS) == -1)
+        {
+            // Don't throw when poll errors due to signal
+            if (errno != EINTR)
+                throw std::system_error(errno, std::system_category());
+        }
 
         vector<struct pollfd>::iterator pollfd = pollfds.begin();
         for (; pollfd != pollfds.end(); pollfd++)
