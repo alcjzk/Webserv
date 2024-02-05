@@ -21,13 +21,12 @@ bool Task::is_complete() const
     return _is_complete;
 }
 
-bool Task::is_expired() const
+bool Task::is_expired_at(Task::TimePoint time_point) const
 {
-    if (_expire_time && *_expire_time >= std::chrono::system_clock::now())
+    if (_expire_time && *_expire_time >= time_point)
         return true;
     return false;
 }
-
 
 Task::WaitFor Task::wait_for() const
 {

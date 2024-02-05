@@ -20,7 +20,7 @@ class Task
 
         int          fd() const;
         bool         is_complete() const;
-        bool         is_expired() const;
+        bool         is_expired_at(TimePoint time_point) const;
         WaitFor      wait_for() const;
 
         bool         operator==(int fd);
