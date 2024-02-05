@@ -1,6 +1,5 @@
 #pragma once
 
-#include <poll.h>
 #include <vector>
 
 class Task;
@@ -16,17 +15,18 @@ class Runtime
         Runtime&        operator=(Runtime&&) = delete;
 
         static void     enqueue(Task* task);
-        void            run();
-        static Runtime& instance();
+        static void     run();
 
     private:
         static const int    POLL_TIMEOUT_MILLIS = 1000;
 
         Runtime() = default;
 
-        static void        _handle_interrupt(int);
-        void               _dequeue(Task* task);
-        Task*              _task(int fd);
+        static Runtime&    instance();
+        static void        handle_interrupt(int);
+
+        void               dequeue(Task* task);
+        Task*              task(int fd);
 
         std::vector<Task*> _tasks;
         static bool        _is_interrupt_signaled;

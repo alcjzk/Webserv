@@ -1,8 +1,9 @@
 #include <algorithm>
+#include <cassert>
 #include <system_error>
 #include <errno.h>
 #include <signal.h>
-#include <string.h>
+#include <poll.h>
 #include "Runtime.hpp"
 #include "Task.hpp"
 
@@ -12,10 +13,9 @@ bool Runtime::_is_interrupt_signaled = false;
 
 Runtime::~Runtime()
 {
-    vector<Task*>::iterator task = _tasks.begin();
-    for (; task != _tasks.end(); task++)
+    for (auto task : _tasks)
     {
-        delete *task;
+        delete task;
     }
 }
 
@@ -31,7 +31,7 @@ void Runtime::enqueue(Task* task)
     instance()._tasks.push_back(task);
 }
 
-void Runtime::_dequeue(Task* task)
+void Runtime::dequeue(Task* task)
 {
     vector<Task*>::iterator it = std::find(_tasks.begin(), _tasks.end(), task);
     _tasks.erase(it);
@@ -40,21 +40,21 @@ void Runtime::_dequeue(Task* task)
 
 void Runtime::run()
 {
-    if (signal(SIGINT, _handle_interrupt) == SIG_ERR)
-        throw "Failed to register handler for SIGINT";
+    if (signal(SIGINT, handle_interrupt) == SIG_ERR)
+        throw std::system_error(errno, std::system_category());
+
     while (!_is_interrupt_signaled)
     {
         vector<struct pollfd>   pollfds;
 
-        vector<Task*>::iterator task = _tasks.begin();
-        for (; task != _tasks.end(); task++)
+        for (auto task : instance()._tasks)
         {
             short events = 0;
-            if ((*task)->wait_for() == Task::Readable)
+            if (task->wait_for() == Task::Readable)
                 events = POLLIN;
-            else if ((*task)->wait_for() == Task::Writable)
+            else if (task->wait_for() == Task::Writable)
                 events = POLLOUT;
-            pollfds.push_back({(*task)->fd(), events, 0});
+            pollfds.push_back({task->fd(), events, 0});
         }
 
         if (poll(pollfds.data(), pollfds.size(), POLL_TIMEOUT_MILLIS) == -1)
@@ -64,34 +64,32 @@ void Runtime::run()
                 throw std::system_error(errno, std::system_category());
         }
 
-        vector<struct pollfd>::iterator pollfd = pollfds.begin();
-        for (; pollfd != pollfds.end(); pollfd++)
+        for (const auto& pollfd : pollfds)
         {
-            if (pollfd->revents)
+            if (pollfd.revents)
             {
-                Task* task = _task(pollfd->fd);
+                Task* task = instance().task(pollfd.fd);
+                assert(task);
                 task->run();
                 if (task->is_complete())
-                    _dequeue(task);
+                    instance().dequeue(task);
             }
         }
     }
 }
 
-Task* Runtime::_task(int fd)
+Task* Runtime::task(int fd)
 {
-    vector<Task*>::iterator task = _tasks.begin();
-    for (; task != _tasks.end(); task++)
-    {
-        if (**task == fd)
-        {
-            return *task;
-        }
-    }
-    throw "Unknown task";
+    vector<Task*>::iterator task = std::find_if(
+        _tasks.begin(), _tasks.end(), [fd](auto task){
+            return task->fd() == fd;
+        });
+    if (task == _tasks.end())
+        return nullptr;
+    return *task;
 }
 
-void Runtime::_handle_interrupt(int)
+void Runtime::handle_interrupt(int)
 {
     _is_interrupt_signaled = true;
 }

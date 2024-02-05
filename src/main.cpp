@@ -40,7 +40,7 @@ int main()
 
         Server server(config);
 
-        Runtime::instance().run();
+        Runtime::run();
     }
     catch (const char* e)
     {
