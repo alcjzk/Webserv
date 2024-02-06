@@ -4,6 +4,8 @@
 #include <errno.h>
 #include <signal.h>
 #include <poll.h>
+#include <chrono>
+#include "Log.hpp"
 #include "Runtime.hpp"
 #include "Task.hpp"
 
@@ -64,15 +66,27 @@ void Runtime::run()
                 throw std::system_error(errno, std::system_category());
         }
 
-        for (const auto& pollfd : pollfds)
+        auto head = pollfds.cbegin();
+        for (auto task : instance()._tasks)
         {
-            if (pollfd.revents)
+            auto pollfd = std::find_if(head, pollfds.cend(), [task](const auto& pollfd){
+                if (task->fd() == pollfd.fd)
+                    return true;
+                return false;
+            });
+            head = pollfd + 1;
+            if (pollfd->revents)
             {
-                Task* task = instance().task(pollfd.fd);
+                Task* task = instance().task(pollfd->fd);
                 assert(task);
                 task->run();
                 if (task->is_complete())
                     instance().dequeue(task);
+            }
+            else if (task->is_expired_at(std::chrono::system_clock::now()))
+            {
+                INFO("Task for fd " << task->fd() << " timed out.");
+                instance().dequeue(task);
             }
         }
     }
