@@ -110,8 +110,10 @@ const Route* Server::route(const std::string& uri_path) const
 }
 
 ServerReceiveRequestTask::ServerReceiveRequestTask(const Server& server, int fd)
-    : Task(fd, Readable), _expect(REQUEST_LINE), _bytes_received_total(0),
-      _reader(vector<char>(_header_buffer_size)), _is_partial_data(true), _server(server)
+    : Task(fd, Readable,
+           Task::TimePoint(std::chrono::system_clock::now() + std::chrono::seconds(60))),
+      _expect(REQUEST_LINE), _bytes_received_total(0), _reader(vector<char>(_header_buffer_size)),
+      _is_partial_data(true), _server(server)
 {
 }
 
@@ -246,6 +248,11 @@ void ServerReceiveRequestTask::run()
         close(_fd);
         _is_complete = true;
     }
+}
+
+void ServerReceiveRequestTask::abort()
+{
+    Runtime::enqueue(new ServerSendResponseTask(_fd, new Response(Status::REQUEST_TIMEOUT)));
 }
 
 ServerReceiveRequestTask::~ServerReceiveRequestTask() {}

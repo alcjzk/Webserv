@@ -70,6 +70,7 @@ class ServerReceiveRequestTask : public Task
         ServerReceiveRequestTask& operator=(ServerReceiveRequestTask&&) = delete;
 
         virtual void              run() override;
+        virtual void              abort() override;
 
     private:
         typedef enum Expect
