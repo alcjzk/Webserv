@@ -23,7 +23,7 @@ bool Task::is_complete() const
 
 bool Task::is_expired_at(Task::TimePoint time_point) const
 {
-    if (_expire_time && *_expire_time >= time_point)
+    if (_expire_time && *_expire_time <= time_point)
         return true;
     return false;
 }
@@ -31,4 +31,9 @@ bool Task::is_expired_at(Task::TimePoint time_point) const
 Task::WaitFor Task::wait_for() const
 {
     return _wait_for;
+}
+
+void Task::abort()
+{
+    (void)close(_fd);
 }

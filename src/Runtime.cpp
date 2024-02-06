@@ -86,6 +86,7 @@ void Runtime::run()
             else if (task->is_expired_at(std::chrono::system_clock::now()))
             {
                 INFO("Task for fd " << task->fd() << " timed out.");
+                task->abort();
                 instance().dequeue(task);
             }
         }

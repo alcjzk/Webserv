@@ -25,6 +25,7 @@ class Task
 
         bool         operator==(int fd);
 
+        virtual void abort();
         virtual void run() = 0;
 
     protected:
