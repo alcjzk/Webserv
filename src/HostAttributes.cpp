@@ -38,6 +38,8 @@ HostAttributes::HostAttributes(const std::string& hostname, const TiniNode* node
 
     for (const auto& [key, value] : routes_map)
     {
+        if (!value)
+            throw std::runtime_error("HostAttributes: Null key in routes map");
         Route     route = Route(Path(key));
 
         TiniNode* path = value->getMapValue()["path"];
@@ -63,9 +65,7 @@ HostAttributes::HostAttributes(const std::string& hostname, const TiniNode* node
         for (const auto& str : map_values)
         {
             if (_method_map.find(str) != _method_map.end())
-                route._methods[_method_map[str]] = true;
-            else
-                route._methods[_method_map[str]] = false;
+                route._methods |= _method_map[str];
         }
 
         TiniNode* type = value->getMapValue()["type"];
