@@ -24,14 +24,14 @@ HostAttributes::HostAttributes(const std::string& hostname, const TiniNode* node
         {
             if (dirlist->getStringValue() != "true" && dirlist->getStringValue() != "false")
             {
-                INFO("Directory list of " << hostname << " is not a boolean value");
+                ERR("Directory list of " << hostname << " is not a boolean value");
             }
             if (dirlist->getStringValue() == "true")
                 _directory_listing = true;
         }
         else
         {
-            INFO("Directory list of " << hostname << " is not string type");
+            ERR("Directory list of " << hostname << " is not string type");
         }
     }
     const std::map<std::string, TiniNode*>& routes_map = routes->getMapValue();
@@ -40,61 +40,66 @@ HostAttributes::HostAttributes(const std::string& hostname, const TiniNode* node
     {
         if (!value)
             throw std::runtime_error("HostAttributes: Null key in routes map");
-        Route     route = Route(Path(key));
+        _assign_route(key, value);
+    }
+}
 
-        TiniNode* path = value->getMapValue()["path"];
-        if (!path || path->getType() != TiniNode::T_STRING)
-        {
-            ERR("Path not defined for " << key << " skipping route definition")
-            continue ;
-        }
-        route._fs_path = path->getStringValue();
+void HostAttributes::_assign_route(std::string key, TiniNode* value)
+{
+    Route     route = Route(Path(key));
 
-        TiniNode* methods = value->getMapValue()["methods"];
-        if (!methods || methods->getType() != TiniNode::T_STRING)
-        {
-            ERR("Methods not defined for " << key << " skipping route definition")
-            continue ;
-        }
-        const std::vector<std::string>& map_values = split(methods->getStringValue(), ",");
-        if (!map_values.size())
-        {
-            ERR("Zero methods for " << key << " skipping route definition")
-            continue ;
-        }
-        for (const auto& str : map_values)
-        {
-            if (_method_map.find(str) != _method_map.end())
-                route._methods |= _method_map[str];
-        }
+    TiniNode* path = value->getMapValue()["path"];
+    if (!path || path->getType() != TiniNode::T_STRING)
+    {
+        ERR("Path not defined for " << key << " skipping route definition")
+        return;
+    }
+    route._fs_path = path->getStringValue();
 
-        TiniNode* type = value->getMapValue()["type"];
-        route._type = Route::NORMAL;
-        if (!type || type->getType() != TiniNode::T_STRING)
+    TiniNode* methods = value->getMapValue()["methods"];
+    if (!methods || methods->getType() != TiniNode::T_STRING)
+    {
+        ERR("Methods not defined for " << key << " skipping route definition")
+        return;
+    }
+    const std::vector<std::string>& map_values = split(methods->getStringValue(), ",");
+    if (!map_values.size())
+    {
+        ERR("Zero methods for " << key << " skipping route definition")
+        return;
+    }
+    for (const auto& str : map_values)
+    {
+        if (_method_map.find(str) != _method_map.end())
+            route._methods |= _method_map[str];
+    }
+
+    TiniNode* type = value->getMapValue()["type"];
+    route._type = Route::NORMAL;
+    if (!type || type->getType() != TiniNode::T_STRING)
+    {
+        INFO("Type not defined for route " << key << ", defaulting to normal");
+    }
+    else
+    {
+        if (type->getStringValue() != "redirection")
         {
-            INFO("Type not defined for route " << key << ", defaulting to normal");
+            ERR("Unknown type for route " << key << ", defaulting to normal");
         }
         else
-        {
-            if (type->getStringValue() != "redirection")
-            {
-                INFO("Unknown type for route " << key << ", defaulting to normal");
-            }
-            else
-                route._type = Route::REDIRECTION;
-        }
-
-        TiniNode* upload = value->getMapValue()["upload"];
-        route._upload_directory = std::nullopt;
-        if (upload && upload->getType() == TiniNode::T_STRING)
-            route._upload_directory = upload->getStringValue();
-
-        TiniNode* default_file = value->getMapValue()["default_file"];
-        route._default_file = std::nullopt;
-        if (default_file && default_file->getType() == TiniNode::T_STRING)
-            route._default_file = default_file->getStringValue();
-        _routes.push(route);
+            route._type = Route::REDIRECTION;
     }
+
+    TiniNode* upload = value->getMapValue()["upload"];
+    route._upload_directory = std::nullopt;
+    if (upload && upload->getType() == TiniNode::T_STRING)
+        route._upload_directory = upload->getStringValue();
+
+    TiniNode* default_file = value->getMapValue()["default_file"];
+    route._default_file = std::nullopt;
+    if (default_file && default_file->getType() == TiniNode::T_STRING)
+        route._default_file = default_file->getStringValue();
+    _routes.push(route);
 }
 
 const Routes& HostAttributes::routes() const
