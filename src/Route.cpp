@@ -6,9 +6,6 @@
 #include "Route.hpp"
 #include <iostream>
 
-const static std::map<std::string, Route::Method> _method_map = {
-    {"GET", Route::GET}, {"POST", Route::POST}, {"DELETE", Route::DELETE}};
-
 Route::Route(Path uri_path) : _uri_path(uri_path)
 {
     _priority = std::distance(_uri_path.begin(), _uri_path.end());
