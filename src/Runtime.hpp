@@ -1,13 +1,14 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 
 class Task;
 
 class Runtime
 {
     public:
-        ~Runtime();
+        ~Runtime() = default;
         Runtime(const Runtime&) = delete;
         Runtime(Runtime&&) = delete;
 
@@ -25,9 +26,9 @@ class Runtime
         static Runtime&    instance();
         static void        handle_interrupt(int);
 
-        Task*              task(int fd);
+        void               run_impl();
 
-        std::vector<Task*> _tasks;
-        static bool        _is_interrupt_signaled;
-        static Runtime     _instance;
+        std::vector<std::unique_ptr<Task>> _tasks;
+        static bool                        _is_interrupt_signaled;
+        static Runtime                     _instance;
 };
