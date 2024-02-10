@@ -66,30 +66,25 @@ void Runtime::run()
                 throw std::system_error(errno, std::system_category());
         }
 
-        auto head = pollfds.cbegin();
-        for (auto task : instance()._tasks)
+        auto now = std::chrono::system_clock::now();
+
+        for (auto pollfd : pollfds)
         {
-            auto pollfd = std::find_if(head, pollfds.cend(), [task](const auto& pollfd){
-                if (task->fd() == pollfd.fd)
-                    return true;
-                return false;
-            });
-            head = pollfd + 1;
-            if (pollfd->revents)
-            {
-                Task* task = instance().task(pollfd->fd);
-                assert(task);
+            Task* task = instance().task(pollfd.fd);
+            assert(task);
+
+            if (pollfd.revents)
                 task->run();
-                if (task->is_complete())
-                    instance().dequeue(task);
-            }
-            else if (task->is_expired_at(std::chrono::system_clock::now()))
-            {
-                INFO("Task for fd " << task->fd() << " timed out.");
+            else if (task->is_expired_at(now))
                 task->abort();
-                instance().dequeue(task);
-            }
         }
+
+        instance()._tasks.erase(std::remove_if(instance()._tasks.begin(), instance()._tasks.end(), [](Task* task){
+            if (!task->is_complete())
+                return false;
+            delete task;
+            return true;
+        }), instance()._tasks.end());
     }
 }
 

@@ -14,6 +14,7 @@
 #include "Log.hpp"
 #include "http.hpp"
 #include "Server.hpp"
+#include "TimeoutResponse.hpp"
 
 using std::optional;
 using std::string;
@@ -111,7 +112,7 @@ const Route* Server::route(const std::string& uri_path) const
 
 ServerReceiveRequestTask::ServerReceiveRequestTask(const Server& server, int fd)
     : Task(fd, Readable,
-           Task::TimePoint(std::chrono::system_clock::now() + std::chrono::seconds(60))),
+           std::chrono::system_clock::now() + std::chrono::seconds(3)),
       _expect(REQUEST_LINE), _bytes_received_total(0), _reader(vector<char>(_header_buffer_size)),
       _is_partial_data(true), _server(server)
 {
@@ -252,7 +253,9 @@ void ServerReceiveRequestTask::run()
 
 void ServerReceiveRequestTask::abort()
 {
-    Runtime::enqueue(new ServerSendResponseTask(_fd, new Response(Status::REQUEST_TIMEOUT)));
+    INFO("ReceiveRequestTask for fd " << _fd << " timed out");
+    _is_complete = true;
+    Runtime::enqueue(new ServerSendResponseTask(_fd, new TimeoutResponse()));
 }
 
 ServerReceiveRequestTask::~ServerReceiveRequestTask() {}

@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include "Task.hpp"
+#include "Log.hpp"
 #include "Runtime.hpp"
 
 Task::Task(int fd, WaitFor wait_for, std::optional<TimePoint> expire_time)
@@ -35,5 +36,7 @@ Task::WaitFor Task::wait_for() const
 
 void Task::abort()
 {
+    INFO("Task for fd " << _fd << " timed out");
+    _is_complete = true;
     (void)close(_fd);
 }
