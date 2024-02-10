@@ -25,7 +25,6 @@ class Runtime
         static Runtime&    instance();
         static void        handle_interrupt(int);
 
-        void               dequeue(Task* task);
         Task*              task(int fd);
 
         std::vector<Task*> _tasks;

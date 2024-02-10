@@ -33,13 +33,6 @@ void Runtime::enqueue(Task* task)
     instance()._tasks.push_back(task);
 }
 
-void Runtime::dequeue(Task* task)
-{
-    vector<Task*>::iterator it = std::find(_tasks.begin(), _tasks.end(), task);
-    _tasks.erase(it);
-    delete task;
-}
-
 void Runtime::run()
 {
     if (signal(SIGINT, handle_interrupt) == SIG_ERR)
