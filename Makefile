@@ -39,6 +39,7 @@ Route.cpp			\
 FileResponse.cpp	\
 Routes.cpp			\
 Path.cpp			\
+TimeoutResponse.cpp \
 main.cpp
 
 SRCS_TEST = test/testmain.cpp
