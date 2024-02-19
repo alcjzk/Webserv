@@ -12,9 +12,9 @@ class Route
     public:
         typedef enum Method
         {
-            GET = 0b000000001,
-            POST = 0b000000010,
-            DELETE = 0b000000100,
+            GET = 0b001,
+            POST = 0b010,
+            DELETE = 0b100,
         } Method;
         typedef enum RouteType
         {
@@ -27,9 +27,11 @@ class Route
         bool                              match(Path uri_path) const;
         Path                              map(Path uri_path) const;
         const std::optional<std::string>& default_file() const;
-        std::optional<std::string>        type() const;
-        int                               methods() const;
-
+        const std::optional<std::string>& upload_directory() const;
+        RouteType                         route_type() const;
+        bool                              method_get() const;
+        bool                              method_post() const;
+        bool                              method_del() const;
         const Path&                       fs_path() const;
 
         bool                              operator<(const Route& rhs) const;
@@ -42,8 +44,9 @@ class Route
         RouteType                         _type;
         ptrdiff_t                         _priority;
         int                               _methods;
-        std::optional<std::string>        _default_file;
-        std::optional<std::string>        _upload_directory;
+        std::optional<std::string>        _default_file = std::nullopt;
+        std::optional<std::string>        _upload_directory = std::nullopt;
+        std::optional<std::string>        _redir_location = std::nullopt;
 
     private:
         Path _uri_path;
