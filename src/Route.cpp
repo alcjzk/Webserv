@@ -58,3 +58,28 @@ const std::optional<std::string>& Route::default_file() const
 {
     return _default_file;
 }
+
+const std::optional<std::string>& Route::upload_directory() const
+{
+    return _upload_directory;
+}
+
+Route::RouteType Route::route_type() const
+{
+    return _type;
+}
+
+bool Route::method_get() const
+{
+    return (_methods & Route::GET);
+}
+
+bool Route::method_post() const
+{
+    return (_methods & Route::POST);
+}
+
+bool Route::method_del() const
+{
+    return (_methods & Route::DELETE);
+}
