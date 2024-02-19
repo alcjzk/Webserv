@@ -16,3 +16,24 @@
         [servers.alpha.localhost.routes./forbidden]
             type = redirection
             path = ./
+            methods = GET
+
+
+[servers.beta]
+    host = 127.0.0.1
+    port = 8001
+    [servers.beta.localhost]
+        directory_listing = true
+        [servers.beta.localhost.routes./]
+            type = normal
+            path = www/
+            methods = GET, POST, DELETE
+            upload = www/uploads/
+            default_file = index.html
+        [servers.beta.localhost.routes./source]
+            type = normal
+            path = src/
+            methods = GET
+        [servers.beta.localhost.routes./forbidden]
+            path = ./
+            methods = GET
