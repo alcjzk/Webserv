@@ -42,7 +42,7 @@ class Route
         int                               _methods;
         std::optional<std::string>        _default_file = std::nullopt;
         std::optional<std::string>        _upload_directory = std::nullopt;
-        std::optional<std::string>        _redir_location = std::nullopt;
+        std::optional<std::string>        _redir = std::nullopt;
 
     private:
         Path _uri_path;

@@ -3,13 +3,13 @@
 #include "Server.hpp"
 #include "FileResponse.hpp"
 #include "DirectoryResponse.hpp"
+#include "RedirectionResponse.hpp"
 #include "HTTPError.hpp"
 #include "URI.hpp"
 #include "Request.hpp"
 #include "TiniUtils.hpp"
 
 using std::string;
-using std::vector;
 
 Response* Request::into_response(const Server& server) const
 {
@@ -39,9 +39,11 @@ Response* Request::into_response(const Server& server) const
 
     if (target.type() == Path::Type::DIRECTORY)
     {
+        if (route->_type == Route::REDIRECTION)
+            return new RedirectionResponse(route->_redir.value());
         try
         {
-            if (route->default_file().has_value())
+            if (route->_default_file.has_value())
                 return new FileResponse(target + Path("index.html"));
         }
         catch (...)
