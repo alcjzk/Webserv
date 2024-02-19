@@ -26,13 +26,9 @@ class Route
 
         bool                              match(Path uri_path) const;
         Path                              map(Path uri_path) const;
-        const std::optional<std::string>& default_file() const;
-        const std::optional<std::string>& upload_directory() const;
-        RouteType                         route_type() const;
         bool                              method_get() const;
         bool                              method_post() const;
         bool                              method_del() const;
-        const Path&                       fs_path() const;
 
         bool                              operator<(const Route& rhs) const;
         bool                              operator>(const Route& rhs) const;

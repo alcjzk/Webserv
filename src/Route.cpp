@@ -24,11 +24,6 @@ Path Route::map(Path uri_path) const
     return _fs_path + Path::relative(uri_path, _uri_path);
 }
 
-const Path& Route::fs_path() const
-{
-    return _fs_path;
-}
-
 bool Route::operator<(const Route& rhs) const
 {
     return rhs._priority < _priority;
@@ -52,21 +47,6 @@ bool Route::operator<=(const Route& rhs) const
 bool Route::operator>=(const Route& rhs) const
 {
     return rhs._priority >= _priority;
-}
-
-const std::optional<std::string>& Route::default_file() const
-{
-    return _default_file;
-}
-
-const std::optional<std::string>& Route::upload_directory() const
-{
-    return _upload_directory;
-}
-
-Route::RouteType Route::route_type() const
-{
-    return _type;
 }
 
 bool Route::method_get() const
