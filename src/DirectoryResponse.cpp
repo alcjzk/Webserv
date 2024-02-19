@@ -10,7 +10,6 @@ using std::filebuf;
 using std::ifstream;
 using std::vector;
 
-// DirectoryResponse::DirectoryResponse(const Path& path, Status status) : Response(status)
 DirectoryResponse::DirectoryResponse(const Path& target_path, const Path& request_path, Status status) : Response(status)
 {
     std::string       cwd_path(static_cast<std::string>(target_path));
@@ -46,6 +45,5 @@ std::string DirectoryResponse::last_uri_segment(const Path& relative_path) const
         if ((*end).length() && *end != "/")
             break;
     }
-    INFO("End: " << *end);
     return (*end);
 }
