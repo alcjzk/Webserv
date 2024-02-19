@@ -48,13 +48,36 @@ void HostAttributes::_assign_route(std::string key, TiniNode* value)
 {
     Route     route = Route(Path(key));
 
+    TiniNode* type = value->getMapValue()["type"];
     TiniNode* path = value->getMapValue()["path"];
     if (!path || path->getType() != TiniNode::T_STRING)
     {
         ERR("Path not defined for " << key << " skipping route definition")
         return;
     }
-    route._fs_path = path->getStringValue();
+    route._type = Route::NORMAL;
+    if (!type || type->getType() != TiniNode::T_STRING)
+    {
+        INFO("Type not defined for route " << key << ", defaulting to normal");
+    }
+    else
+    {
+        if (type->getStringValue() == "normal")
+        {
+            route._type = Route::NORMAL;
+            route._fs_path = path->getStringValue();
+        }
+        else if (type->getStringValue() == "redirection")
+        {
+            route._type = Route::REDIRECTION;
+            route._redir = path->getStringValue();
+        }
+        else
+        {
+            ERR("Unknown type for route " << key << ", skipping route definition");
+            return;
+        }
+    }
 
     TiniNode* methods = value->getMapValue()["methods"];
     if (!methods || methods->getType() != TiniNode::T_STRING)
@@ -72,22 +95,6 @@ void HostAttributes::_assign_route(std::string key, TiniNode* value)
     {
         if (_method_map.find(str) != _method_map.end())
             route._methods |= _method_map[str];
-    }
-
-    TiniNode* type = value->getMapValue()["type"];
-    route._type = Route::NORMAL;
-    if (!type || type->getType() != TiniNode::T_STRING)
-    {
-        INFO("Type not defined for route " << key << ", defaulting to normal");
-    }
-    else
-    {
-        if (type->getStringValue() == "normal")
-            route._type = Route::NORMAL;
-        else if (type->getStringValue() == "redirection")
-            route._type = Route::REDIRECTION;
-        else
-            ERR("Unknown type for route " << key << ", defaulting to normal");
     }
 
     TiniNode* upload = value->getMapValue()["upload"];
