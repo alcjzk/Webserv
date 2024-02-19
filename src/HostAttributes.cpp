@@ -82,21 +82,19 @@ void HostAttributes::_assign_route(std::string key, TiniNode* value)
     }
     else
     {
-        if (type->getStringValue() != "redirection")
-        {
-            ERR("Unknown type for route " << key << ", defaulting to normal");
-        }
-        else
+        if (type->getStringValue() == "normal")
+            route._type = Route::NORMAL;
+        else if (type->getStringValue() == "redirection")
             route._type = Route::REDIRECTION;
+        else
+            ERR("Unknown type for route " << key << ", defaulting to normal");
     }
 
     TiniNode* upload = value->getMapValue()["upload"];
-    route._upload_directory = std::nullopt;
     if (upload && upload->getType() == TiniNode::T_STRING)
         route._upload_directory = upload->getStringValue();
 
     TiniNode* default_file = value->getMapValue()["default_file"];
-    route._default_file = std::nullopt;
     if (default_file && default_file->getType() == TiniNode::T_STRING)
         route._default_file = default_file->getStringValue();
     _routes.push(route);
