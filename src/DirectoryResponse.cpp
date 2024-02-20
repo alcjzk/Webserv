@@ -5,6 +5,7 @@
 #include <cstring>
 #include <algorithm>
 #include "Log.hpp"
+#include "HTTPError.hpp"
 
 using std::filebuf;
 using std::ifstream;
@@ -15,6 +16,11 @@ DirectoryResponse::DirectoryResponse(const Path& target_path, const Path& reques
     std::string       cwd_path(static_cast<std::string>(target_path));
     const char*       cwd_cstr = cwd_path.c_str();
     DIR*              cwd_dirobj = opendir(cwd_cstr);
+    if (!cwd_dirobj)
+    {
+        ERR("Directory object for " << cwd_cstr << " not found");
+        throw HTTPError(Status::NOT_FOUND);
+    }
     struct dirent*    cwd_entry = readdir(cwd_dirobj);
     std::stringstream body;
 
