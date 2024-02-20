@@ -34,10 +34,13 @@ class Path
         const_iterator cbegin() const noexcept;
         const_iterator cend() const noexcept;
         Type           type();
+        bool           is_root() const noexcept;
+        void           is_root(bool value) noexcept;
 
         operator std::string() const;
 
         Path        operator+(const Path& rhs) const;
+        bool        operator==(const Path& rhs) const;
 
         static Path relative(const Path& path, const Path& base);
         static Path canonical(const Path& path);
@@ -46,7 +49,19 @@ class Path
         Type                     fetch_type() const;
 
         std::vector<std::string> _segments;
+        bool                     _is_root = false;
         Type                     _type = NONE;
 };
 
 std::ostream& operator<<(std::ostream& os, const Path& path);
+
+#ifdef TEST
+
+class PathTest : public Path
+{
+    public:
+        static void canonical_test();
+        static void repeated_delim_test();
+};
+
+#endif

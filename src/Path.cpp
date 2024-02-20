@@ -17,28 +17,22 @@ Path::Path(const string& path)
     size_t start = 0;
     size_t end;
 
-    if (path.empty())
-        throw std::runtime_error("Empty paths are not yet supported");
-
     if (path[0] == '/')
     {
-        _segments.push_back("/");
-        start = 1;
+        _is_root = true;
+        start = path.find_first_not_of('/', 1);
     }
 
-    if (path.size() == 1)
-        return;
-
-    while (true)
+    while (start != string::npos)
     {
-        end = path.find_first_of('/', start);
+        end = path.find_first_of('/', start + 1);
         if (end == string::npos)
         {
             _segments.push_back(path.substr(start));
-            break;
+            return;
         }
         _segments.push_back(path.substr(start, end - start));
-        start = end + 1;
+        start = path.find_first_not_of('/', end + 1);
     }
 }
 
@@ -75,16 +69,29 @@ Path::Type Path::type()
     return _type;
 }
 
+bool Path::is_root() const noexcept
+{
+    return _is_root;
+}
+
+void Path::is_root(bool value) noexcept
+{
+    _is_root = value;
+}
+
 Path::operator string() const
 {
     string         path;
     const_iterator begin = cbegin();
     const_iterator end = cend();
 
+    if (_is_root)
+    {
+        path = '/';
+    }
     if (begin == end)
         return path;
-    if (*begin != "/")
-        path = *begin;
+    path += *begin;
     std::for_each(begin + 1, end, [&path](const string& segment) { path = path + '/' + segment; });
     return path;
 }
@@ -96,6 +103,16 @@ Path Path::operator+(const Path& rhs) const
     path._segments.reserve(rhs._segments.size());
     path._segments.insert(path.end(), rhs.cbegin(), rhs.cend());
     return path;
+}
+
+bool Path::operator==(const Path& rhs) const
+{
+    if (_is_root != rhs._is_root)
+        return false;
+    auto pair = std::mismatch(cbegin(), cend(), rhs.cbegin(), rhs.cend());
+    if (pair.first != cend() || pair.second != rhs.cend())
+        return false;
+    return true;
 }
 
 Path Path::relative(const Path& path, const Path& base)
@@ -115,8 +132,31 @@ Path Path::relative(const Path& path, const Path& base)
 
 Path Path::canonical(const Path& path)
 {
-    // FIXME: Not implemented
-    return Path(path);
+    Path result;
+
+    result.is_root(path.is_root());
+    for (auto it = path.cbegin(); it != path.cend(); it++)
+    {
+        if (*it != "." && *it != "..")
+        {
+            auto next = std::next(it);
+            while (next != path.cend() && *next == ".")
+            {
+                next = std::next(next);
+            }
+            if (next == path.cend())
+            {
+                result._segments.push_back(*it);
+                return result;
+            }
+            if (*next != "..")
+            {
+                result._segments.push_back(*it);
+                it = std::next(next);
+            }
+        }
+    }
+    return result;
 }
 
 ostream& operator<<(ostream& os, const Path& path)
@@ -156,3 +196,31 @@ Path::Type Path::fetch_type() const
 
     return UNKNOWN;
 }
+
+#ifdef TEST
+
+#include "testutils.hpp"
+
+void PathTest::canonical_test()
+{
+    BEGIN
+
+    EXPECT((Path::canonical(Path("/foo/../bar")) == Path("/bar")));
+    EXPECT((Path::canonical(Path("/.././.././../foo")) == Path("/foo")));
+    EXPECT((Path::canonical(Path("foo/bar/././../baz/")) == Path("foo/baz")));
+    EXPECT((Path::canonical(Path("foo/bar/././../baz/../.")) == Path("foo/")));
+
+    END
+}
+
+void PathTest::repeated_delim_test()
+{
+    BEGIN
+
+    EXPECT((Path("//////") == Path("/")));
+    EXPECT((Path("a////b") == Path("a/b")));
+
+    END
+}
+
+#endif
