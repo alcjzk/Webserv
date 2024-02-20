@@ -12,24 +12,27 @@
             methods = GET, POST, DELETE
             upload = www/uploads/
             default_file = index.html
+            [servers.alpha.localhost.routes./.cgi]
+                .py=/bin/python3
         [servers.alpha.localhost.routes./source]
             type = normal
             path = src/
             methods = GET
-        [servers.alpha.localhost.routes./forbidden]
+        [servers.alpha.localhost.routes./redirection]
             type = redirection
             path = http://www.google.com
             methods = GET
     [servers.alpha.alternative]
-        directory_listing = true
-        [servers.alpha.alternative.routes./]
+        directory_listing = false
+        [servers.alpha.admin.routes./]
             type = normal
-            path = ./
+            path = /
+            methods = GET
             default_file = index.html
 
 [servers.beta]
     host = 127.0.0.1
-    port = 8001
+    port = 8081
     [servers.beta.localhost]
         directory_listing = true
         [servers.beta.localhost.routes./]
@@ -43,5 +46,4 @@
             path = src/
             methods = GET
         [servers.beta.localhost.routes./forbidden]
-            path = ./
-            methods = GET
+            path = /
