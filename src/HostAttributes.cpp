@@ -8,6 +8,7 @@ HostAttributes::MethodMap HostAttributes::_method_map = {
 HostAttributes::HostAttributes(const std::string& hostname, const TiniNode* node)
     : _directory_listing(false), _hostname(hostname)
 {
+    INFO("CONSTRUCTING HOSTATTRIBUTES FOR " << hostname);
     std::map<std::string, TiniNode*>& n = node->getMapValue();
     TiniNode*                         routes = n["routes"];
     TiniNode*                         dirlist = n["directory_listing"];
@@ -64,13 +65,13 @@ void HostAttributes::_assign_route(std::string key, TiniNode* value)
     {
         if (type->getStringValue() == "normal")
         {
-            route._type = Route::NORMAL;
             route._fs_path = path->getStringValue();
         }
         else if (type->getStringValue() == "redirection")
         {
             route._type = Route::REDIRECTION;
             route._redir = path->getStringValue();
+            route._fs_path = std::string("./");
         }
         else
         {
@@ -82,19 +83,21 @@ void HostAttributes::_assign_route(std::string key, TiniNode* value)
     TiniNode* methods = value->getMapValue()["methods"];
     if (!methods || methods->getType() != TiniNode::T_STRING)
     {
-        ERR("Methods not defined for " << key << " skipping route definition")
-        return;
+        INFO("Methods not defined for " << key << ", route effectively forbidden")
     }
-    const std::vector<std::string>& map_values = split(methods->getStringValue(), ",");
-    if (!map_values.size())
+    else
     {
-        ERR("Zero methods for " << key << " skipping route definition")
-        return;
-    }
-    for (const auto& str : map_values)
-    {
-        if (_method_map.find(str) != _method_map.end())
-            route._methods |= _method_map[str];
+        const std::vector<std::string>& map_values = split(methods->getStringValue(), ",");
+        route._methods = 0;
+        if (!map_values.size())
+        {
+            INFO("Zero methods for " << key << ", route effectively forbidden")
+        }
+        for (const auto& str : map_values)
+        {
+            if (_method_map.find(str) != _method_map.end())
+                route._methods |= _method_map[str];
+        }
     }
 
     TiniNode* upload = value->getMapValue()["upload"];
