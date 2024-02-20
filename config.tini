@@ -11,6 +11,7 @@
             path = www/
             methods = GET, POST, DELETE
             upload = www/uploads/
+            default_file = index.html
             [servers.alpha.localhost.routes./.cgi]
                 .py=/bin/python3
         [servers.alpha.localhost.routes./source]
