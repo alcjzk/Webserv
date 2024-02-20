@@ -11,7 +11,7 @@ Route::Route(Path uri_path) : _uri_path(uri_path)
     _priority = std::distance(_uri_path.begin(), _uri_path.end());
 }
 
-bool Route::match(Path uri_path) const
+bool Route::match(const Path& uri_path) const
 {
     auto pair =
         std::mismatch(uri_path.cbegin(), uri_path.cend(), _uri_path.cbegin(), _uri_path.cend());
@@ -19,7 +19,7 @@ bool Route::match(Path uri_path) const
     return pair.second == _uri_path.cend();
 }
 
-Path Route::map(Path uri_path) const
+Path Route::map(const Path& uri_path) const
 {
     return _fs_path + Path::relative(uri_path, _uri_path);
 }

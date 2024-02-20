@@ -25,8 +25,8 @@ class Route
 
         Route(Path uri_path);
 
-        bool                       match(Path uri_path) const;
-        Path                       map(Path uri_path) const;
+        bool                       match(const Path& uri_path) const;
+        Path                       map(const Path& uri_path) const;
         bool                       method_get() const;
         bool                       method_post() const;
         bool                       method_del() const;
