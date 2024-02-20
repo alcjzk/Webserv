@@ -1,6 +1,9 @@
 [servers.alpha]
     host = 127.0.0.1
     port = 8080
+    [servers.alpha./errorpages]
+        404 = err/404.html
+        403 = err/403.html
     [servers.alpha.localhost]
         directory_listing = true
         [servers.alpha.localhost.routes./]
@@ -15,9 +18,14 @@
             methods = GET
         [servers.alpha.localhost.routes./forbidden]
             type = redirection
-            path = ./
+            path = http://www.google.com
             methods = GET
-
+    [servers.alpha.alternative]
+        directory_listing = true
+        [servers.alpha.alternative.routes./]
+            type = normal
+            path = ./
+            default_file = index.html
 
 [servers.beta]
     host = 127.0.0.1
