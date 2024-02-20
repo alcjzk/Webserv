@@ -82,6 +82,7 @@ void HostAttributes::_assign_route(std::string key, TiniNode* value)
     }
 
     TiniNode* methods = value->getMapValue()["methods"];
+    route._methods = 0;
     if (!methods || methods->getType() != TiniNode::T_STRING)
     {
         INFO("Methods not defined for " << key << ", route effectively forbidden")
@@ -89,15 +90,17 @@ void HostAttributes::_assign_route(std::string key, TiniNode* value)
     else
     {
         const std::vector<std::string>& map_values = split(methods->getStringValue(), ",");
-        route._methods = 0;
         if (!map_values.size())
         {
             INFO("Zero methods for " << key << ", route effectively forbidden")
         }
-        for (const auto& str : map_values)
+        else
         {
-            if (_method_map.find(str) != _method_map.end())
-                route._methods |= _method_map[str];
+            for (const auto& str : map_values)
+            {
+                if (_method_map.find(str) != _method_map.end())
+                    route._methods |= _method_map[str];
+            }
         }
     }
 
