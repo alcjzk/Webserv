@@ -11,24 +11,24 @@ HostAttributes::HostAttributes(const std::string& hostname, const TiniNode* node
     if (!node)
         throw std::runtime_error("Null pointer in node argument for HostAttributes");
     std::map<std::string, TiniNode*>& n = node->getMapValue();
-    TiniNode*                         routes = n["routes"];
-    TiniNode*                         dirlist = n["directory_listing"];
+    const TiniNode*                   h_routes = n["routes"];
+    const TiniNode*                   h_dirlist = n["directory_listing"];
 
-    if (!routes)
+    if (!h_routes)
         throw std::runtime_error("Routes not in node");
-    if (!dirlist)
+    if (!h_dirlist)
     {
         INFO("Directory list not found for host " << hostname << " defaulting to false");
     }
     else
     {
-        if (dirlist->getType() == TiniNode::T_STRING)
+        if (h_dirlist->getType() == TiniNode::T_STRING)
         {
-            if (dirlist->getStringValue() != "true" && dirlist->getStringValue() != "false")
+            if (h_dirlist->getStringValue() != "true" && h_dirlist->getStringValue() != "false")
             {
                 ERR("Directory list of " << hostname << " is not a boolean value");
             }
-            if (dirlist->getStringValue() == "true")
+            if (h_dirlist->getStringValue() == "true")
                 _directory_listing = true;
         }
         else
@@ -36,7 +36,7 @@ HostAttributes::HostAttributes(const std::string& hostname, const TiniNode* node
             ERR("Directory list of " << hostname << " is not string type");
         }
     }
-    const std::map<std::string, TiniNode*>& routes_map = routes->getMapValue();
+    const std::map<std::string, TiniNode*>& routes_map = h_routes->getMapValue();
 
     for (const auto& [key, value] : routes_map)
     {
