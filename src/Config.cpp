@@ -13,7 +13,7 @@ Config::Config(std::map<std::string, TiniNode*>& server, std::map<std::string, T
 {
     TiniNode* body_size = root["body_size"];
     TiniNode* header_buffer_size = root["header_buffer_size"];
-    TiniNode* port = server["port"];
+    TiniNode* s_port = server["port"];
     TiniNode* host = server["host"];
     TiniNode* errpages = server["/errorpages"];
 
@@ -69,12 +69,12 @@ Config::Config(std::map<std::string, TiniNode*>& server, std::map<std::string, T
     }
     else
         _body_size = stoi(body_size->getStringValue());
-    if (!port || port->getType() != TiniNode::T_STRING)
+    if (!s_port || s_port->getType() != TiniNode::T_STRING)
     {
         INFO("Port not specified or invalid type, defaulting to 8000");
     }
     else
-        _port = port->getStringValue();
+        _port = s_port->getStringValue();
     if (!host || host->getType() != TiniNode::T_STRING)
     {
         INFO("Host not specified or invalid type, defaulting to 127.0.0.1");
