@@ -32,7 +32,8 @@ Response* Request::into_response(const Server& server) const
     {
         throw HTTPError(Status::NOT_FOUND);
     }
-    if ((target.type() != Path::Type::REGULAR && target.type() != Path::Type::DIRECTORY) || !route->method_get())
+    if ((target.type() != Path::Type::REGULAR && target.type() != Path::Type::DIRECTORY) ||
+        !route->method_get())
     {
         throw HTTPError(Status::FORBIDDEN);
     }
@@ -44,7 +45,7 @@ Response* Request::into_response(const Server& server) const
         try
         {
             if (route->_default_file.has_value())
-                return new FileResponse(target + Path("index.html"));
+                return new FileResponse(target + Path(route->_default_file.value()));
         }
         catch (...)
         {
