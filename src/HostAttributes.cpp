@@ -46,12 +46,12 @@ HostAttributes::HostAttributes(const std::string& hostname, const TiniNode* node
     }
 }
 
-void HostAttributes::_assign_route(std::string key, TiniNode* value)
+void HostAttributes::_assign_route(const std::string& key, const TiniNode* value)
 {
     Route     route = Route(Path(key));
 
-    TiniNode* type = value->getMapValue()["type"];
-    TiniNode* path = value->getMapValue()["path"];
+    const TiniNode* type = value->getMapValue()["type"];
+    const TiniNode* path = value->getMapValue()["path"];
     if (!path || path->getType() != TiniNode::T_STRING)
     {
         ERR("Path not defined for " << key << " skipping route definition")
@@ -81,7 +81,7 @@ void HostAttributes::_assign_route(std::string key, TiniNode* value)
         }
     }
 
-    TiniNode* methods = value->getMapValue()["methods"];
+    const TiniNode* methods = value->getMapValue()["methods"];
     route._methods = 0;
     if (!methods || methods->getType() != TiniNode::T_STRING)
     {
@@ -104,21 +104,21 @@ void HostAttributes::_assign_route(std::string key, TiniNode* value)
         }
     }
 
-    TiniNode* upload = value->getMapValue()["upload"];
+    const TiniNode* upload = value->getMapValue()["upload"];
     if (upload && upload->getType() == TiniNode::T_STRING)
         route._upload_directory = upload->getStringValue();
 
-    TiniNode* default_file = value->getMapValue()["default_file"];
+    const TiniNode* default_file = value->getMapValue()["default_file"];
     if (default_file && default_file->getType() == TiniNode::T_STRING)
         route._default_file = default_file->getStringValue();
 
-    TiniNode* cgi_map = value->getMapValue()["cgi"];
+    const TiniNode* cgi_map = value->getMapValue()["cgi"];
     if (cgi_map)
     {
-        for (const auto& [key, value] : cgi_map->getMapValue())
+        for (const auto& [k, v] : cgi_map->getMapValue())
         {
-            if (key[0] == '.')
-                route.insert_cgi(std::pair<std::string, TiniNode*>(key, value));
+            if (k[0] == '.')
+                route.insert_cgi(std::pair<std::string, TiniNode*>(k, v));
             else
             {
                 ERR("Non extension type key for cgi, skipping")
