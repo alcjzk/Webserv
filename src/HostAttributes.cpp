@@ -106,6 +106,20 @@ void HostAttributes::_assign_route(std::string key, TiniNode* value)
     TiniNode* default_file = value->getMapValue()["default_file"];
     if (default_file && default_file->getType() == TiniNode::T_STRING)
         route._default_file = default_file->getStringValue();
+
+    TiniNode* cgi_map = value->getMapValue()["cgi"];
+    if (cgi_map)
+    {
+        for (const auto& [key, value] : cgi_map->getMapValue())
+        {
+            if (key[0] == '.')
+                route.insert_cgi(std::pair<std::string, TiniNode*>(key, value));
+            else
+            {
+                ERR("Non extension type key for cgi, skipping")
+            }
+        }
+    }
     _routes.push(route);
 }
 
