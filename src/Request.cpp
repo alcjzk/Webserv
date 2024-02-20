@@ -47,9 +47,9 @@ Response* Request::into_response(const Server& server) const
             if (route->_default_file.has_value())
                 return new FileResponse(target + Path(route->_default_file.value()));
         }
-        catch (...)
+        catch (const std::exception& e)
         {
-            INFO("Configured default file doesn't exist!");
+            INFO("Request::into_response: " << e.what());
             if (server.map_attributes(hostname).dirlist())
                 return new DirectoryResponse(target, request_uri.path());
             throw HTTPError(Status::NOT_FOUND);
@@ -59,11 +59,7 @@ Response* Request::into_response(const Server& server) const
         return new DirectoryResponse(target, request_uri.path());
     }
     else
-    {
-        if (route->method_get())
-            return new FileResponse(target);
-        throw HTTPError(Status::FORBIDDEN);
-    }
+        return new FileResponse(target);
 }
 
 const Method& Request::method() const
