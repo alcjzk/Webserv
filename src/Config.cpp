@@ -8,14 +8,15 @@ using std::string;
 
 Config::Config(std::map<std::string, TiniNode*>& server, std::map<std::string, TiniNode*>& root,
                std::pair<std::string, TiniNode*> first_pair)
-    : _port(string("8000")), _host(string("127.0.0.1")), _first_attr(HostAttributes(first_pair.first, first_pair.second)),
-      _backlog(128), _body_size(4096) // OSX capped value for listen(2)
+    : _port(string("8000")), _host(string("127.0.0.1")),
+      _first_attr(HostAttributes(first_pair.first, first_pair.second)), _backlog(128),
+      _body_size(4096) // OSX capped value for listen(2)
 {
-    TiniNode* body_size = root["body_size"];
-    TiniNode* header_buffer_size = root["header_buffer_size"];
-    TiniNode* s_port = server["port"];
-    TiniNode* host = server["host"];
-    TiniNode* errpages = server["/errorpages"];
+    const TiniNode* body_size = root["body_size"];
+    const TiniNode* header_buffer_size = root["header_buffer_size"];
+    const TiniNode* s_port = server["port"];
+    const TiniNode* s_host = server["host"];
+    const TiniNode* errpages = server["/errorpages"];
 
     if (errpages && errpages->getType() == TiniNode::T_MAP)
     {
@@ -75,12 +76,12 @@ Config::Config(std::map<std::string, TiniNode*>& server, std::map<std::string, T
     }
     else
         _port = s_port->getStringValue();
-    if (!host || host->getType() != TiniNode::T_STRING)
+    if (!s_host || s_host->getType() != TiniNode::T_STRING)
     {
         INFO("Host not specified or invalid type, defaulting to 127.0.0.1");
     }
     else
-        _host = host->getStringValue();
+        _host = s_host->getStringValue();
 }
 
 const string& Config::port() const
@@ -115,7 +116,6 @@ std::optional<Path> Config::error_page(Status status) const
         return (it->second);
     return std::nullopt;
 }
-
 
 const HostAttributes& Config::first_attr() const
 {
