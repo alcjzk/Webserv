@@ -50,8 +50,9 @@ Config::Config(std::map<std::string, TiniNode*>& server, std::map<std::string, T
                 _attrs.push_back(HostAttributes(key, value));
         }
     }
-    catch (...)
+    catch (const std::exception& err)
     {
+        ERR("what: " << err.what())
         throw std::runtime_error("Server is not defined as map!");
     }
 
