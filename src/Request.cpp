@@ -28,12 +28,15 @@ Response* Request::into_response(const Server& server) const
 
     Path target = route->map(request_uri.path());
 
+    if (!route->method_get())
+    {
+        throw HTTPError(Status::FORBIDDEN);
+    }
     if (target.type() == Path::Type::NOT_FOUND)
     {
         throw HTTPError(Status::NOT_FOUND);
     }
-    if ((target.type() != Path::Type::REGULAR && target.type() != Path::Type::DIRECTORY) ||
-        !route->method_get())
+    if ((target.type() != Path::Type::REGULAR && target.type() != Path::Type::DIRECTORY))
     {
         throw HTTPError(Status::FORBIDDEN);
     }
