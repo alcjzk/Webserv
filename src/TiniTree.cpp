@@ -199,7 +199,7 @@ TiniNode& TiniTree::getRoot()
     return *_root;
 }
 
-void      TiniTree::trySetFirst(TiniNode* current, std::string key)
+void TiniTree::trySetFirst(TiniNode* current, std::string key)
 {
     if (!current->getFirstValue().has_value() && key[0] != '/')
         current->setFirstValue(*current->getMapValue().find(key));

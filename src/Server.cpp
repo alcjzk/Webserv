@@ -255,7 +255,8 @@ void ServerReceiveRequestTask::run()
         WARN(error.what());
         std::optional<Path> err_page_path = _server.config().error_page(error.status());
         if (err_page_path.has_value())
-            Runtime::enqueue(new ServerSendResponseTask(_fd, new FileResponse(err_page_path.value(), error.status())));
+            Runtime::enqueue(new ServerSendResponseTask(
+                _fd, new FileResponse(err_page_path.value(), error.status())));
         else
             Runtime::enqueue(new ServerSendResponseTask(_fd, new Response(error.status())));
         _is_complete = true;

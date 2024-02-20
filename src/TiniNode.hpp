@@ -68,7 +68,7 @@ class TiniNode
         std::vector<TiniNode*>&           getVectorValue() const;
         std::map<std::string, TiniNode*>& getMapValue() const;
         std::string&                      getStringValue() const;
-        void setFirstValue(std::pair<std::string, TiniNode*> pair);
+        void                              setFirstValue(std::pair<std::string, TiniNode*> pair);
         std::optional<std::pair<std::string, TiniNode*>> getFirstValue() const;
         void printContents(int depth, std::string name) const;
         void deepCopyChildren(const TiniNode& other);

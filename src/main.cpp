@@ -12,10 +12,10 @@
 
 void cleanup(std::vector<Server*> s, std::vector<Config*> c)
 {
-        for (auto e : s)
-            delete e;
-        for (auto e : c)
-            delete e;
+    for (auto e : s)
+        delete e;
+    for (auto e : c)
+        delete e;
 }
 
 int main()
@@ -25,7 +25,7 @@ int main()
     std::set<std::string> opened_ports;
     try
     {
-        TiniTree  tree;
+        TiniTree        tree;
         const TiniNode& root = tree.getRoot();
         const TiniNode* servers = root.getMapValue()["servers"];
 
@@ -35,7 +35,8 @@ int main()
         {
             std::optional<std::pair<std::string, TiniNode*>> first_pair = val->getFirstValue();
             assert(first_pair.has_value());
-            Config* cfg = new Config(val->getMapValue(), root.getMapValue(), val->getFirstValue().value());
+            Config* cfg =
+                new Config(val->getMapValue(), root.getMapValue(), val->getFirstValue().value());
 
             if (opened_ports.find(cfg->port()) != opened_ports.end())
             {
