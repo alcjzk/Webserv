@@ -13,6 +13,7 @@
 #include "HTTPError.hpp"
 #include "Log.hpp"
 #include "http.hpp"
+#include "FileResponse.hpp"
 #include "Server.hpp"
 
 using std::string;
@@ -30,7 +31,7 @@ Server::Server(const Config& config)
     hints.ai_family = AF_UNSPEC;
     hints.ai_flags = AI_PASSIVE;
 
-    status = getaddrinfo(NULL, _port, &hints, &_address_info);
+    status = getaddrinfo(config.host().c_str(), _port, &hints, &_address_info);
     if (status != 0)
         throw std::runtime_error(gai_strerror(status));
     _fd = socket(_address_info->ai_family, _address_info->ai_socktype, _address_info->ai_protocol);
@@ -116,7 +117,10 @@ const Route* Server::route(const std::string& uri_path, const std::string& host)
         std::find_if(_attributes.begin(), _attributes.end(),
                      [host](const HostAttributes& a) { return (a.hostname() == host); });
     if (attr == _attributes.end())
-        return (*_attributes.begin()).routes().find(uri_path);
+    {
+        INFO("Attribute not found returning " << _config.first_attr().hostname());
+        return (_config.first_attr()).routes().find(uri_path);
+    }
     return ((*attr).routes().find(uri_path));
 }
 
@@ -249,8 +253,11 @@ void ServerReceiveRequestTask::run()
     catch (const HTTPError& error)
     {
         WARN(error.what());
-        // TODO: Replace with proper error response
-        Runtime::enqueue(new ServerSendResponseTask(_fd, new Response(error.status())));
+        std::optional<Path> err_page_path = _server.config().error_page(error.status());
+        if (err_page_path.has_value())
+            Runtime::enqueue(new ServerSendResponseTask(_fd, new FileResponse(err_page_path.value(), error.status())));
+        else
+            Runtime::enqueue(new ServerSendResponseTask(_fd, new Response(error.status())));
         _is_complete = true;
     }
     catch (const std::exception& error)

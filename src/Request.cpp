@@ -19,6 +19,7 @@ Response* Request::into_response(const Server& server) const
         throw HTTPError(Status::BAD_REQUEST);
     }
     std::string  hostname = split(host->_value, ":")[0];
+    INFO("Hostname is " << hostname);
     URI          request_uri(_request_line.request_target(), host->_value);
     const Route* route = server.route(request_uri.path(), hostname);
     if (!route)
@@ -32,7 +33,7 @@ Response* Request::into_response(const Server& server) const
     {
         throw HTTPError(Status::NOT_FOUND);
     }
-    if (target.type() != Path::Type::REGULAR && target.type() != Path::Type::DIRECTORY)
+    if ((target.type() != Path::Type::REGULAR && target.type() != Path::Type::DIRECTORY) || !route->method_get())
     {
         throw HTTPError(Status::FORBIDDEN);
     }
@@ -57,7 +58,12 @@ Response* Request::into_response(const Server& server) const
             throw HTTPError(Status::FORBIDDEN);
         return new DirectoryResponse(target, request_uri.path());
     }
-    return new FileResponse(target);
+    else
+    {
+        if (route->method_get())
+            return new FileResponse(target);
+        throw HTTPError(Status::FORBIDDEN);
+    }
 }
 
 const Method& Request::method() const
