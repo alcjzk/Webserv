@@ -8,7 +8,6 @@ HostAttributes::MethodMap HostAttributes::_method_map = {
 HostAttributes::HostAttributes(const std::string& hostname, const TiniNode* node)
     : _directory_listing(false), _hostname(hostname)
 {
-    INFO("CONSTRUCTING HOSTATTRIBUTES FOR " << hostname);
     std::map<std::string, TiniNode*>& n = node->getMapValue();
     TiniNode*                         routes = n["routes"];
     TiniNode*                         dirlist = n["directory_listing"];

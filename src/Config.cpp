@@ -11,7 +11,6 @@ Config::Config(std::map<std::string, TiniNode*>& server, std::map<std::string, T
     : _port(string("8000")), _host(string("127.0.0.1")), _first_attr(HostAttributes(first_pair.first, first_pair.second)),
       _backlog(128), _body_size(4096) // OSX capped value for listen(2)
 {
-    INFO("DEFINING CONFIG")
     TiniNode* body_size = root["body_size"];
     TiniNode* header_buffer_size = root["header_buffer_size"];
     TiniNode* port = server["port"];

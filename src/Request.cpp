@@ -19,7 +19,6 @@ Response* Request::into_response(const Server& server) const
         throw HTTPError(Status::BAD_REQUEST);
     }
     std::string  hostname = split(host->_value, ":")[0];
-    INFO("Hostname is " << hostname);
     URI          request_uri(_request_line.request_target(), host->_value);
     const Route* route = server.route(request_uri.path(), hostname);
     if (!route)
