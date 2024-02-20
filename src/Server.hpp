@@ -83,22 +83,22 @@ class ServerReceiveRequestTask : public Task
         } Expect;
 
         // State impl
-        void                receive_start_line();
-        void                receive_headers();
+        void          receive_start_line();
+        void          receive_headers();
         // TODO: void receive_body()
 
         // Util
-        void                fill_buffer();
-        char*               buffer_head();
-        size_t              buffer_size_available();
+        void          fill_buffer();
+        char*         buffer_head();
+        size_t        buffer_size_available();
 
         // TODO: Use value from config + expanding buffersize?
-        Expect              _expect;
-        size_t              _bytes_received_total;
-        Reader              _reader;
-        Request             _request;
-        bool                _is_partial_data;
-        const Server&       _server;
+        Expect        _expect;
+        size_t        _bytes_received_total;
+        Reader        _reader;
+        Request       _request;
+        bool          _is_partial_data;
+        const Server& _server;
 };
 
 class ServerAcceptTask : public Task
