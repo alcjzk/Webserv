@@ -26,8 +26,8 @@ int main()
     try
     {
         TiniTree  tree;
-        TiniNode& root = tree.getRoot();
-        TiniNode* servers = root.getMapValue()["servers"];
+        const TiniNode& root = tree.getRoot();
+        const TiniNode* servers = root.getMapValue()["servers"];
 
         if (!servers)
             throw std::runtime_error("\"servers\" not found in the root map");
@@ -37,7 +37,7 @@ int main()
             assert(first_pair.has_value());
             Config* cfg = new Config(val->getMapValue(), root.getMapValue(), val->getFirstValue().value());
 
-            if (cfg && opened_ports.find(cfg->port()) != opened_ports.end())
+            if (opened_ports.find(cfg->port()) != opened_ports.end())
             {
                 delete cfg;
                 throw std::runtime_error("Port already defined");
