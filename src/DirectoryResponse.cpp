@@ -11,11 +11,13 @@ using std::filebuf;
 using std::ifstream;
 using std::vector;
 
-DirectoryResponse::DirectoryResponse(const Path& target_path, const Path& request_path, Status status) : Response(status)
+DirectoryResponse::DirectoryResponse(const Path& target_path, const Path& request_path,
+                                     Status status)
+    : Response(status)
 {
-    std::string       cwd_path(static_cast<std::string>(target_path));
-    const char*       cwd_cstr = cwd_path.c_str();
-    DIR*              cwd_dirobj = opendir(cwd_cstr);
+    std::string cwd_path(static_cast<std::string>(target_path));
+    const char* cwd_cstr = cwd_path.c_str();
+    DIR*        cwd_dirobj = opendir(cwd_cstr);
     if (!cwd_dirobj)
     {
         ERR("Directory object for " << cwd_cstr << " not found");
@@ -30,7 +32,8 @@ DirectoryResponse::DirectoryResponse(const Path& target_path, const Path& reques
     while (cwd_entry)
     {
         body << "  <li><a href=\"";
-        if (static_cast<std::string>(request_path).back() != '/')
+        if (!static_cast<std::string>(request_path).empty() &&
+            static_cast<std::string>(request_path).back() != '/')
             body << last_uri_segment(request_path) << "/";
         body << cwd_entry->d_name << "\">";
         body << cwd_entry->d_name << "</a></li>\n";
