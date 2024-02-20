@@ -11,7 +11,6 @@
             path = www/
             methods = GET, POST, DELETE
             upload = www/uploads/
-            default_file = index.html
             [servers.alpha.localhost.routes./.cgi]
                 .py=/bin/python3
         [servers.alpha.localhost.routes./source]
@@ -24,7 +23,7 @@
             methods = GET
     [servers.alpha.alternative]
         directory_listing = false
-        [servers.alpha.admin.routes./]
+        [servers.alpha.alternative.routes./]
             type = normal
             path = /
             methods = GET
