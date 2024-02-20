@@ -8,6 +8,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <set>
+#include <assert.h>
 
 void cleanup(std::vector<Server*> s, std::vector<Config*> c)
 {
@@ -32,7 +33,9 @@ int main()
             throw std::runtime_error("\"servers\" not found in the root map");
         for (const auto& [key, val] : servers->getMapValue())
         {
-            Config* cfg = new Config(val->getMapValue(), root.getMapValue());
+            std::optional<std::pair<std::string, TiniNode*>> first_pair = val->getFirstValue();
+            assert(first_pair.has_value());
+            Config* cfg = new Config(val->getMapValue(), root.getMapValue(), val->getFirstValue().value());
 
             if (cfg && opened_ports.find(cfg->port()) != opened_ports.end())
             {
