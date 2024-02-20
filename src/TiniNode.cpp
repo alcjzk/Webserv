@@ -322,6 +322,16 @@ void TiniNode::printContents(int depth, std::string name) const
     }
 }
 
+void TiniNode::setFirstValue(std::pair<std::string, TiniNode*> pair)
+{
+    _firstMapValue = pair;
+}
+
+std::optional<std::pair<std::string, TiniNode*>> TiniNode::getFirstValue() const
+{
+    return _firstMapValue;
+}
+
 #ifdef TESTS
 
 void TiniNodeTests::all() {}

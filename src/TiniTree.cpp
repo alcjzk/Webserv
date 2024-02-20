@@ -91,7 +91,10 @@ int TiniTree::contextSwitch(std::string ctx, int row)
                         if (_current->getType() == TiniNode::T_VECTOR)
                             _current->getVectorValue().push_back(new TiniNode(TiniNode::T_MAP));
                         else
+                        {
                             _current->getMapValue()[map_ops[i]] = new TiniNode(TiniNode::T_MAP);
+                            trySetFirst(_current, map_ops[i]);
+                        }
                     }
                     tmp = &_current->fetchTiniNode(map_ops[i]);
                 }
@@ -112,7 +115,10 @@ int TiniTree::contextSwitch(std::string ctx, int row)
                     if (_current->getType() == TiniNode::T_VECTOR)
                         _current->getVectorValue().push_back(new TiniNode(TiniNode::T_MAP));
                     else
+                    {
                         _current->getMapValue()[map_ops[i]] = new TiniNode(TiniNode::T_MAP);
+                        trySetFirst(_current, map_ops[i]);
+                    }
                     tmp = &_current->fetchTiniNode(map_ops[i]);
                 }
                 _current = tmp;
@@ -191,4 +197,10 @@ void TiniTree::constructTree()
 TiniNode& TiniTree::getRoot()
 {
     return *_root;
+}
+
+void      TiniTree::trySetFirst(TiniNode* current, std::string key)
+{
+    if (!current->getFirstValue().has_value() && key[0] != '/')
+        current->setFirstValue(*current->getMapValue().find(key));
 }

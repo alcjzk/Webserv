@@ -1,6 +1,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <optional>
 
 #ifndef TINI_NODE_H
 #define TINI_NODE_H
@@ -41,12 +42,13 @@ class TiniNode
         };
 
     private:
-        TiniNodeType                      _type;
+        TiniNodeType                                     _type;
         // Could be union or some sort of variant type, but feel like the dynamic
         // casting is not worth the space savings here
-        std::vector<TiniNode*>*           _vectorValue;
-        std::map<std::string, TiniNode*>* _mapValue;
-        std::string*                      _stringValue;
+        std::optional<std::pair<std::string, TiniNode*>> _firstMapValue = std::nullopt;
+        std::vector<TiniNode*>*                          _vectorValue;
+        std::map<std::string, TiniNode*>*                _mapValue;
+        std::string*                                     _stringValue;
 
     public:
         TiniNode();
@@ -66,8 +68,10 @@ class TiniNode
         std::vector<TiniNode*>&           getVectorValue() const;
         std::map<std::string, TiniNode*>& getMapValue() const;
         std::string&                      getStringValue() const;
-        void                              printContents(int depth, std::string name) const;
-        void                              deepCopyChildren(const TiniNode& other);
+        void setFirstValue(std::pair<std::string, TiniNode*> pair);
+        std::optional<std::pair<std::string, TiniNode*>> getFirstValue() const;
+        void printContents(int depth, std::string name) const;
+        void deepCopyChildren(const TiniNode& other);
 };
 
 #ifdef TESTS
