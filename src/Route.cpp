@@ -63,3 +63,11 @@ bool Route::method_del() const
 {
     return (_methods & Route::DELETE);
 }
+
+void Route::insert_cgi(const std::pair<std::string, TiniNode*>& extension)
+{
+    if (!extension.second)
+        throw std::runtime_error("Null key in TiniNode");
+    if (extension.second->getType() == TiniNode::T_STRING)
+        _cgi_opts[extension.first] = extension.second->getStringValue();
+}
