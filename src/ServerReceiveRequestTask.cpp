@@ -15,13 +15,12 @@
 #include "Log.hpp"
 #include "http.hpp"
 
-using std::vector;
 using std::string;
+using std::vector;
 
 ServerReceiveRequestTask::ServerReceiveRequestTask(const Server& server, int fd)
-    : Task(fd, Readable),
-      _expect(REQUEST_LINE), _bytes_received_total(0), _reader(vector<char>(_header_buffer_size)),
-      _is_partial_data(true), _server(server)
+    : Task(fd, Readable), _expect(REQUEST_LINE), _bytes_received_total(0),
+      _reader(vector<char>(_header_buffer_size)), _is_partial_data(true), _server(server)
 {
     auto maybe_keepalive_timeout = server.config().keepalive_timeout();
     if (maybe_keepalive_timeout)
@@ -154,7 +153,8 @@ void ServerReceiveRequestTask::run()
     {
         WARN(error.what());
         // TODO: Replace with proper error response
-        Runtime::enqueue(new ServerSendResponseTask(_server.config(), _fd, new Response(error.status())));
+        Runtime::enqueue(
+            new ServerSendResponseTask(_server.config(), _fd, new Response(error.status())));
         _is_complete = true;
     }
     catch (const std::exception& error)

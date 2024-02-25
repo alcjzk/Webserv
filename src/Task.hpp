@@ -29,13 +29,12 @@ class Task
         virtual void run() = 0;
 
     protected:
-        Task(int fd, WaitFor wait_for,
-            std::optional<TimePoint> expire_time = std::nullopt);
+        Task(int fd, WaitFor wait_for, std::optional<TimePoint> expire_time = std::nullopt);
 
-        int                         _fd;
-        WaitFor                     _wait_for;
-        bool                        _is_complete;
-        std::optional<TimePoint>    _expire_time;
+        int                      _fd;
+        WaitFor                  _wait_for;
+        bool                     _is_complete;
+        std::optional<TimePoint> _expire_time;
 };
 
 #endif

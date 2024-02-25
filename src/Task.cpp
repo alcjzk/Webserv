@@ -3,8 +3,9 @@
 #include "Log.hpp"
 
 Task::Task(int fd, WaitFor wait_for, std::optional<TimePoint> expire_time)
-    : _fd(fd), _wait_for(wait_for), _is_complete(false),
-    _expire_time(expire_time) {}
+    : _fd(fd), _wait_for(wait_for), _is_complete(false), _expire_time(expire_time)
+{
+}
 
 bool Task::operator==(int fd)
 {
