@@ -1,7 +1,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <fcntl.h>
-#include <stdio.h>
+#include <string.h>
 #include "ServerAcceptTask.hpp"
 #include "Log.hpp"
 #include "Runtime.hpp"
