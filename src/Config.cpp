@@ -17,3 +17,38 @@ int Config::backlog() const
 {
     return _backlog;
 }
+
+std::optional<Config::Seconds> Config::keepalive_timeout() const
+{
+    return _keepalive_timeout;
+}
+
+std::optional<Config::Seconds> Config::client_header_timeout() const
+{
+    return _client_header_timeout;
+}
+
+std::optional<Config::Seconds> Config::client_body_timeout() const
+{
+    return _client_body_timeout;
+}
+
+std::optional<Config::Seconds> Config::send_timeout() const
+{
+    return _send_timeout;
+}
+
+Config::Seconds Config::lingering_timeout() const
+{
+    return _lingering_timeout;
+}
+
+std::optional<Config::Seconds> Config::cgi_read_timeout() const
+{
+    return _cgi_read_timeout;
+}
+
+std::optional<Config::Seconds> Config::cgi_write_timeout() const
+{
+    return _cgi_write_timeout;
+}

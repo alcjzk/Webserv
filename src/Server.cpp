@@ -63,6 +63,11 @@ const HTTPVersion Server::http_version()
     return HTTPVersion(1, 1);
 }
 
+const Config& Server::config() const
+{
+    return _config;
+}
+
 Server::~Server()
 {
     if (_fd != -1)
@@ -76,9 +81,11 @@ int Server::fd() const
     return _fd;
 }
 
-ServerSendResponseTask::ServerSendResponseTask(int fd, Response* response)
+ServerSendResponseTask::ServerSendResponseTask(const Config& config, int fd, Response* response)
     : Task(fd, Writable), _response(response)
 {
+    if (config.send_timeout())
+        _expire_time = std::chrono::system_clock::now() + config.send_timeout().value();
 }
 
 ServerSendResponseTask::~ServerSendResponseTask()
@@ -111,11 +118,13 @@ const Route* Server::route(const std::string& uri_path) const
 }
 
 ServerReceiveRequestTask::ServerReceiveRequestTask(const Server& server, int fd)
-    : Task(fd, Readable,
-           std::chrono::system_clock::now() + std::chrono::seconds(3)),
+    : Task(fd, Readable),
       _expect(REQUEST_LINE), _bytes_received_total(0), _reader(vector<char>(_header_buffer_size)),
       _is_partial_data(true), _server(server)
 {
+    auto maybe_keepalive_timeout = server.config().keepalive_timeout();
+    if (maybe_keepalive_timeout)
+        _expire_time = std::chrono::system_clock::now() + maybe_keepalive_timeout.value();
 }
 
 size_t ServerReceiveRequestTask::buffer_size_available()
@@ -161,7 +170,11 @@ void ServerReceiveRequestTask::receive_start_line()
             throw HTTPError(Status::HTTP_VERSION_NOT_SUPPORTED);
         }
         INFO(_request._request_line);
+
         _expect = HEADERS;
+        auto maybe_client_headers_timeout = _server.config().client_header_timeout();
+        if (maybe_client_headers_timeout)
+            _expire_time = std::chrono::system_clock::now() + maybe_client_headers_timeout.value();
     }
     catch (const std::bad_optional_access&)
     {
@@ -183,7 +196,7 @@ void ServerReceiveRequestTask::receive_headers()
             {
                 INFO("End of headers");
                 response = _request.into_response(_server);
-                Runtime::enqueue(new ServerSendResponseTask(_fd, response));
+                Runtime::enqueue(new ServerSendResponseTask(_server.config(), _fd, response));
                 _is_complete = true;
                 return;
             }
@@ -240,7 +253,7 @@ void ServerReceiveRequestTask::run()
     {
         WARN(error.what());
         // TODO: Replace with proper error response
-        Runtime::enqueue(new ServerSendResponseTask(_fd, new Response(error.status())));
+        Runtime::enqueue(new ServerSendResponseTask(_server.config(), _fd, new Response(error.status())));
         _is_complete = true;
     }
     catch (const std::exception& error)
@@ -255,7 +268,7 @@ void ServerReceiveRequestTask::abort()
 {
     INFO("ReceiveRequestTask for fd " << _fd << " timed out");
     _is_complete = true;
-    Runtime::enqueue(new ServerSendResponseTask(_fd, new TimeoutResponse()));
+    Runtime::enqueue(new ServerSendResponseTask(_server.config(), _fd, new TimeoutResponse()));
 }
 
 ServerReceiveRequestTask::~ServerReceiveRequestTask() {}

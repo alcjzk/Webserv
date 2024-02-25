@@ -30,6 +30,7 @@ class Server
         int                      fd() const;
         const Route*             route(const std::string& uri_path) const;
         static const HTTPVersion http_version();
+        const Config&            config() const;
 
     private:
         const Config&    _config;
@@ -44,7 +45,7 @@ class ServerSendResponseTask : public Task
     public:
         virtual ~ServerSendResponseTask() override;
 
-        ServerSendResponseTask(int fd, Response* response);
+        ServerSendResponseTask(const Config& config, int fd, Response* response);
         ServerSendResponseTask(const ServerSendResponseTask&) = delete;
         ServerSendResponseTask(ServerSendResponseTask&&) = delete;
 
