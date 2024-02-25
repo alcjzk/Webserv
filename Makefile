@@ -13,33 +13,36 @@ OBJ_DIR = obj
 SRC_DIR = src
 BIN_DIR = bin
 
-SRCS =\
-Config.cpp			\
-Server.cpp			\
-Runtime.cpp			\
-Task.cpp			\
-Reader.cpp			\
-Method.cpp			\
-HTTPVersion.cpp		\
-URI.cpp				\
-RequestLine.cpp		\
-Error.cpp			\
-Status.cpp			\
-HTTPError.cpp		\
-Response.cpp		\
-Log.cpp				\
-Request.cpp			\
-Header.cpp			\
-http.cpp			\
-TiniNode.cpp		\
-TiniTree.cpp		\
-TiniUtils.cpp		\
-TiniValidator.cpp	\
-Route.cpp			\
-FileResponse.cpp	\
-Routes.cpp			\
-Path.cpp			\
-TimeoutResponse.cpp \
+SRCS =							\
+Config.cpp						\
+Server.cpp						\
+Runtime.cpp						\
+Task.cpp						\
+Reader.cpp						\
+Method.cpp						\
+HTTPVersion.cpp					\
+URI.cpp							\
+RequestLine.cpp					\
+Error.cpp						\
+Status.cpp						\
+HTTPError.cpp					\
+Response.cpp					\
+Log.cpp							\
+Request.cpp						\
+Header.cpp						\
+http.cpp						\
+TiniNode.cpp					\
+TiniTree.cpp					\
+TiniUtils.cpp					\
+TiniValidator.cpp				\
+Route.cpp						\
+FileResponse.cpp				\
+Routes.cpp						\
+Path.cpp						\
+TimeoutResponse.cpp 			\
+ServerAcceptTask.cpp 			\
+ServerReceiveRequestTask.cpp	\
+ServerSendResponseTask.cpp		\
 main.cpp
 
 SRCS_TEST = test/testmain.cpp
