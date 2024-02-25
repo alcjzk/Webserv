@@ -1,25 +1,12 @@
+#include <fcntl.h>
+#include <stdio.h>
 #include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <errno.h>
-#include <string.h>
-#include <netdb.h>
-#include <stdexcept>
-#include <cassert>
-#include <algorithm>
-#include "Reader.hpp"
-#include "Error.hpp"
-#include "RequestLine.hpp"
-#include "HTTPError.hpp"
-#include "Log.hpp"
-#include "http.hpp"
 #include "Server.hpp"
-#include "TimeoutResponse.hpp"
+#include "Log.hpp"
+#include "Runtime.hpp"
 #include "ServerAcceptTask.hpp"
 
-using std::optional;
 using std::string;
-using std::vector;
 
 Server::Server(const Config& config)
     : _config(config), _port(config.ports().front().c_str()), _fd(-1)
