@@ -1,13 +1,13 @@
 #include <unistd.h>
 #include <cassert>
+#include <chrono>
 #include "ServerSendResponseTask.hpp"
 #include "Log.hpp"
 
 ServerSendResponseTask::ServerSendResponseTask(const Config& config, int fd, Response* response)
-    : Task(fd, Writable), _response(response)
+    : Task(fd, Writable, std::chrono::system_clock::now() + config.send_timeout()),
+      _response(response)
 {
-    if (config.send_timeout())
-        _expire_time = std::chrono::system_clock::now() + config.send_timeout().value();
 }
 
 ServerSendResponseTask::~ServerSendResponseTask()

@@ -19,12 +19,10 @@ using std::string;
 using std::vector;
 
 ServerReceiveRequestTask::ServerReceiveRequestTask(const Server& server, int fd)
-    : Task(fd, Readable), _expect(REQUEST_LINE), _bytes_received_total(0),
-      _reader(vector<char>(_header_buffer_size)), _is_partial_data(true), _server(server)
+    : Task(fd, Readable, std::chrono::system_clock::now() + server.config().keepalive_timeout()),
+      _expect(REQUEST_LINE), _bytes_received_total(0), _reader(vector<char>(_header_buffer_size)),
+      _is_partial_data(true), _server(server)
 {
-    auto maybe_keepalive_timeout = server.config().keepalive_timeout();
-    if (maybe_keepalive_timeout)
-        _expire_time = std::chrono::system_clock::now() + maybe_keepalive_timeout.value();
 }
 
 size_t ServerReceiveRequestTask::buffer_size_available()
@@ -70,11 +68,8 @@ void ServerReceiveRequestTask::receive_start_line()
             throw HTTPError(Status::HTTP_VERSION_NOT_SUPPORTED);
         }
         INFO(_request._request_line);
-
         _expect = HEADERS;
-        auto maybe_client_headers_timeout = _server.config().client_header_timeout();
-        if (maybe_client_headers_timeout)
-            _expire_time = std::chrono::system_clock::now() + maybe_client_headers_timeout.value();
+        _expire_time = std::chrono::system_clock::now() + _server.config().client_header_timeout();
     }
     catch (const std::bad_optional_access&)
     {
