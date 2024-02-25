@@ -28,7 +28,6 @@ class TiniTree
         void      constructTree();
         int       contextSwitch(std::string ctx, int row);
         int       valueInsertion(std::string act, int row);
-        void      trySetFirst();
         void      trySetFirst(TiniNode* current, std::string key);
         TiniNode& getRoot();
 };
