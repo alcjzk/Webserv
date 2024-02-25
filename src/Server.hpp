@@ -53,6 +53,7 @@ class ServerSendResponseTask : public Task
         ServerSendResponseTask& operator=(ServerSendResponseTask&&) = delete;
 
         virtual void            run() override;
+        virtual void            abort() override;
 
     private:
         Response* _response;

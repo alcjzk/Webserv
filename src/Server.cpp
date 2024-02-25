@@ -112,6 +112,13 @@ void ServerSendResponseTask::run()
     (void)close(_fd);
 }
 
+void ServerSendResponseTask::abort()
+{
+    INFO("ServerSendResponseTask for fd " << _fd << " timed out.");
+    _is_complete = true;
+    (void)close(_fd);
+}
+
 const Route* Server::route(const std::string& uri_path) const
 {
     return _routes.find(uri_path);
