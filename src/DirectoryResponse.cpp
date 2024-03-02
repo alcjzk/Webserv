@@ -15,7 +15,7 @@ DirectoryResponse::DirectoryResponse(const Path& target_path, const Path& reques
                                      Status status)
     : Response(status)
 {
-    std::string cwd_path(static_cast<std::string>(target_path));
+    std::string cwd_path(target_path);
     const char* cwd_cstr = cwd_path.c_str();
     DIR*        cwd_dirobj = opendir(cwd_cstr);
     if (!cwd_dirobj)
