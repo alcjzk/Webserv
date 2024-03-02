@@ -8,6 +8,7 @@
 #include "URI.hpp"
 #include "Request.hpp"
 #include "TiniUtils.hpp"
+#include "CGIWriteTask.hpp" //TODO
 
 using std::string;
 using std::vector;

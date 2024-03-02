@@ -4,6 +4,7 @@
 #include "Status.hpp"
 #include "Request.hpp"
 
+//set the header and body
 class CGIResponse : public Response
 {
     public:

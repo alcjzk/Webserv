@@ -1,7 +1,11 @@
 #pragma once
 
 #include <sys/wait.h>
+#include <unistd.h>
+#include <exception>
+#include "HTTPError.hpp"
 #include "Task.hpp"
+#include "Request.hpp"
 
 class CGIWriteTask : public Task
 {
@@ -23,7 +27,9 @@ class CGIWriteTask : public Task
         // TODO: override Task::abort (signal child to exit)
 
     private:
-        void set_env(const std::string& key, const std::string& value);
+        void SetEnv(const std::string& key, const std::string& value);
+        void QueryString(const std::string& query_string);
+        void SignalhandlerChild(int sig);
 
         Request            _request;
         std::vector<char*> _environment;
