@@ -24,6 +24,11 @@ class Route
         } RouteType;
 
         Route(Path uri_path);
+        Route() = delete;
+        Route(const Route& other) = default;
+        Route& operator=(const Route& other) = default;
+        Route(Route&& other) = default;
+        Route& operator=(Route&& other) = default;
 
         bool                       match(const Path& uri_path) const;
         Path                       map(const Path& uri_path) const;
