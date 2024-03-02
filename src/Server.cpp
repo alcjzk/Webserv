@@ -232,6 +232,7 @@ void ServerReceiveRequestTask::run()
             switch (_expect)
             {
                 case REQUEST_LINE:
+
                     receive_start_line();
                     continue;
                 case HEADERS:

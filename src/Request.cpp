@@ -9,11 +9,8 @@
 #include "Request.hpp"
 #include "TiniUtils.hpp"
 
-<<<<<<< Updated upstream
-=======
-using std::vector;
->>>>>>> Stashed changes
 using std::string;
+using std::vector;
 
 Response* Request::into_response(const Server& server) const
 {
@@ -34,8 +31,9 @@ Response* Request::into_response(const Server& server) const
     Path target = route->map(request_uri.path());
 
     // suffix == .py? -> create CGIResponse
-    if (static_cast<std::string>(target).substr(static_cast<std::string>(target).size() - 3) == ".py")
-        return new CGIResponse(target);
+    //    if (static_cast<std::string>(target).substr(static_cast<std::string>(target).size() - 3)
+    //    == ".py")
+    //       return new CGIResponse(target);
 
     if (!route->method_get())
         throw HTTPError(Status::FORBIDDEN);
@@ -65,10 +63,7 @@ Response* Request::into_response(const Server& server) const
     }
     if (!server.map_attributes(hostname).dirlist())
         throw HTTPError(Status::FORBIDDEN);
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
     return new DirectoryResponse(target, request_uri.path());
 }
 
