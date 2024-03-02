@@ -26,15 +26,15 @@ DirectoryResponse::DirectoryResponse(const Path& target_path, const Path& reques
     struct dirent*    cwd_entry = readdir(cwd_dirobj);
     std::stringstream body;
 
+    body << "<head>";
+    body << "<base href=\"" << request_path << "/\" target=\"_blank\"></base>";
+    body << "</head>";
     body << "<h1>Webserv listing for ";
     body << request_path;
     body << " </h1>\n<hr>\n<ul>\n";
     while (cwd_entry)
     {
         body << "  <li><a href=\"";
-        if (!static_cast<std::string>(request_path).empty() &&
-            static_cast<std::string>(request_path).back() != '/')
-            body << last_uri_segment(request_path) << "/";
         body << cwd_entry->d_name << "\">";
         body << cwd_entry->d_name << "</a></li>\n";
         cwd_entry = readdir(cwd_dirobj);
@@ -44,15 +44,4 @@ DirectoryResponse::DirectoryResponse(const Path& target_path, const Path& reques
     std::string  body_str = body.str();
     vector<char> body_vec(body_str.begin(), body_str.end());
     this->body(std::move(body_vec));
-}
-
-std::string DirectoryResponse::last_uri_segment(const Path& relative_path) const
-{
-    auto end = relative_path.cend() - 1;
-    for (; end > relative_path.cbegin(); --end)
-    {
-        if ((*end).length() && *end != "/")
-            break;
-    }
-    return (*end);
 }
