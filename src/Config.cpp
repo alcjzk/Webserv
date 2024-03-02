@@ -23,7 +23,7 @@ Config::Config(std::map<std::string, TiniNode*>& server, std::map<std::string, T
         {
             if (value->getType() == TiniNode::T_STRING)
             {
-                int error_value = stoi(key);
+                int error_value = std::stoi(key);
                 if (!(error_value >= 400 && error_value <= 599))
                 {
                     ERR("Error value of " << error_value
@@ -60,13 +60,13 @@ Config::Config(std::map<std::string, TiniNode*>& server, std::map<std::string, T
         INFO("Header buffer size not specified or invalid type, defaulting to 4096");
     }
     else
-        _header_buffer_size = stoi(header_buffer_size->getStringValue());
+        _header_buffer_size = std::stoi(header_buffer_size->getStringValue());
     if (!body_size || body_size->getType() != TiniNode::T_STRING)
     {
         INFO("Body size not specified or invalid type, defaulting to 4096");
     }
     else
-        _body_size = stoi(body_size->getStringValue());
+        _body_size = std::stoi(body_size->getStringValue());
     if (!s_port || s_port->getType() != TiniNode::T_STRING)
     {
         INFO("Port not specified or invalid type, defaulting to 8000");
