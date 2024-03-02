@@ -24,7 +24,7 @@ class Config
         size_t                             header_buffsize() const;
         std::optional<Path>                error_page(Status status) const;
 
-    protected:
+    private:
         std::string                 _port;
         std::string                 _host;
         std::vector<HostAttributes> _attrs;
