@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstddef>
 #include <vector>
 #include <string>
 #include "TiniTree.hpp"
@@ -11,6 +10,10 @@ class Config
 {
     public:
         Config() = delete;
+        Config(const Config& other) = default;
+        Config& operator=(const Config& other) = default;
+        Config(Config&& other) = default;
+        Config& operator=(Config&& other) = default;
         Config(std::map<std::string, TiniNode*>& server, std::map<std::string, TiniNode*>& root,
                std::pair<std::string, TiniNode*> first_pair);
 
