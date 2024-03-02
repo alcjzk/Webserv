@@ -15,54 +15,49 @@ Response* Request::into_response(const Server& server) const
 {
     const Header* host = header("Host");
     if (!host)
-    {
         throw HTTPError(Status::BAD_REQUEST);
-    }
     std::string  hostname = split(host->_value, ":")[0];
     URI          request_uri(_request_line.request_target(), host->_value);
+
     const Route* route = server.route(request_uri.path(), hostname);
     if (!route)
-    {
         throw HTTPError(Status::BAD_REQUEST);
-    }
+
+    // Redirect does not depend on request_uri mapping to a valid target directory on the host
+    if (route->_type == Route::REDIRECTION)
+        return new RedirectionResponse(route->_redir.value());
 
     Path target = route->map(request_uri.path());
 
     if (!route->method_get())
-    {
         throw HTTPError(Status::FORBIDDEN);
-    }
+
     if (target.type() == Path::Type::NOT_FOUND)
+        throw HTTPError(Status::NOT_FOUND);
+
+    // Can add CGI suffix parsing here later
+    if (target.type() == Path::Type::REGULAR)
+        return new FileResponse(target);
+
+    if (target.type() != Path::Type::DIRECTORY)
+        throw HTTPError(Status::FORBIDDEN);
+
+    // At this point we know it's a directory, can remove a layer of nesting
+    try
     {
+        if (route->_default_file.has_value())
+            return new FileResponse(target + Path(route->_default_file.value()));
+    }
+    catch (const std::exception& e)
+    {
+        INFO("Request::into_response: " << e.what());
+        if (server.map_attributes(hostname).dirlist())
+            return new DirectoryResponse(target, request_uri.path());
         throw HTTPError(Status::NOT_FOUND);
     }
-    if ((target.type() != Path::Type::REGULAR && target.type() != Path::Type::DIRECTORY))
-    {
+    if (!server.map_attributes(hostname).dirlist())
         throw HTTPError(Status::FORBIDDEN);
-    }
-
-    if (target.type() == Path::Type::DIRECTORY)
-    {
-        if (route->_type == Route::REDIRECTION)
-            return new RedirectionResponse(route->_redir.value());
-        try
-        {
-            if (route->_default_file.has_value())
-                return new FileResponse(target + Path(route->_default_file.value()));
-        }
-        catch (const std::exception& e)
-        {
-            INFO("Request::into_response: " << e.what());
-            if (server.map_attributes(hostname).dirlist())
-                return new DirectoryResponse(target, request_uri.path());
-            throw HTTPError(Status::NOT_FOUND);
-        }
-        if (!server.map_attributes(hostname).dirlist())
-            throw HTTPError(Status::FORBIDDEN);
-        return new DirectoryResponse(target, request_uri.path());
-    }
-    else
-        return new FileResponse(target);
+    return new DirectoryResponse(target, request_uri.path());
 }
 
 const Method& Request::method() const
