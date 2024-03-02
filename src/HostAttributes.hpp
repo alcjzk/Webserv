@@ -21,6 +21,10 @@ class HostAttributes
 
     public:
         HostAttributes() = delete;
+        HostAttributes(const HostAttributes& other) = default;
+        HostAttributes& operator=(const HostAttributes& other) = default;
+        HostAttributes(HostAttributes&& other) = default;
+        HostAttributes& operator=(HostAttributes&& other) = default;
         HostAttributes(const std::string& hostname, const TiniNode* node);
         const Routes&      routes() const;
         const std::string& hostname() const;
