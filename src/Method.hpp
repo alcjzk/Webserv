@@ -23,9 +23,7 @@ class Method
         static Type type_from(const std::string& str);
 
     private:
-        Type        _type;
+        Type _type;
 };
 
 std::ostream& operator<<(std::ostream& os, const Method& method);
-
-

@@ -23,7 +23,7 @@ class Route
         Route(const Route& other) = default;
         Route& operator=(const Route& other) = default;
         Route(Route&& other) = default;
-        Route&                     operator=(Route&& other) = default;
+        Route& operator=(Route&& other) = default;
         using AllowedMethods = std::bitset<Method::COUNT>;
 
         bool                       match(const Path& uri_path) const;
