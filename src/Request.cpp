@@ -7,12 +7,9 @@
 #include "HTTPError.hpp"
 #include "URI.hpp"
 #include "Request.hpp"
-#include "CGIResponse.hpp"
 #include "TiniUtils.hpp"
 #include "CGIResponse.hpp"
 
-using std::string;
-using std::vector;
 using std::string;
 
 Response* Request::into_response(const Server& server) const
@@ -61,9 +58,7 @@ Response* Request::into_response(const Server& server) const
     }
     if (!server.map_attributes(hostname).dirlist())
         throw HTTPError(Status::FORBIDDEN);
-    }
-
-    return new FileResponse(target);
+    return new DirectoryResponse(target, request_uri.path());
 }
 
 const Method& Request::method() const
