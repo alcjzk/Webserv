@@ -1,4 +1,5 @@
 #include "TiniValidator.hpp"
+#include "TiniUtils.hpp"
 
 int TiniValidator::validateContext(std::string ctx, int row)
 {

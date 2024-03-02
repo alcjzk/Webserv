@@ -1,47 +1,52 @@
-root_map_value=test
-second_root_map_value=test
+[servers.alpha]
+    host = 127.0.0.1
+    port = 8080
+    [servers.alpha./errorpages]
+        404 = err/404.html
+        403 = err/403.html
+    [servers.alpha.localhost]
+        directory_listing = true
+        [servers.alpha.localhost.routes./]
+            type = normal
+            path = www/
+            methods = GET, POST, DELETE
+            upload = www/uploads/
+            default_file = index.html
+            [servers.alpha.localhost.routes./.cgi]
+                .py=/bin/python3
+        [servers.alpha.localhost.routes./source]
+            type = normal
+            path = src/
+            methods = GET
+        [servers.alpha.localhost.routes./redirection]
+            type = redirection
+            path = http://www.google.com
+            methods = GET
+    [servers.alpha.alternative]
+        directory_listing = false
+        [servers.alpha.alternative.routes./]
+            type = normal
+            path = /
+            methods = GET
+            default_file = index.html
 
-[[http.servers]]
-    ip=192.168.1.2
-    hostname=hive_pc
-[[http.servers]]
-    ip=192.168.1.3
-    hostname=home_pc
-[[http.servers]]
-    ip=192.168.1.4
-    hostname=work_pc
-[http]
-    project=webserv
-
-[[spamvector]]
-    key=value
-    value=key
-[[spamvector]]
-    key=value
-    value=key
-[[spamvector]]
-    key=value
-    value=key
-[[spamvector]]
-    key=value
-    value=key
-[[spamvector]]
-    key=value
-    value=key
-[[spamvector]]
-    key=value
-    value=key
-[[spamvector]]
-    key=value
-    value=key
-[[spamvector]]
-    key=value
-    value=key
-
-[a.b.c.d.e.f.g.h.i.j.k.l.m.n.o.p.q.r.s.t.u]
-    key=value
-    value=key
-
-[a.b.c.d.e.f.g.h.i.j.k.boo.m.n.o.p.q.r.s.t.u]
-    key=value
-    value=key
+[servers.beta]
+    host = 127.0.0.1
+    port = 8081
+    [servers.beta./errorpages]
+        404 = err/404.html
+        403 = err/403.html
+    [servers.beta.localhost]
+        directory_listing = true
+        [servers.beta.localhost.routes./]
+            type = normal
+            path = www/
+            methods = GET, POST, DELETE
+            upload = www/uploads/
+            default_file = index.html
+        [servers.beta.localhost.routes./source]
+            type = normal
+            path = src/
+            methods = GET
+        [servers.beta.localhost.routes./forbidden]
+            path = /

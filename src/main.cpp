@@ -1,3 +1,4 @@
+#include "Runtime.hpp"
 #include "Config.hpp"
 #include "Log.hpp"
 #include "Server.hpp"
@@ -6,40 +7,34 @@
 #include <cstdlib>
 #include <exception>
 #include <iostream>
+#include <stdexcept>
+#include <set>
+#include <assert.h>
+#include <memory>
 
 int main()
 {
+    std::vector<std::unique_ptr<Server>> v_servers;
+    std::set<std::string>                opened_ports;
+
     try
     {
-        Config    config;
-        TiniTree  tree;
-        TiniNode& root = tree.getRoot();
-        TiniNode  test = root["http"];
-        TiniNode  funny = test;
+        TiniTree        tree;
+        const TiniNode& root = tree.getRoot();
+        const TiniNode* servers = root.getMapValue()["servers"];
 
-        INFO("Printing the copied test");
-        test.printContents(0, "");
-
-        INFO("Printing the whole tree");
-        root.printContents(0, "");
-
-        std::cout << "\n\n\n";
-        INFO("Printing a nested map");
-        root["a"]["b"]["c"].printContents(0, "");
-
-        std::cout << "\n\n\n";
-        INFO("Printing the server listing");
-        for (auto n : root["http"]["servers"].getVectorValue())
-            n->printContents(0, "");
-
-        std::cout << "\n\n\n";
-        INFO("Printing an individual key value pair");
-        auto v = root["root_map_value"].getStringValue();
-        std::cout << "Value for key "
-                  << "root_map_value is: " << v << std::endl;
-
-        Server server(config);
-
+        if (!servers)
+            throw std::runtime_error("\"servers\" not found in the root map");
+        for (const auto& [key, val] : servers->getMapValue())
+        {
+            std::optional<std::pair<std::string, TiniNode*>> first_pair = val->getFirstValue();
+            assert(first_pair.has_value());
+            Config cfg(val->getMapValue(), root.getMapValue(), val->getFirstValue().value());
+            if (opened_ports.find(cfg.port()) != opened_ports.end())
+                throw std::runtime_error("Port already defined");
+            opened_ports.insert(cfg.port());
+            v_servers.push_back(std::make_unique<Server>(std::move(cfg)));
+        }
         Runtime::instance().run();
     }
     catch (const char* e)

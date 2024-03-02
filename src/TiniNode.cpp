@@ -235,6 +235,8 @@ std::vector<TiniNode*>& TiniNode::getVectorValue() const
     if (_type != T_VECTOR)
         throw std::runtime_error(
             "TiniNode: getVectorValue: Tried to get non vector value as string");
+    if (_vectorValue == nullptr)
+        throw std::runtime_error("TiniNode: getVectorValue: Attempted to get a null vector");
     return *_vectorValue;
 }
 
@@ -242,6 +244,8 @@ std::map<std::string, TiniNode*>& TiniNode::getMapValue() const
 {
     if (_type != T_MAP)
         throw std::runtime_error("TiniNode: getMapValue: Tried to get non map value as string");
+    if (_mapValue == nullptr)
+        throw std::runtime_error("TiniNode: getMapValue: Attempted to get a null map");
     return *_mapValue;
 }
 
@@ -250,6 +254,8 @@ std::string& TiniNode::getStringValue() const
     if (_type != T_STRING)
         throw std::runtime_error(
             "TiniNode: getStringValue: Tried to get non string value as string");
+    if (_stringValue == nullptr)
+        throw std::runtime_error("TiniNode: getStringValue: Attempted to get a null string value");
     return *_stringValue;
 }
 
@@ -314,6 +320,16 @@ void TiniNode::printContents(int depth, std::string name) const
             std::cout << "string value: " << *_stringValue;
             break;
     }
+}
+
+void TiniNode::setFirstValue(std::pair<std::string, TiniNode*> pair)
+{
+    _firstMapValue = pair;
+}
+
+std::optional<std::pair<std::string, TiniNode*>> TiniNode::getFirstValue() const
+{
+    return _firstMapValue;
 }
 
 #ifdef TESTS

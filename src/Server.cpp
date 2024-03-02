@@ -10,17 +10,17 @@
 #include "Reader.hpp"
 #include "Error.hpp"
 #include "RequestLine.hpp"
+#include "Runtime.hpp"
 #include "HTTPError.hpp"
 #include "Log.hpp"
 #include "http.hpp"
+#include "FileResponse.hpp"
 #include "Server.hpp"
 
-using std::optional;
 using std::string;
 using std::vector;
 
-Server::Server(const Config& config)
-    : _config(config), _port(config.ports().front().c_str()), _fd(-1)
+Server::Server(Config&& config) : _config(std::move(config)), _port(_config.port().c_str()), _fd(-1)
 {
     struct addrinfo hints;
     int             status;
@@ -31,7 +31,7 @@ Server::Server(const Config& config)
     hints.ai_family = AF_UNSPEC;
     hints.ai_flags = AI_PASSIVE;
 
-    status = getaddrinfo(NULL, _port, &hints, &_address_info);
+    status = getaddrinfo(_config.host().c_str(), _port, &hints, &_address_info);
     if (status != 0)
         throw std::runtime_error(gai_strerror(status));
     _fd = socket(_address_info->ai_family, _address_info->ai_socktype, _address_info->ai_protocol);
@@ -39,20 +39,14 @@ Server::Server(const Config& config)
         throw std::runtime_error(strerror(errno));
     if (fcntl(_fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
         throw std::runtime_error(strerror(errno));
-    setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &sockopt_value,
-               sizeof(sockopt_value)); // TODO: Could warn on error here
+    if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &sockopt_value, sizeof(sockopt_value)) == -1)
+    {
+        ERR("Server: setsockopt: failure");
+    }
     if (bind(_fd, _address_info->ai_addr, _address_info->ai_addrlen) == -1)
         throw std::runtime_error(strerror(errno));
     if (listen(_fd, _config.backlog()) == -1)
         throw std::runtime_error(strerror(errno));
-    try
-    {
-        _routes.push(Route("/", "www"));
-    }
-    catch (const std::runtime_error& error)
-    {
-        WARN(error.what());
-    }
     INFO("Listening on " << _fd);
     Runtime::enqueue(new ServerAcceptTask(*this));
 }
@@ -73,6 +67,22 @@ Server::~Server()
 int Server::fd() const
 {
     return _fd;
+}
+
+const Config& Server::config() const
+{
+    return _config;
+}
+
+const HostAttributes& Server::map_attributes(std::string host_name) const
+{
+    const std::vector<HostAttributes>& attributes = _config.attrs();
+    const auto&                        attr =
+        std::find_if(attributes.begin(), attributes.end(),
+                     [host_name](const auto& a) { return a.hostname() == host_name; });
+    if (attr == attributes.end())
+        return attributes.front();
+    return *attr;
 }
 
 ServerSendResponseTask::ServerSendResponseTask(int fd, Response* response)
@@ -104,20 +114,30 @@ void ServerSendResponseTask::run()
     (void)close(_fd);
 }
 
-const Route* Server::route(const std::string& uri_path) const
+const Route* Server::route(const std::string& uri_path, const std::string& host) const
 {
-    return _routes.find(uri_path);
+    const std::vector<HostAttributes>& attributes = _config.attrs();
+    const auto                         attr =
+        std::find_if(attributes.begin(), attributes.end(),
+                     [host](const HostAttributes& a) { return (a.hostname() == host); });
+    if (attr == attributes.end())
+    {
+        INFO("Attribute not found returning " << _config.first_attr().hostname());
+        return (_config.first_attr()).routes().find(uri_path);
+    }
+    return ((*attr).routes().find(uri_path));
 }
 
 ServerReceiveRequestTask::ServerReceiveRequestTask(const Server& server, int fd)
     : Task(fd, Readable), _expect(REQUEST_LINE), _bytes_received_total(0),
-      _reader(vector<char>(_header_buffer_size)), _is_partial_data(true), _server(server)
+      _reader(vector<char>(server.config().header_buffsize())), _is_partial_data(true),
+      _server(server)
 {
 }
 
 size_t ServerReceiveRequestTask::buffer_size_available()
 {
-    return _header_buffer_size - _bytes_received_total;
+    return _server.config().header_buffsize() - _bytes_received_total;
 }
 
 char* ServerReceiveRequestTask::buffer_head()
@@ -236,8 +256,12 @@ void ServerReceiveRequestTask::run()
     catch (const HTTPError& error)
     {
         WARN(error.what());
-        // TODO: Replace with proper error response
-        Runtime::enqueue(new ServerSendResponseTask(_fd, new Response(error.status())));
+        std::optional<Path> err_page_path = _server.config().error_page(error.status());
+        if (err_page_path.has_value())
+            Runtime::enqueue(new ServerSendResponseTask(
+                _fd, new FileResponse(err_page_path.value(), error.status())));
+        else
+            Runtime::enqueue(new ServerSendResponseTask(_fd, new Response(error.status())));
         _is_complete = true;
     }
     catch (const std::exception& error)

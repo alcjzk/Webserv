@@ -1,7 +1,6 @@
 #ifndef TINI_VALIDATOR_HPP
 #define TINI_VALIDATOR_HPP
 #include "TiniNode.hpp"
-#include "TiniUtils.hpp"
 
 class TiniValidator
 {

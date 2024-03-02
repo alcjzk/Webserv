@@ -1,5 +1,4 @@
 #include "TiniNode.hpp"
-#include "TiniUtils.hpp"
 #include "TiniValidator.hpp"
 
 #include <vector>
@@ -28,6 +27,7 @@ class TiniTree
         void      constructTree();
         int       contextSwitch(std::string ctx, int row);
         int       valueInsertion(std::string act, int row);
+        void      trySetFirst(TiniNode* current, std::string key);
         TiniNode& getRoot();
 };
 
