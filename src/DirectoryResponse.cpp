@@ -41,8 +41,8 @@ DirectoryResponse::DirectoryResponse(const Path& target_path, const Path& reques
     }
     body << "</ul>\n<hr>\n";
     closedir(cwd_dirobj);
-    const std::string  body_str = body.str();
-    const vector<char> body_vec(body_str.begin(), body_str.end());
+    std::string  body_str = body.str();
+    vector<char> body_vec(body_str.begin(), body_str.end());
     this->body(std::move(body_vec));
 }
 
