@@ -6,5 +6,5 @@
 class RedirectionResponse : public Response
 {
     public:
-        RedirectionResponse(const std::string value, Status status = Status::PERM_REDIR);
+        RedirectionResponse(const std::string value, Status status = Status::MOVED_PERMANENTLY);
 };

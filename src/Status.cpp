@@ -17,7 +17,7 @@ const char* Status::text() const
     {
         case OK:
             return "200 OK";
-        case PERM_REDIR:
+        case MOVED_PERMANENTLY:
             return "302 Moved Permanently";
         case BAD_REQUEST:
             return "400 Bad Request";

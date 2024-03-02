@@ -9,7 +9,7 @@ class Status
         typedef enum Code
         {
             OK = 200,
-            PERM_REDIR = 301,
+            MOVED_PERMANENTLY = 302,
             BAD_REQUEST = 400,
             FORBIDDEN = 403,
             NOT_FOUND = 404,
