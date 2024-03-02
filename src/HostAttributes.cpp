@@ -2,9 +2,10 @@
 #include "Log.hpp"
 #include "TiniUtils.hpp"
 #include <algorithm>
+#include "Method.hpp"
 
 HostAttributes::MethodMap HostAttributes::_method_map = {
-    {"GET", Route::GET}, {"POST", Route::POST}, {"DELETE", Route::DELETE}};
+    {"GET", Method::GET}, {"POST", Method::POST}, {"DELETE", Method::DELETE}};
 
 HostAttributes::HostAttributes(const std::string& hostname, const TiniNode* node)
     : _directory_listing(false), _hostname(hostname)
@@ -83,7 +84,6 @@ void HostAttributes::_assign_route(const std::string& key, const TiniNode* value
     }
 
     const TiniNode* methods = value->getMapValue()["methods"];
-    route._methods = 0;
     if (!methods || methods->getType() != TiniNode::T_STRING)
     {
         INFO("Methods not defined for " << key << ", route effectively forbidden")
@@ -100,7 +100,7 @@ void HostAttributes::_assign_route(const std::string& key, const TiniNode* value
             for (const auto& str : map_values)
             {
                 if (_method_map.find(str) != _method_map.end())
-                    route._methods |= _method_map[str];
+                    route._allowed_methods.set(_method_map[str]);
             }
         }
     }

@@ -51,17 +51,17 @@ bool Route::operator>=(const Route& rhs) const
 
 bool Route::method_get() const
 {
-    return (_methods & Route::GET);
+    return (_allowed_methods.test(Method::GET));
 }
 
 bool Route::method_post() const
 {
-    return (_methods & Route::POST);
+    return (_allowed_methods.test(Method::POST));
 }
 
 bool Route::method_del() const
 {
-    return (_methods & Route::DELETE);
+    return (_allowed_methods.test(Method::DELETE));
 }
 
 void Route::insert_cgi(const std::pair<std::string, TiniNode*>& extension)

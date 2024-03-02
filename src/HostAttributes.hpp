@@ -5,6 +5,7 @@
 #include "Routes.hpp"
 #include "TiniNode.hpp"
 #include "Path.hpp"
+#include "Method.hpp"
 
 class HostAttributes
 {
@@ -15,8 +16,8 @@ class HostAttributes
         std::string _hostname;
         Routes      _routes;
         Path        _directory_file;
-        typedef std::map<std::string, Route::Method> MethodMap;
-        static MethodMap                             _method_map;
+        typedef std::map<std::string, Method::Type> MethodMap;
+        static MethodMap                            _method_map;
 
     public:
         HostAttributes() = delete;

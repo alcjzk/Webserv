@@ -1,21 +1,17 @@
 #pragma once
 
+#include <bitset>
 #include <cstddef>
 #include <map>
 #include <string>
 #include <optional>
 #include "Path.hpp"
 #include "TiniNode.hpp"
+#include "Method.hpp"
 
 class Route
 {
     public:
-        typedef enum Method
-        {
-            GET = 0b001,
-            POST = 0b010,
-            DELETE = 0b100,
-        } Method;
         typedef enum RouteType
         {
             NORMAL,
@@ -28,6 +24,7 @@ class Route
         Route& operator=(const Route& other) = default;
         Route(Route&& other) = default;
         Route&                     operator=(Route&& other) = default;
+        using AllowedMethods = std::bitset<Method::COUNT>;
 
         bool                       match(const Path& uri_path) const;
         Path                       map(const Path& uri_path) const;
@@ -45,10 +42,10 @@ class Route
         Path                       _fs_path;
         RouteType                  _type;
         ptrdiff_t                  _priority;
-        int                        _methods;
         std::optional<std::string> _default_file = std::nullopt;
         std::optional<std::string> _upload_directory = std::nullopt;
         std::optional<std::string> _redir = std::nullopt;
+        AllowedMethods             _allowed_methods;
 
     private:
         Path                               _uri_path;
