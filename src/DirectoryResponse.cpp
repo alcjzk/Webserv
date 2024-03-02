@@ -27,7 +27,7 @@ DirectoryResponse::DirectoryResponse(const Path& target_path, const Path& reques
     std::stringstream body;
 
     body << "<h1>Webserv listing for ";
-    body << cwd_cstr;
+    body << request_path;
     body << " </h1>\n<hr>\n<ul>\n";
     while (cwd_entry)
     {
