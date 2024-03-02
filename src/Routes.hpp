@@ -8,6 +8,10 @@ class Routes
 {
     public:
         Routes() = default;
+        Routes(const Routes& other) = default;
+        Routes& operator=(const Routes& other) = default;
+        Routes(Routes&& other) = default;
+        Routes& operator=(Routes&& other) = default;
         Routes(const std::vector<Route>& routes);
         Routes(std::vector<Route>&& routes);
 
