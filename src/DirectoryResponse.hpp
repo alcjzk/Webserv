@@ -11,6 +11,5 @@ class DirectoryResponse : public Response
                           Status status = Status::OK);
 
     private:
-        std::string last_uri_elem() const;
         std::string last_uri_segment(const Path& full_path) const;
 };
