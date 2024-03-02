@@ -19,8 +19,7 @@
 using std::string;
 using std::vector;
 
-Server::Server(Config&& config)
-    : _config(std::move(config)), _port(_config.port().c_str()), _fd(-1)
+Server::Server(Config&& config) : _config(std::move(config)), _port(_config.port().c_str()), _fd(-1)
 {
     struct addrinfo hints;
     int             status;

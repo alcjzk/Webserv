@@ -36,7 +36,7 @@ class Server
         const HostAttributes&    map_attributes(std::string host_name) const;
 
     private:
-        Config     _config;
+        Config           _config;
         const char*      _port;
         struct addrinfo* _address_info;
         int              _fd;
