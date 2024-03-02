@@ -27,7 +27,7 @@ DirectoryResponse::DirectoryResponse(const Path& target_path, const Path& reques
     std::stringstream body;
 
     body << "<head>";
-    body << "<base href=\"" << request_path << "/\" target=\"_blank\"></base>";
+    body << "<base href=\"" << request_path << "/\"></base>";
     body << "</head>";
     body << "<h1>Webserv listing for ";
     body << request_path;
