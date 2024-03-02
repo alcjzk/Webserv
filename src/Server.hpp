@@ -21,7 +21,8 @@ class Server
     public:
         ~Server();
 
-        Server(const Config& config);
+        Server() = delete;
+        Server(Config&& config);
         Server(const Server&) = delete;
         Server(Server&&) = delete;
 
@@ -35,12 +36,11 @@ class Server
         const HostAttributes&    map_attributes(std::string host_name) const;
 
     private:
-        const Config&                      _config;
-        const char*                        _port;
-        struct addrinfo*                   _address_info;
-        int                                _fd;
-        Routes                             _routes;
-        const std::vector<HostAttributes>& _attributes;
+        Config     _config;
+        const char*      _port;
+        struct addrinfo* _address_info;
+        int              _fd;
+        Routes           _routes;
 };
 
 class ServerSendResponseTask : public Task

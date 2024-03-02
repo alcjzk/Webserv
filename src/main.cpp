@@ -9,20 +9,13 @@
 #include <stdexcept>
 #include <set>
 #include <assert.h>
-
-void cleanup(std::vector<Server*> s, std::vector<Config*> c)
-{
-    for (auto e : s)
-        delete e;
-    for (auto e : c)
-        delete e;
-}
+#include <memory>
 
 int main()
 {
-    std::vector<Server*>  v_servers;
-    std::vector<Config*>  v_configs;
-    std::set<std::string> opened_ports;
+    std::vector<std::unique_ptr<Server>> v_servers;
+    std::set<std::string>                opened_ports;
+
     try
     {
         TiniTree        tree;
@@ -35,31 +28,22 @@ int main()
         {
             std::optional<std::pair<std::string, TiniNode*>> first_pair = val->getFirstValue();
             assert(first_pair.has_value());
-            Config* cfg =
-                new Config(val->getMapValue(), root.getMapValue(), val->getFirstValue().value());
-
-            if (opened_ports.find(cfg->port()) != opened_ports.end())
-            {
-                delete cfg;
+            Config cfg(val->getMapValue(), root.getMapValue(), val->getFirstValue().value());
+            if (opened_ports.find(cfg.port()) != opened_ports.end())
                 throw std::runtime_error("Port already defined");
-            }
-            opened_ports.insert(cfg->port());
-            v_configs.push_back(cfg);
-            v_servers.push_back(new Server(*v_configs.back()));
+            opened_ports.insert(cfg.port());
+            v_servers.push_back(std::make_unique<Server>(std::move(cfg)));
         }
         Runtime::instance().run();
-        cleanup(v_servers, v_configs);
     }
     catch (const char* e)
     {
         ERR(e);
-        cleanup(v_servers, v_configs);
         return EXIT_FAILURE;
     }
     catch (const std::exception& e)
     {
         ERR(e.what());
-        cleanup(v_servers, v_configs);
         return EXIT_FAILURE;
     }
 
