@@ -61,10 +61,7 @@ Response* Request::into_response(const Server& server) const
     }
     if (!server.map_attributes(hostname).dirlist())
         throw HTTPError(Status::FORBIDDEN);
-
-    // suffix == .py? -> create CGIResponse
-    if (static_cast<std::string>(target).substr(static_cast<std::string>(target).size() - 3) == ".py")
-        return new CGIResponse(target);
+    }
 
     return new FileResponse(target);
 }
