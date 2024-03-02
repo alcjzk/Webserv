@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Path.hpp"
 #include "Status.hpp"
 #include "Response.hpp"
 

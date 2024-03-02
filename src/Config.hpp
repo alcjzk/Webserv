@@ -2,7 +2,6 @@
 
 #include <vector>
 #include <string>
-#include "TiniTree.hpp"
 #include "HostAttributes.hpp"
 #include "Status.hpp"
 

@@ -1,5 +1,6 @@
 #include "HostAttributes.hpp"
 #include "Log.hpp"
+#include "TiniUtils.hpp"
 #include <algorithm>
 
 HostAttributes::MethodMap HostAttributes::_method_map = {

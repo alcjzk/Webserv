@@ -4,7 +4,6 @@
 #include <map>
 #include <string>
 #include <optional>
-#include "Method.hpp"
 #include "Path.hpp"
 #include "TiniNode.hpp"
 

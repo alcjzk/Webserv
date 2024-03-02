@@ -1,3 +1,4 @@
+#include "Runtime.hpp"
 #include "Config.hpp"
 #include "Log.hpp"
 #include "Server.hpp"

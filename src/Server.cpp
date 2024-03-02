@@ -10,6 +10,7 @@
 #include "Reader.hpp"
 #include "Error.hpp"
 #include "RequestLine.hpp"
+#include "Runtime.hpp"
 #include "HTTPError.hpp"
 #include "Log.hpp"
 #include "http.hpp"

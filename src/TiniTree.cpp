@@ -1,8 +1,10 @@
 #include "TiniTree.hpp"
+#include "TiniUtils.hpp"
 
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
+#include <iostream>
 
 TiniTree::TiniTree() : _current(nullptr), _root(nullptr)
 {
