@@ -5,7 +5,6 @@
 #include <signal.h>
 #include <poll.h>
 #include <chrono>
-#include "Log.hpp"
 #include "Runtime.hpp"
 #include "Task.hpp"
 
@@ -39,7 +38,7 @@ void Runtime::run_impl()
     {
         vector<struct pollfd> pollfds;
 
-        for (auto& task : _tasks)
+        for (const auto& task : _tasks)
         {
             short events = 0;
             if (task->wait_for() == Task::Readable)
@@ -58,7 +57,7 @@ void Runtime::run_impl()
 
         auto now = std::chrono::system_clock::now();
 
-        for (auto& pollfd : pollfds)
+        for (const auto& pollfd : pollfds)
         {
             auto task =
                 std::find_if(_tasks.begin(), _tasks.end(),
