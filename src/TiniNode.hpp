@@ -1,10 +1,9 @@
+#pragma once
+
 #include <map>
 #include <string>
 #include <vector>
 #include <optional>
-
-#ifndef TINI_NODE_H
-#define TINI_NODE_H
 
 class TiniNode
 {
@@ -56,7 +55,7 @@ class TiniNode
         TiniNode(TiniNodeType type);
         TiniNode(const TiniNode& other);
         TiniNode& operator=(const TiniNode& other);
-        TiniNode(TiniNode&& other);
+        TiniNode(TiniNode&& other) noexcept;
         TiniNode& operator=(TiniNode&& other);
         TiniNode(std::string s);
         TiniNode                          operator[](size_t i) const;
@@ -74,17 +73,12 @@ class TiniNode
         void deepCopyChildren(const TiniNode& other);
 };
 
-#ifdef TESTS
+#ifdef TEST
 
-class TiniNodeTests : public TiniNode
+class TiniNodeTest : public TiniNode
 {
     public:
-        static void all();
-
-        static void basic();
-        static void compatible();
+        static void deepcopy_test();
 };
-
-#endif
 
 #endif

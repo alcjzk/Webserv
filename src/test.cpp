@@ -3,6 +3,7 @@
 #include <vector>
 #include "RequestLine.hpp"
 #include "Reader.hpp"
+#include "TiniNode.hpp"
 
 using std::string;
 using std::vector;
@@ -30,6 +31,7 @@ int main()
         ReaderTests::line_basic();
 
         HTTPVersionTests::all();
+        TiniNodeTests::deepcopy_test();
 
         static const char content[] = "GET     \t\t\t   /\t\t      HTTP/1.1  \t\t\t\t    \r\n";
         vector<char>      buffer(content, content + sizeof(content) / sizeof(*content));
