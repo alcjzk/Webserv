@@ -1,16 +1,15 @@
 #pragma once
 
-#include <cstdlib>
-#include <iostream>
+#include <sys/types.h>
 #include <sys/socket.h>
-#include <fcntl.h>
-#include <utility>
-#include "Task.hpp"
+#include <netdb.h>
+#include <string>
 #include "Config.hpp"
-#include "HTTPVersion.hpp"
-#include "Response.hpp"
+#include "Route.hpp"
 #include "Routes.hpp"
-#include "Reader.hpp"
+#include "HTTPVersion.hpp"
+#include "HTTPVersion.hpp"
+#include "Routes.hpp"
 #include "Request.hpp"
 #include "HostAttributes.hpp"
 
@@ -39,81 +38,4 @@ class Server
         struct addrinfo* _address_info;
         int              _fd;
         Routes           _routes;
-};
-
-class ServerSendResponseTask : public Task
-{
-    public:
-        virtual ~ServerSendResponseTask() override;
-
-        ServerSendResponseTask(int fd, Response* response);
-        ServerSendResponseTask(const ServerSendResponseTask&) = delete;
-        ServerSendResponseTask(ServerSendResponseTask&&) = delete;
-
-        ServerSendResponseTask& operator=(const ServerSendResponseTask&) = delete;
-        ServerSendResponseTask& operator=(ServerSendResponseTask&&) = delete;
-
-        virtual void            run() override;
-
-    private:
-        Response* _response;
-};
-
-class ServerReceiveRequestTask : public Task
-{
-    public:
-        virtual ~ServerReceiveRequestTask() override;
-
-        ServerReceiveRequestTask(const Server& server, int fd);
-        ServerReceiveRequestTask(const ServerReceiveRequestTask&) = delete;
-        ServerReceiveRequestTask(ServerReceiveRequestTask&&) = delete;
-
-        ServerReceiveRequestTask& operator=(const ServerReceiveRequestTask&) = delete;
-        ServerReceiveRequestTask& operator=(ServerReceiveRequestTask&&) = delete;
-
-        virtual void              run() override;
-
-    private:
-        typedef enum Expect
-        {
-            REQUEST_LINE,
-            HEADERS
-        } Expect;
-
-        // State impl
-        void          receive_start_line();
-        void          receive_headers();
-        // TODO: void receive_body()
-
-        // Util
-        void          fill_buffer();
-        char*         buffer_head();
-        size_t        buffer_size_available();
-
-        // TODO: Use value from config + expanding buffersize?
-        Expect        _expect;
-        size_t        _bytes_received_total;
-        Reader        _reader;
-        Request       _request;
-        bool          _is_partial_data;
-        const Server& _server;
-};
-
-class ServerAcceptTask : public Task
-{
-    public:
-        virtual ~ServerAcceptTask() override;
-
-        ServerAcceptTask(const Server& server);
-
-        ServerAcceptTask(const ServerAcceptTask&) = delete;
-        ServerAcceptTask(ServerAcceptTask&&) = delete;
-
-        ServerAcceptTask& operator=(const ServerAcceptTask&) = delete;
-        ServerAcceptTask& operator=(ServerAcceptTask&&) = delete;
-
-        virtual void      run() override;
-
-    private:
-        const Server& _server;
 };

@@ -25,6 +25,8 @@ const char* Status::text() const
             return "403 Forbidden";
         case NOT_FOUND:
             return "404 Not Found";
+        case REQUEST_TIMEOUT:
+            return "408 Request Timeout";
         case INTERNAL_SERVER_ERROR:
             return "500 Internal Server Error";
         case HTTP_VERSION_NOT_SUPPORTED:

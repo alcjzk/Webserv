@@ -3,6 +3,7 @@
 #include "Log.hpp"
 #include "Server.hpp"
 #include "TiniTree.hpp"
+#include "Runtime.hpp"
 
 #include <cstdlib>
 #include <exception>
@@ -35,7 +36,7 @@ int main()
             opened_ports.insert(cfg.port());
             v_servers.push_back(std::make_unique<Server>(std::move(cfg)));
         }
-        Runtime::instance().run();
+        Runtime::run();
     }
     catch (const char* e)
     {

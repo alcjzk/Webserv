@@ -1,22 +1,16 @@
 #include <algorithm>
+#include <cassert>
+#include <system_error>
 #include <errno.h>
 #include <signal.h>
-#include <string.h>
+#include <poll.h>
+#include <chrono>
 #include "Runtime.hpp"
 #include "Task.hpp"
 
 using std::vector;
 
-bool Runtime::_is_interrupt_signaled = false;
-
-Runtime::~Runtime()
-{
-    vector<Task*>::iterator task = _tasks.begin();
-    for (; task != _tasks.end(); task++)
-    {
-        delete *task;
-    }
-}
+bool     Runtime::_is_interrupt_signaled = false;
 
 Runtime& Runtime::instance()
 {
@@ -27,67 +21,62 @@ Runtime& Runtime::instance()
 
 void Runtime::enqueue(Task* task)
 {
-    instance()._tasks.push_back(task);
-}
-
-void Runtime::_dequeue(Task* task)
-{
-    vector<Task*>::iterator it = std::find(_tasks.begin(), _tasks.end(), task);
-    _tasks.erase(it);
-    delete task;
+    instance()._tasks.push_back(std::unique_ptr<Task>(task));
 }
 
 void Runtime::run()
 {
-    if (signal(SIGINT, _handle_interrupt) == SIG_ERR)
-        throw "Failed to register handler for SIGINT";
+    instance().run_impl();
+}
+
+void Runtime::run_impl()
+{
+    if (signal(SIGINT, handle_interrupt) == SIG_ERR)
+        throw std::system_error(errno, std::system_category());
+
     while (!_is_interrupt_signaled)
     {
-        vector<struct pollfd>   pollfds;
+        vector<struct pollfd> pollfds;
 
-        vector<Task*>::iterator task = _tasks.begin();
-        for (; task != _tasks.end(); task++)
+        for (const auto& task : _tasks)
         {
             short events = 0;
-            if ((*task)->wait_for() == Task::Readable)
+            if (task->wait_for() == Task::Readable)
                 events = POLLIN;
-            else if ((*task)->wait_for() == Task::Writable)
+            else if (task->wait_for() == Task::Writable)
                 events = POLLOUT;
-            pollfds.push_back({(*task)->fd(), events, 0});
+            pollfds.push_back({task->fd(), events, 0});
         }
 
-        // Don't throw when poll errors due to signal
-        if (poll(pollfds.data(), pollfds.size(), -1) == -1 && errno != EINTR)
-            throw strerror(errno);
-
-        vector<struct pollfd>::iterator pollfd = pollfds.begin();
-        for (; pollfd != pollfds.end(); pollfd++)
+        if (poll(pollfds.data(), pollfds.size(), POLL_TIMEOUT_MILLIS) == -1)
         {
-            if (pollfd->revents)
-            {
-                Task* task = _task(pollfd->fd);
-                task->run();
-                if (task->is_complete())
-                    _dequeue(task);
-            }
+            // Don't throw when poll errors due to signal
+            if (errno != EINTR)
+                throw std::system_error(errno, std::system_category());
         }
+
+        auto now = std::chrono::system_clock::now();
+
+        for (const auto& pollfd : pollfds)
+        {
+            auto task =
+                std::find_if(_tasks.begin(), _tasks.end(),
+                             [&pollfd](const auto& task) { return task->fd() == pollfd.fd; });
+            assert(task != _tasks.end());
+
+            if (pollfd.revents)
+                (*task)->run();
+            else if ((*task)->is_expired_at(now))
+                (*task)->abort();
+        }
+
+        _tasks.erase(std::remove_if(_tasks.begin(), _tasks.end(),
+                                    [](const auto& task) { return task->is_complete(); }),
+                     _tasks.end());
     }
 }
 
-Task* Runtime::_task(int fd)
-{
-    vector<Task*>::iterator task = _tasks.begin();
-    for (; task != _tasks.end(); task++)
-    {
-        if (**task == fd)
-        {
-            return *task;
-        }
-    }
-    throw "Unknown task";
-}
-
-void Runtime::_handle_interrupt(int)
+void Runtime::handle_interrupt(int)
 {
     _is_interrupt_signaled = true;
 }
