@@ -5,7 +5,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <errno.h>
+#include <iostream>
 #include "Path.hpp"
+#include "Log.hpp"
 
 using std::ostream;
 using std::string;

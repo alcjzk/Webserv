@@ -4,8 +4,6 @@
 #include <chrono>
 #include <optional>
 
-class Runtime;
-
 class Task
 {
     public:

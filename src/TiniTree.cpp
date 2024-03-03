@@ -1,8 +1,10 @@
 #include "TiniTree.hpp"
+#include "TiniUtils.hpp"
 
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
+#include <iostream>
 
 TiniTree::TiniTree() : _current(nullptr), _root(nullptr)
 {
@@ -91,7 +93,10 @@ int TiniTree::contextSwitch(std::string ctx, int row)
                         if (_current->getType() == TiniNode::T_VECTOR)
                             _current->getVectorValue().push_back(new TiniNode(TiniNode::T_MAP));
                         else
+                        {
                             _current->getMapValue()[map_ops[i]] = new TiniNode(TiniNode::T_MAP);
+                            trySetFirst(_current, map_ops[i]);
+                        }
                     }
                     tmp = &_current->fetchTiniNode(map_ops[i]);
                 }
@@ -112,7 +117,10 @@ int TiniTree::contextSwitch(std::string ctx, int row)
                     if (_current->getType() == TiniNode::T_VECTOR)
                         _current->getVectorValue().push_back(new TiniNode(TiniNode::T_MAP));
                     else
+                    {
                         _current->getMapValue()[map_ops[i]] = new TiniNode(TiniNode::T_MAP);
+                        trySetFirst(_current, map_ops[i]);
+                    }
                     tmp = &_current->fetchTiniNode(map_ops[i]);
                 }
                 _current = tmp;
@@ -133,6 +141,8 @@ int TiniTree::valueInsertion(std::string act, int row)
             throw std::runtime_error("TiniTree: valueInsertion: Vector cannot act as endpoint");
             break;
         case TiniNode::T_MAP:
+            if (_current->getMapValue().count(pair[0]))
+                throw std::runtime_error("TiniTree: valueInsertion: Duplicate key error!");
             _current->getMapValue()[pair[0]] = new TiniNode(pair[1]);
             break;
         case TiniNode::T_STRING:
@@ -189,4 +199,10 @@ void TiniTree::constructTree()
 TiniNode& TiniTree::getRoot()
 {
     return *_root;
+}
+
+void TiniTree::trySetFirst(TiniNode* current, std::string key)
+{
+    if (!current->getFirstValue().has_value() && key[0] != '/')
+        current->setFirstValue(*current->getMapValue().find(key));
 }

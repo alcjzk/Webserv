@@ -5,6 +5,7 @@
 !*.cpp
 !*.hpp
 !*.tini
+!*.html
 !.editorconfig
 !.github/workflows/*
 !.clang-format

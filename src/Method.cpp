@@ -43,3 +43,8 @@ std::ostream& operator<<(std::ostream& os, const Method& method)
 {
     return os << method.to_string();
 }
+
+Method::operator size_t() const
+{
+    return _type;
+}

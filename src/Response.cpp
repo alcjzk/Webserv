@@ -10,7 +10,7 @@
 
 Response::~Response()
 {
-    delete _buffer;
+    delete[] _buffer;
     _buffer = nullptr;
 }
 

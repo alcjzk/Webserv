@@ -39,6 +39,9 @@ Route.cpp						\
 FileResponse.cpp				\
 Routes.cpp						\
 Path.cpp						\
+HostAttributes.cpp				\
+DirectoryResponse.cpp			\
+RedirectionResponse.cpp			\
 TimeoutResponse.cpp 			\
 ServerAcceptTask.cpp 			\
 ServerReceiveRequestTask.cpp	\
