@@ -4,7 +4,6 @@
 #include <string>
 #include <chrono>
 #include "HostAttributes.hpp"
-#include "Status.hpp"
 
 class Config
 {
