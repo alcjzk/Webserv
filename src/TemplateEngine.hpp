@@ -20,3 +20,17 @@ class TemplateEngine
         std::string                                  _template_str;
         std::unordered_map<std::string, std::string> _data;
 };
+
+#ifdef TEST
+
+class TemplateEngineTest : public TemplateEngine
+{
+    public:
+        static void single_replace_test();
+        static void multiple_same_replace_test();
+        static void multiple_different_replace_test();
+        static void empty_replace_test();
+        static void nested_empty_test();
+};
+
+#endif
