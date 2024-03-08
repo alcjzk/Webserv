@@ -25,7 +25,7 @@ class Config
         const std::vector<HostAttributes>& attrs() const;
         const HostAttributes&              first_attr() const;
         size_t                             header_buffsize() const;
-        std::optional<Path>                error_page(Status status) const;
+        const std::string&                 error_str() const;
 
         /// Returns a timeout in seconds for keeping an inactive connection alive.
         Seconds                            keepalive_timeout() const;
@@ -70,5 +70,30 @@ class Config
         int                         _backlog;
         size_t                      _body_size;
         size_t                      _header_buffer_size;
-        std::map<int, Path>         _error_pages;
+        std::string                 _error_template = R"(<!DOCTYPE html>
+                                                        <html lang="en">
+                                                        <head>
+                                                            <meta charset="UTF-8">
+                                                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                                            <title>Error</title>
+                                                            <style>
+                                                                body {
+                                                                    font-family: Arial, sans-serif;
+                                                                    text-align: center;
+                                                                    padding: 20px;
+                                                                }
+                                                                h1 {
+                                                                    color: #ff0000;
+                                                                }
+                                                                p {
+                                                                    font-size: 18px;
+                                                                }
+                                                            </style>
+                                                        </head>
+                                                        <body>
+                                                            <h1>Error</h1>
+                                                            <p>An error has occurred. Please try again later.</p>
+                                                            <p>Error Code: {{status}}</p>
+                                                        </body>
+                                                        </html>)";
 };

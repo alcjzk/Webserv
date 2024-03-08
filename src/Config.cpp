@@ -1,5 +1,6 @@
 #include "Config.hpp"
 #include "Log.hpp"
+#include <fstream>
 
 using std::string;
 
@@ -13,32 +14,18 @@ Config::Config(std::map<std::string, TiniNode*>& server, std::map<std::string, T
     const TiniNode* header_buffer_size = root["header_buffer_size"];
     const TiniNode* s_port = server["port"];
     const TiniNode* s_host = server["host"];
-    const TiniNode* errpages = server["/errorpages"];
 
-    if (errpages && errpages->getType() == TiniNode::T_MAP)
+    std::ifstream   input_file("err/template.html");
+    if (!input_file.is_open())
     {
-        const std::map<std::string, TiniNode*>& errpages_map = errpages->getMapValue();
+        ERR("Config: Error template file not found, defaulting")
+    }
+    else
+    {
+        std::stringstream buffer;
 
-        for (const auto& [key, value] : errpages_map)
-        {
-            if (value->getType() == TiniNode::T_STRING)
-            {
-                int error_value = std::stoi(key);
-                if (!(error_value >= 400 && error_value <= 599))
-                {
-                    ERR("Error value of " << error_value
-                                          << " invalid for error page configuration, ignoring")
-                    continue;
-                }
-                Path error_path(value->getStringValue());
-                if (error_path.type() != Path::REGULAR)
-                {
-                    ERR("Invalid error page path: " << value << ", ignoring")
-                    continue;
-                }
-                _error_pages[error_value] = Path(value->getStringValue());
-            }
-        }
+        buffer << input_file.rdbuf();
+        _error_template = buffer.str();
     }
     try
     {
@@ -50,32 +37,32 @@ Config::Config(std::map<std::string, TiniNode*>& server, std::map<std::string, T
     }
     catch (const std::exception& err)
     {
-        ERR("what: " << err.what())
+        ERR("Config: what: " << err.what())
         throw std::runtime_error("Server is not defined as map!");
     }
 
     if (!header_buffer_size || header_buffer_size->getType() != TiniNode::T_STRING)
     {
         _header_buffer_size = 4096;
-        INFO("Header buffer size not specified or invalid type, defaulting to 4096");
+        INFO("Config: Header buffer size not specified or invalid type, defaulting to 4096");
     }
     else
         _header_buffer_size = std::stoi(header_buffer_size->getStringValue());
     if (!body_size || body_size->getType() != TiniNode::T_STRING)
     {
-        INFO("Body size not specified or invalid type, defaulting to 4096");
+        INFO("Config: Body size not specified or invalid type, defaulting to 4096");
     }
     else
         _body_size = std::stoi(body_size->getStringValue());
     if (!s_port || s_port->getType() != TiniNode::T_STRING)
     {
-        INFO("Port not specified or invalid type, defaulting to 8000");
+        INFO("Config: Port not specified or invalid type, defaulting to 8000");
     }
     else
         _port = s_port->getStringValue();
     if (!s_host || s_host->getType() != TiniNode::T_STRING)
     {
-        INFO("Host not specified or invalid type, defaulting to 127.0.0.1");
+        INFO("Config: Host not specified or invalid type, defaulting to 127.0.0.1");
     }
     else
         _host = s_host->getStringValue();
@@ -141,15 +128,12 @@ size_t Config::header_buffsize() const
     return _header_buffer_size;
 }
 
-std::optional<Path> Config::error_page(Status status) const
-{
-    auto it = _error_pages.find(status.code());
-    if (it != _error_pages.end())
-        return (it->second);
-    return std::nullopt;
-}
-
 const HostAttributes& Config::first_attr() const
 {
     return _first_attr;
+}
+
+const std::string& Config::error_str() const
+{
+    return _error_template;
 }
