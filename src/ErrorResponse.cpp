@@ -11,7 +11,7 @@ ErrorResponse::ErrorResponse(const std::string& _template_str, Status status) : 
 
     engine.set_value("status", status.text());
     std::string buf = engine.render();
-    body.resize(engine.render().size());
+    body.resize(buf.size());
     std::copy(buf.begin(), buf.end(), body.begin());
     this->body(std::move(body));
 }
