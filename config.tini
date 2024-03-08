@@ -1,9 +1,6 @@
 [servers.alpha]
     host = 127.0.0.1
     port = 8080
-    [servers.alpha./errorpages]
-        404 = err/404.html
-        403 = err/403.html
     [servers.alpha.localhost]
         directory_listing = true
         [servers.alpha.localhost.routes./]
@@ -33,9 +30,6 @@
 [servers.beta]
     host = 127.0.0.1
     port = 8081
-    [servers.beta./errorpages]
-        404 = err/404.html
-        403 = err/403.html
     [servers.beta.localhost]
         directory_listing = true
         [servers.beta.localhost.routes./]
