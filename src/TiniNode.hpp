@@ -25,7 +25,7 @@ class TiniNode
         {
             S_NONE,
             S_OBRACK,
-            S_ALPHA,
+            S_VALID,
             S_ISPRINT,
             S_EQ,
             S_DOT,

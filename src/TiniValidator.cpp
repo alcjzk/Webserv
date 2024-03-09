@@ -1,3 +1,4 @@
+#include <iostream>
 #include "TiniValidator.hpp"
 #include "TiniUtils.hpp"
 
@@ -10,14 +11,14 @@ int TiniValidator::validateContext(std::string ctx, int row)
     _next_state = TiniNode::S_NONE;
     for (std::string::iterator it = ctx.begin(); it != ctx.end(); ++it)
     {
-        _cur_state = chr_to_ctx_state(*it);
-        _next_state = chr_to_ctx_state(*(it + 1));
+        _cur_state = tiniutils::chr_to_ctx_state(*it, *(it - 1));
+        _next_state = tiniutils::chr_to_ctx_state(*(it + 1), *it);
         map_idx = _context_transitions.find(_cur_state);
         if (it < ctx.end() - 1)
         {
             if (map_idx == _context_transitions.end())
             {
-                printErr(TiniNode::E_UNEXP, it - ctx.begin() + 1, row, ctx);
+                tiniutils::printErr(TiniNode::E_UNEXP, it - ctx.begin() + 1, row, ctx);
                 return (-1);
             }
             int good = 0;
@@ -28,7 +29,7 @@ int TiniValidator::validateContext(std::string ctx, int row)
             }
             if (good != 1)
             {
-                printErr(TiniNode::E_UNEXP, it - ctx.begin() + 1, row, ctx);
+                tiniutils::printErr(TiniNode::E_UNEXP, it - ctx.begin() + 1, row, ctx);
                 return (-1);
             }
         }
@@ -39,7 +40,7 @@ int TiniValidator::validateContext(std::string ctx, int row)
                 ++balance;
                 if (balance > 2)
                 {
-                    printErr(TiniNode::E_BRACKC_HIGH, it - ctx.begin(), row, ctx);
+                    tiniutils::printErr(TiniNode::E_BRACKC_HIGH, it - ctx.begin(), row, ctx);
                     return (-1);
                 }
                 break;
@@ -49,7 +50,7 @@ int TiniValidator::validateContext(std::string ctx, int row)
                 --balance;
                 if (balance < 0)
                 {
-                    printErr(TiniNode::E_BRACKC_LOW, it - ctx.begin(), row, ctx);
+                    tiniutils::printErr(TiniNode::E_BRACKC_LOW, it - ctx.begin(), row, ctx);
                     return (-1);
                 }
                 break;
@@ -60,7 +61,7 @@ int TiniValidator::validateContext(std::string ctx, int row)
     }
     if (balance != 0)
     {
-        printErr(TiniNode::E_BRACKBAL, ctx.size() - 1, row, ctx);
+        tiniutils::printErr(TiniNode::E_BRACKBAL, ctx.size() - 1, row, ctx);
         return (-1);
     }
     return (0);
@@ -75,14 +76,14 @@ int TiniValidator::validateValue(std::string act, int row)
     _next_state = TiniNode::S_NONE;
     for (std::string::iterator it = act.begin(); it != act.end(); ++it)
     {
-        _cur_state = chr_to_act_state(*it);
-        _next_state = chr_to_act_state(*(it + 1));
+        _cur_state = tiniutils::chr_to_act_state(*it);
+        _next_state = tiniutils::chr_to_act_state(*(it + 1));
         map_idx = _value_transitions.find(_cur_state);
         if (it < act.end() - 1)
         {
             if (map_idx == _value_transitions.end())
             {
-                printErr(TiniNode::E_UNEXP, it - act.begin() + 1, row, act);
+                tiniutils::printErr(TiniNode::E_UNEXP, it - act.begin() + 1, row, act);
                 return (-1);
             }
             int good = 0;
@@ -93,7 +94,7 @@ int TiniValidator::validateValue(std::string act, int row)
             }
             if (good != 1)
             {
-                printErr(TiniNode::E_UNEXP, it - act.begin() + 1, row, act);
+                tiniutils::printErr(TiniNode::E_UNEXP, it - act.begin() + 1, row, act);
                 return (-1);
             }
         }
@@ -101,7 +102,7 @@ int TiniValidator::validateValue(std::string act, int row)
         {
             if (eq_visited)
             {
-                printErr(TiniNode::E_EQCOUNT, act.size() - 1, row, act);
+                tiniutils::printErr(TiniNode::E_EQCOUNT, act.size() - 1, row, act);
                 return (-1);
             }
             eq_visited = true;
@@ -109,7 +110,7 @@ int TiniValidator::validateValue(std::string act, int row)
     }
     if (!eq_visited)
     {
-        printErr(TiniNode::E_NOEQ, act.size() - 1, row, act);
+        tiniutils::printErr(TiniNode::E_NOEQ, act.size() - 1, row, act);
         return (-1);
     }
     return (0);
@@ -121,7 +122,7 @@ int TiniValidator::validateConfig(std::vector<std::string>& split_input)
 
     for (unsigned long i = 0; i < split_input.size(); ++i)
     {
-        switch (match_input(split_input[i]))
+        switch (tiniutils::match_input(split_input[i]))
         {
             case TiniNode::O_CTX:
                 if (validateContext(split_input[i], i) == -1)

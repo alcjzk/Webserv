@@ -15,7 +15,7 @@ TiniTree::TiniTree() : _current(nullptr), _root(nullptr)
 
         ss << f.rdbuf();
         std::string input_string = ss.str();
-        _split_input = removeSpaces(split(input_string, "\n"));
+        _split_input = tiniutils::removeSpaces(tiniutils::split(input_string, "\n"));
     }
     catch (std::exception& e)
     {
@@ -37,7 +37,7 @@ TiniTree::TiniTree(std::string config_location) : _current(nullptr), _root(nullp
 
         ss << f.rdbuf();
         std::string input_string = ss.str();
-        _split_input = removeSpaces(split(input_string, "\n"));
+        _split_input = tiniutils::removeSpaces(tiniutils::split(input_string, "\n"));
     }
     catch (std::exception& e)
     {
@@ -70,7 +70,7 @@ int TiniTree::contextSwitch(std::string ctx, int row)
     }
     else
         processed = ctx.substr(1, ctx.length() - 2);
-    map_ops = split(processed, std::string("."));
+    map_ops = tiniutils::split(processed, std::string("."), '\\');
     _current = _root;
     for (size_t i = 0; i < map_ops.size(); ++i)
     {
@@ -134,7 +134,7 @@ int TiniTree::contextSwitch(std::string ctx, int row)
 
 int TiniTree::valueInsertion(std::string act, int row)
 {
-    std::vector<std::string> pair = split(act, "=");
+    std::vector<std::string> pair = tiniutils::split(act, "=");
     switch (_current->getType())
     {
         case TiniNode::T_VECTOR:
@@ -174,7 +174,7 @@ void TiniTree::constructTree()
     {
         try
         {
-            switch (match_input(_split_input[i]))
+            switch (tiniutils::match_input(_split_input[i]))
             {
                 case TiniNode::O_CTX:
                     contextSwitch(_split_input[i], i);

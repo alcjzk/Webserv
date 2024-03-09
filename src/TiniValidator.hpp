@@ -6,9 +6,9 @@ class TiniValidator
 {
     private:
         std::map<int, std::vector<int>> _context_transitions = {
-            {TiniNode::S_OBRACK, {TiniNode::S_OBRACK, TiniNode::S_ALPHA}},
-            {TiniNode::S_ALPHA, {TiniNode::S_ALPHA, TiniNode::S_DOT, TiniNode::S_CBRACK}},
-            {TiniNode::S_DOT, {TiniNode::S_ALPHA}},
+            {TiniNode::S_OBRACK, {TiniNode::S_OBRACK, TiniNode::S_VALID}},
+            {TiniNode::S_VALID, {TiniNode::S_VALID, TiniNode::S_DOT, TiniNode::S_CBRACK}},
+            {TiniNode::S_DOT, {TiniNode::S_VALID}},
             {TiniNode::S_CBRACK, {TiniNode::S_CBRACK}}};
         std::map<int, std::vector<int>> _value_transitions = {
             {TiniNode::S_ISPRINT, {TiniNode::S_ISPRINT, TiniNode::S_EQ}},
