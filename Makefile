@@ -42,10 +42,12 @@ Path.cpp						\
 HostAttributes.cpp				\
 DirectoryResponse.cpp			\
 RedirectionResponse.cpp			\
+ErrorResponse.cpp			    \
 TimeoutResponse.cpp 			\
 ServerAcceptTask.cpp 			\
 ServerReceiveRequestTask.cpp	\
 ServerSendResponseTask.cpp		\
+TemplateEngine.cpp              \
 main.cpp
 
 SRCS_TEST = test/testmain.cpp
