@@ -15,6 +15,7 @@
 #include "Log.hpp"
 #include "http.hpp"
 #include "ErrorResponse.hpp"
+#include "FileResponse.hpp"
 
 using std::string;
 using std::vector;
@@ -147,10 +148,20 @@ void ServerReceiveRequestTask::run()
     }
     catch (const HTTPError& error)
     {
+        std::optional<Path> error_path = _server.config().error_page(error.status());
+
         WARN(error.what());
-        Runtime::enqueue(new ServerSendResponseTask(
-            _server.config(), _fd,
-            new ErrorResponse(_server.config().error_str(), error.status())));
+        if (error_path.has_value())
+        {
+            Runtime::enqueue(new ServerSendResponseTask(
+                _server.config(), _fd, new ErrorResponse(error_path.value(), error.status())));
+        }
+        else
+        {
+            Runtime::enqueue(new ServerSendResponseTask(
+                _server.config(), _fd,
+                new ErrorResponse(_server.config().error_str(), error.status())));
+        }
         _is_complete = true;
     }
     catch (const std::exception& error)

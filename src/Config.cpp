@@ -14,8 +14,35 @@ Config::Config(std::map<std::string, TiniNode*>& server, std::map<std::string, T
     const TiniNode* header_buffer_size = root["header_buffer_size"];
     const TiniNode* s_port = server["port"];
     const TiniNode* s_host = server["host"];
+    const TiniNode* errpages = server["/errorpages"];
 
-    std::ifstream   input_file("err/template.html");
+    if (errpages && errpages->getType() == TiniNode::T_MAP)
+    {
+        const std::map<std::string, TiniNode*>& errpages_map = errpages->getMapValue();
+
+        for (const auto& [key, value] : errpages_map)
+        {
+            if (value->getType() == TiniNode::T_STRING)
+            {
+                int error_value = std::stoi(key);
+                if (!(error_value >= 400 && error_value <= 599))
+                {
+                    ERR("Error value of " << error_value
+                                          << " invalid for error page configuration, ignoring")
+                    continue;
+                }
+                Path error_path(value->getStringValue());
+                if (error_path.type() != Path::REGULAR)
+                {
+                    ERR("Invalid error page path: " << value->getStringValue() << ", ignoring")
+                    continue;
+                }
+                _error_pages[error_value] = Path(value->getStringValue());
+            }
+        }
+    }
+
+    std::ifstream input_file("err/template.html");
     if (!input_file.is_open())
     {
         ERR("Config: Error template file not found, defaulting")
@@ -136,4 +163,12 @@ const HostAttributes& Config::first_attr() const
 const std::string& Config::error_str() const
 {
     return _error_template;
+}
+
+std::optional<Path> Config::error_page(Status status) const
+{
+    auto it = _error_pages.find(status.code());
+    if (it != _error_pages.end())
+        return (it->second);
+    return std::nullopt;
 }

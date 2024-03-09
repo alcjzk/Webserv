@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <chrono>
+#include "Status.hpp"
 #include "HostAttributes.hpp"
 
 class Config
@@ -25,6 +26,7 @@ class Config
         const HostAttributes&              first_attr() const;
         size_t                             header_buffsize() const;
         const std::string&                 error_str() const;
+        std::optional<Path>                error_page(Status status) const;
 
         /// Returns a timeout in seconds for keeping an inactive connection alive.
         Seconds                            keepalive_timeout() const;
@@ -69,6 +71,7 @@ class Config
         int                         _backlog;
         size_t                      _body_size;
         size_t                      _header_buffer_size;
+        std::map<int, Path>         _error_pages;
         std::string                 _error_template = R"(<!DOCTYPE html>
                                                         <html lang="en">
                                                         <head>
