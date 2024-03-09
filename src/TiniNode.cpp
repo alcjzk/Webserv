@@ -330,8 +330,40 @@ std::optional<std::pair<std::string, TiniNode*>> TiniNode::getFirstValue() const
     return _firstMapValue;
 }
 
-#ifdef TESTS
+#ifdef TEST
 
-void TiniNodeTests::all() {}
+#include "testutils.hpp"
+
+void TiniNodeTest::deepcopy_test()
+{
+    BEGIN
+        TiniNode* root = new TiniNode(TiniNode::T_MAP);
+        auto& root_map = root->getMapValue();
+
+        root_map.insert(std::make_pair(std::string("nested_map"), new TiniNode(TiniNode::T_MAP)));
+        root_map.insert(std::make_pair(std::string("vector"), new TiniNode(TiniNode::T_VECTOR)));
+        root_map.insert(std::make_pair(std::string("string"), new TiniNode(TiniNode::T_STRING)));
+
+        TiniNode* nested = root_map["nested_map"];
+        auto& nested_map = nested->getMapValue();
+        nested_map["first"] = new TiniNode(TiniNode::T_STRING);
+        nested_map["second"] = new TiniNode(TiniNode::T_STRING);
+        nested_map["third"] = new TiniNode(TiniNode::T_STRING);
+        nested_map["twodeep"] = new TiniNode(TiniNode::T_MAP);
+
+        TiniNode* twodeep = nested_map["twodeep"];
+        auto& twodeep_map = twodeep->getMapValue();
+        twodeep_map["first"] = new TiniNode(TiniNode::T_STRING);
+        twodeep_map["second"] = new TiniNode(TiniNode::T_STRING);
+        twodeep_map["third"] = new TiniNode(TiniNode::T_STRING);
+
+        TiniNode* funny = new TiniNode();
+        *funny = *root;
+        auto& funnimap = funny->getMapValue();
+        TiniNode* funni_nested = funnimap["nested_map"];
+        EXPECT(funni_nested != nullptr);
+        EXPECT(funni_nested != nested);
+    END
+}
 
 #endif
