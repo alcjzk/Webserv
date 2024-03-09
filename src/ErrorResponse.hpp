@@ -7,6 +7,6 @@
 class ErrorResponse : public Response
 {
     public:
-        ErrorResponse(const std::string& _template_str, Status status = Status::BAD_REQUEST);
+        ErrorResponse(const std::string& template_str, Status status = Status::BAD_REQUEST);
         ErrorResponse(const Path& error_page, Status status = Status::BAD_REQUEST);
 };

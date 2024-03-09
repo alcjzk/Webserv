@@ -1,7 +1,7 @@
 #include <regex>
 #include "TemplateEngine.hpp"
 
-TemplateEngine::TemplateEngine(const std::string& _template_str) : _template_str(_template_str) {}
+TemplateEngine::TemplateEngine(const std::string& template_str) : _template_str(template_str) {}
 
 void TemplateEngine::set_value(const std::string& key, const std::string& value)
 {

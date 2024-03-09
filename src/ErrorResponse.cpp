@@ -31,9 +31,9 @@ ErrorResponse::ErrorResponse(const Path& error_page, Status status) : Response(s
     file_stream.close();
 }
 
-ErrorResponse::ErrorResponse(const std::string& _template_str, Status status)
+ErrorResponse::ErrorResponse(const std::string& template_str, Status status)
 {
-    TemplateEngine    engine(_template_str);
+    TemplateEngine    engine(template_str);
     std::vector<char> body;
 
     engine.set_value("status", status.text());
