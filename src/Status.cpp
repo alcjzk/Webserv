@@ -27,8 +27,12 @@ const char* Status::text() const
             return "404 Not Found";
         case REQUEST_TIMEOUT:
             return "408 Request Timeout";
+        case URI_TOO_LONG:
+            return "414 URI Too Long";
         case INTERNAL_SERVER_ERROR:
             return "500 Internal Server Error";
+        case NOT_IMPLEMENTED:
+            return "501 Not Implemented";
         case HTTP_VERSION_NOT_SUPPORTED:
             return "505 HTTP Version Not Supported";
         default:
