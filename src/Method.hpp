@@ -6,6 +6,8 @@
 class Method
 {
     public:
+        static const size_t MAX_LENGTH = 6;
+
         Method() = default;
         Method(const std::string& str);
         static const size_t COUNT = 3;
