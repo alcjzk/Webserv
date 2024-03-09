@@ -21,7 +21,6 @@ Task.cpp						\
 Reader.cpp						\
 Method.cpp						\
 HTTPVersion.cpp					\
-URI.cpp							\
 RequestLine.cpp					\
 Error.cpp						\
 Status.cpp						\
