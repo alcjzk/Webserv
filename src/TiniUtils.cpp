@@ -47,7 +47,7 @@ namespace tiniutils
     int chr_to_ctx_state(char c, char p)
     {
         if (isalpha(c) || c == '/' || c == '\\' || p == '\\')
-            return TiniNode::S_ALPHA;
+            return TiniNode::S_VALID;
         switch (c)
         {
             case '[':
