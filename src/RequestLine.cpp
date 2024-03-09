@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "http.hpp"
 #include "HTTPError.hpp"
 #include "RequestLine.hpp"
