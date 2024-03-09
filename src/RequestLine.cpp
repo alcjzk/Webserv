@@ -5,6 +5,11 @@
 using std::ostream;
 using std::string;
 
+constexpr size_t RequestLine::uri_max_length()
+{
+    return MAX_LENGTH - Method::MAX_LENGTH - HTTPVersion::MAX_LENGTH - 2;
+}
+
 RequestLine::RequestLine(const string& line)
 {
     size_t head;
@@ -24,7 +29,7 @@ RequestLine::RequestLine(const string& line)
     if (end == string::npos)
         throw HTTPError(Status::BAD_REQUEST);
     size_t length = end - head;
-    if (length > URI_MAX_LENGTH)
+    if (length > uri_max_length())
         throw HTTPError(Status::URI_TOO_LONG);
     _request_target = line.substr(head, length);
 
@@ -91,7 +96,7 @@ void RequestLineTest::uri_too_long_test()
         std::stringstream request_line_str;
 
         request_line_str << "GET ";
-        request_line_str << '/' << std::string(RequestLine::URI_MAX_LENGTH, 'x');
+        request_line_str << '/' << std::string(RequestLine::uri_max_length(), 'x');
         request_line_str << " HTTP/1.1";
 
         RequestLine request_line(request_line_str.str());
@@ -113,7 +118,7 @@ void RequestLineTest::uri_max_length_test()
     std::stringstream request_line_str;
 
     request_line_str << "GET ";
-    request_line_str << '/' << std::string(RequestLine::URI_MAX_LENGTH - 1, 'x');
+    request_line_str << '/' << std::string(RequestLine::uri_max_length() - 1, 'x');
     request_line_str << " HTTP/1.1";
 
     RequestLine request_line(request_line_str.str());

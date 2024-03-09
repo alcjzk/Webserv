@@ -8,8 +8,8 @@ class RequestLine
 {
     public:
         static const size_t     MAX_LENGTH = 8000;
-        static constexpr size_t URI_MAX_LENGTH =
-            MAX_LENGTH - Method::MAX_LENGTH - HTTPVersion::MAX_LENGTH - 2;
+
+        static constexpr size_t uri_max_length();
 
         RequestLine() = default;
         RequestLine(const std::string& line);
@@ -42,4 +42,3 @@ class RequestLineTest : public RequestLine
 };
 
 #endif
-
