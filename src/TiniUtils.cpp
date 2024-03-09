@@ -4,7 +4,6 @@
 
 #include <string>
 #include <vector>
-#include "Log.hpp"
 
 namespace tiniutils
 {

@@ -5,7 +5,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <iostream>
-#include "Log.hpp"
 
 TiniTree::TiniTree() : _current(nullptr), _root(nullptr)
 {
