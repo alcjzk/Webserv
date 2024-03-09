@@ -87,7 +87,7 @@ void HostAttributes::_assign_route(const std::string& key, const TiniNode* value
     }
     else
     {
-        const std::vector<std::string>& map_values = split(methods->getStringValue(), ",");
+        const std::vector<std::string>& map_values = tiniutils::split(methods->getStringValue(), ",");
         if (!map_values.size())
         {
             INFO("Zero methods for " << key << ", route effectively forbidden")
