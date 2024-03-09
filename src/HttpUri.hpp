@@ -55,6 +55,7 @@ class HttpUriTest : private HttpUri
 {
     public:
         static void absolute_form_test();
+        static void origin_form_test();
 };
 
 #endif

@@ -109,4 +109,39 @@ void HttpUriTest::absolute_form_test()
     END
 }
 
+void HttpUriTest::origin_form_test()
+{
+    BEGIN
+
+    // Root
+    HttpUri uri1("/", "example.com");
+    EXPECT(uri1.host() == "example.com");
+    EXPECT(uri1.port() == "80");
+    EXPECT(uri1.path() == "/");
+    EXPECT(uri1.query() == "");
+
+    // Root with query
+    HttpUri uri2("/?query", "example.com");
+    EXPECT(uri2.host() == "example.com");
+    EXPECT(uri2.port() == "80");
+    EXPECT(uri2.path() == "/");
+    EXPECT(uri2.query() == "query");
+
+    // Path
+    HttpUri uri3("/path", "example.com");
+    EXPECT(uri3.host() == "example.com");
+    EXPECT(uri3.port() == "80");
+    EXPECT(uri3.path() == "/path");
+    EXPECT(uri3.query() == "");
+
+    // Path with query
+    HttpUri uri4("/path?query", "example.com");
+    EXPECT(uri4.host() == "example.com");
+    EXPECT(uri4.port() == "80");
+    EXPECT(uri4.path() == "/path");
+    EXPECT(uri4.query() == "query");
+
+    END
+}
+
 #endif
