@@ -1,3 +1,4 @@
+#include <iostream>
 #include "TiniValidator.hpp"
 #include "TiniUtils.hpp"
 

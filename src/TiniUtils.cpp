@@ -1,9 +1,8 @@
-#include "TiniUtils.hpp"
-
-#include "TiniNode.hpp"
-
 #include <string>
+#include <iostream>
 #include <vector>
+#include "TiniUtils.hpp"
+#include "TiniNode.hpp"
 
 namespace tiniutils
 {
@@ -23,7 +22,7 @@ namespace tiniutils
             {
                 raw_string.erase(end - 1, 1);
                 search_start = end + 1;
-                continue ;
+                continue;
             }
             tmp = raw_string.substr(start, end - start);
             start = end + d_len;
@@ -115,44 +114,45 @@ namespace tiniutils
         }
         std::cerr << " at R: " << row + 1 << " C: " << col + 1 << "\n" << std::endl;
     }
-}
+} // namespace tiniutils
 
 #ifdef TEST
 
 #include "testutils.hpp"
 
-void              tiniutilsTest::split_basic_test()
+void tiniutilsTest::split_basic_test()
 {
     BEGIN
 
-    std::string teststr = ("split on space");
-    std::vector<std::string>result = tiniutils::split(teststr, " ");
+    std::string              teststr = ("split on space");
+    std::vector<std::string> result = tiniutils::split(teststr, " ");
 
     EXPECT(result[0] == "split");
     EXPECT(result[1] == "on");
     EXPECT(result[2] == "space");
-    
+
     END
 }
 
-void              tiniutilsTest::split_weird_delim_test()
+void tiniutilsTest::split_weird_delim_test()
 {
     BEGIN
 
-    std::string teststr = ("split on space");
-    std::vector<std::string>result = tiniutils::split(teststr, "qwiowdjwqoidjqwoidja\rq1k1 1\100 i101 1");
+    std::string              teststr = ("split on space");
+    std::vector<std::string> result =
+        tiniutils::split(teststr, "qwiowdjwqoidjqwoidja\rq1k1 1\100 i101 1");
 
     EXPECT(result[0] == "split on space");
-    
+
     END
 }
 
-void              tiniutilsTest::split_multichar_delim_test()
+void tiniutilsTest::split_multichar_delim_test()
 {
     BEGIN
 
-    std::string teststr = ("split on space");
-    std::vector<std::string>result = tiniutils::split(teststr, " on ");
+    std::string              teststr = ("split on space");
+    std::vector<std::string> result = tiniutils::split(teststr, " on ");
 
     EXPECT(result[0] == "split");
     EXPECT(result[1] == "space");
@@ -160,24 +160,24 @@ void              tiniutilsTest::split_multichar_delim_test()
     END
 }
 
-void              tiniutilsTest::split_none_test()
+void tiniutilsTest::split_none_test()
 {
     BEGIN
 
-    std::string teststr = ("");
-    std::vector<std::string>result = tiniutils::split(teststr, " on ");
+    std::string              teststr = ("");
+    std::vector<std::string> result = tiniutils::split(teststr, " on ");
 
     EXPECT(result[0] == "");
 
     END
 }
 
-void              tiniutilsTest::split_basic_escape_test()
+void tiniutilsTest::split_basic_escape_test()
 {
     BEGIN
 
-    std::string teststr = ("split on space but\\ not\\ on\\ me");
-    std::vector<std::string>result = tiniutils::split(teststr, " ", '\\');
+    std::string              teststr = ("split on space but\\ not\\ on\\ me");
+    std::vector<std::string> result = tiniutils::split(teststr, " ", '\\');
 
     EXPECT(result[0] == "split");
     EXPECT(result[1] == "on");
@@ -186,6 +186,5 @@ void              tiniutilsTest::split_basic_escape_test()
 
     END
 }
-
 
 #endif
