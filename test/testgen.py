@@ -10,7 +10,7 @@ def collect_tests(name):
     for line in file:
         line = line.strip()
         if class_name is None:
-            res = re.search("(>:class|namespace) (.+Test)", line)
+            res = re.search("(?:class|namespace) (.+Test)", line)
             if res:
                 class_name = res.group(1)
         else:
