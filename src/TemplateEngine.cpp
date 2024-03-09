@@ -1,5 +1,5 @@
+#include <regex>
 #include "TemplateEngine.hpp"
-#include <iostream>
 
 TemplateEngine::TemplateEngine(const std::string& _template_str) : _template_str(_template_str) {}
 

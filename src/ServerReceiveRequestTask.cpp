@@ -15,7 +15,6 @@
 #include "Log.hpp"
 #include "http.hpp"
 #include "ErrorResponse.hpp"
-#include "FileResponse.hpp"
 
 using std::string;
 using std::vector;

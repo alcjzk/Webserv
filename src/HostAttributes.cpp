@@ -2,7 +2,6 @@
 #include "HTTPError.hpp"
 #include "Log.hpp"
 #include "TiniUtils.hpp"
-#include <algorithm>
 #include "Method.hpp"
 
 HostAttributes::HostAttributes(const std::string& hostname, const TiniNode* node)

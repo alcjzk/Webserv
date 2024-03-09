@@ -1,6 +1,4 @@
 #include "ErrorResponse.hpp"
-#include "Log.hpp"
-#include "HTTPError.hpp"
 #include "TemplateEngine.hpp"
 #include <fstream>
 

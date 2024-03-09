@@ -1,6 +1,5 @@
 #include <string>
 #include <unordered_map>
-#include <regex>
 
 class TemplateEngine
 {
