@@ -7,20 +7,8 @@
 class HttpUri
 {
     public:
-        static constexpr std::string_view SCHEME = "http";
-        static constexpr std::string_view HIER_PART_PREFIX = "//";
         static constexpr std::string_view PORT_DEFAULT = "80";
         static constexpr std::string_view PREFIX = "http://";
-        /// Minimum length for the hier-part portion of the scheme.
-        static constexpr size_t           HIER_PART_LENGTH_MIN();
-
-        /// Minimum length for the authority portion of the scheme.
-        static const size_t               AUTHORITY_LENGTH_MIN = 1;
-
-        /// Minimum length for the path portion of the scheme.
-        static const size_t               PATH_LENGTH_MIN = 1;
-
-        HttpUri() = default;
 
         HttpUri(const std::string& request_target, const std::string& host);
 
@@ -56,6 +44,7 @@ class HttpUriTest : private HttpUri
     public:
         static void absolute_form_test();
         static void origin_form_test();
+        static void absolute_form_ignores_host_header_test();
 };
 
 #endif

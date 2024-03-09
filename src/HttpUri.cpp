@@ -4,11 +4,6 @@
 
 using std::string;
 
-constexpr size_t HttpUri::HIER_PART_LENGTH_MIN()
-{
-    return HIER_PART_PREFIX.length() + AUTHORITY_LENGTH_MIN + PATH_LENGTH_MIN;
-}
-
 HttpUri::HttpUri(const std::string& request_target, const std::string& host)
 {
     size_t query_offset;
@@ -36,9 +31,10 @@ HttpUri::HttpUri(const std::string& request_target, const std::string& host)
 
         path_offset = std::min(request_target.find_first_of("/", PREFIX.length()), query_offset);
         if (path_offset < query_offset)
-        {
             _path = request_target.substr(path_offset, query_offset - path_offset);
-        }
+        else
+            _path = "/";
+
         authority(std::string_view(request_target.c_str() + PREFIX.length(),
                                    path_offset - PREFIX.length()));
     }
@@ -140,6 +136,16 @@ void HttpUriTest::origin_form_test()
     EXPECT(uri4.port() == "80");
     EXPECT(uri4.path() == "/path");
     EXPECT(uri4.query() == "query");
+
+    END
+}
+
+void HttpUriTest::absolute_form_ignores_host_header_test()
+{
+    BEGIN
+
+    HttpUri uri("http://example.com/", "notreal.com");
+    EXPECT(uri.host() == "example.com");
 
     END
 }
