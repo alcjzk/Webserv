@@ -5,9 +5,8 @@
 #include "DirectoryResponse.hpp"
 #include "RedirectionResponse.hpp"
 #include "HTTPError.hpp"
-#include "URI.hpp"
 #include "Request.hpp"
-#include "TiniUtils.hpp"
+#include "HttpUri.hpp"
 
 using std::string;
 
@@ -16,10 +15,10 @@ Response* Request::into_response(const Server& server) const
     const Header* host = header("Host");
     if (!host)
         throw HTTPError(Status::BAD_REQUEST);
-    std::string  hostname = tiniutils::split(host->_value, ":")[0];
-    URI          request_uri(_request_line.request_target(), host->_value);
 
-    const Route* route = server.route(request_uri.path(), hostname);
+    HttpUri      uri(_request_line.request_target(), host->_value);
+
+    const Route* route = server.route(uri.path(), uri.host());
     if (!route)
         throw HTTPError(Status::BAD_REQUEST);
 
@@ -27,7 +26,7 @@ Response* Request::into_response(const Server& server) const
     if (route->_type == Route::REDIRECTION)
         return new RedirectionResponse(route->_redir.value());
 
-    Path target = route->map(request_uri.path());
+    Path target = route->map(uri.path());
 
     if (!route->method_get())
         throw HTTPError(Status::FORBIDDEN);
@@ -51,13 +50,13 @@ Response* Request::into_response(const Server& server) const
     catch (const std::exception& e)
     {
         INFO("Request::into_response: " << e.what());
-        if (server.map_attributes(hostname).dirlist())
-            return new DirectoryResponse(target, request_uri.path());
+        if (server.map_attributes(uri.host()).dirlist())
+            return new DirectoryResponse(target, uri.path());
         throw HTTPError(Status::NOT_FOUND);
     }
-    if (!server.map_attributes(hostname).dirlist())
+    if (!server.map_attributes(uri.host()).dirlist())
         throw HTTPError(Status::FORBIDDEN);
-    return new DirectoryResponse(target, request_uri.path());
+    return new DirectoryResponse(target, uri.path());
 }
 
 const Method& Request::method() const

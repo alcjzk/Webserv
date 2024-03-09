@@ -85,7 +85,7 @@ void HttpUriTest::absolute_form_test()
     HttpUri uri3("http://example.com:80?key=value", "example.com:80");
     EXPECT(uri3.host() == "example.com");
     EXPECT(uri3.port() == "80");
-    EXPECT(uri3.path() == "");
+    EXPECT(uri3.path() == "/");
     EXPECT(uri3.query() == "key=value");
 
     // No port
@@ -99,7 +99,7 @@ void HttpUriTest::absolute_form_test()
     HttpUri uri5("http://example.com", "example.com");
     EXPECT(uri5.host() == "example.com");
     EXPECT(uri5.port() == "80");
-    EXPECT(uri5.path() == "");
+    EXPECT(uri5.path() == "/");
     EXPECT(uri5.query() == "");
 
     END
