@@ -2,6 +2,7 @@
 
 #include <string>
 #include <string_view>
+#include <ostream>
 
 /// https://datatracker.ietf.org/doc/html/rfc9110#name-http-uri-scheme
 class HttpUri
@@ -36,6 +37,8 @@ class HttpUri
                 _port = std::string(authority.cbegin() + host_length + 1, authority.cend());
         }
 };
+
+std::ostream& operator<<(std::ostream& os, const HttpUri& http_uri);
 
 #ifdef TEST
 

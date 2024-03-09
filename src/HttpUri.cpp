@@ -60,6 +60,16 @@ const std::string& HttpUri::port() const
     return _port;
 }
 
+std::ostream& operator<<(std::ostream& os, const HttpUri& http_uri)
+{
+    os << http_uri.PREFIX;
+    os << http_uri.host() << ':' << http_uri.port();
+    os << http_uri.path();
+    if (!http_uri.query().empty())
+        os << '?' << http_uri.query();
+    return os;
+}
+
 #ifdef TEST
 
 #include "testutils.hpp"
