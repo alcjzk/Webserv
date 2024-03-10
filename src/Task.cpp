@@ -20,7 +20,7 @@ bool Task::operator==(int fd)
 
 int Task::fd() const
 {
-    return _fd; // FIXME: throwing behavior here can be a bit unexpected
+    return _fd;
 }
 
 bool Task::is_complete() const
