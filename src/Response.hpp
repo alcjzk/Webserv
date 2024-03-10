@@ -8,6 +8,12 @@
 class Response
 {
     public:
+        enum class Connection
+        {
+            KeepAlive,
+            Close,
+        };
+
         virtual ~Response();
 
         Response(Status = Status::OK);
@@ -34,6 +40,8 @@ class Response
         const std::vector<char>&   body() const;
 
         void                       content_length(size_t content_length);
+
+        Connection                 _connection = Connection::KeepAlive;
 
     private:
         Status              _status;
