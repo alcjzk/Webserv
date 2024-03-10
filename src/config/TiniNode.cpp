@@ -139,6 +139,7 @@ TiniNode::~TiniNode()
 
 TiniNode::TiniNode(TiniNode&& other)
 {
+    std::cout << "\nmova con\n";
     if (this == &other)
         return;
     switch (other._type)
@@ -163,6 +164,7 @@ TiniNode::TiniNode(TiniNode&& other)
 
 TiniNode& TiniNode::operator=(TiniNode&& other)
 {
+    std::cout << "mova ass\n";
     if (this == &other)
         return *this;
     switch (_type)
@@ -385,6 +387,36 @@ void TiniNodeTest::deepcopy_test()
 
     delete root;
     delete rootcopy;
+    END
+}
+
+// Should not leak
+void TiniNodeTest::duplicate_insterion_test()
+{
+    BEGIN
+        TiniNode*   root = new TiniNode(TiniNode::T_MAP);
+        
+        auto root_map = root->getMapValue();
+        root_map["key"] = new TiniNode(TiniNode::T_STRING);
+        root_map["key"] = new TiniNode(TiniNode::T_STRING);
+        delete root;
+    END
+}
+
+void TiniNodeTest::ownership_change_test()
+{
+    BEGIN
+        TiniNode*   root  = new TiniNode(TiniNode::T_MAP);
+        auto        root_map = root->getMapValue();
+        
+        root_map["key"] = new TiniNode(TiniNode::T_MAP);
+
+        TiniNode*   big_gabe = new TiniNode(TiniNode::T_MAP);
+        *big_gabe = std::move(*root);
+        auto& map = big_gabe->getMapValue();
+        auto key = map["key"];
+
+        EXPECT(key->getType() == TiniNode::T_MAP);
     END
 }
 
