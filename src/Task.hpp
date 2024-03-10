@@ -3,6 +3,7 @@
 
 #include <chrono>
 #include <optional>
+#include "File.hpp"
 
 class Task
 {
@@ -16,6 +17,8 @@ class Task
 
         virtual ~Task() = default;
 
+        Task(Task&&) noexcept = default;
+
         int          fd() const;
         bool         is_complete() const;
         bool         is_expired_at(TimePoint time_point) const;
@@ -26,10 +29,16 @@ class Task
         virtual void abort();
         virtual void run() = 0;
 
-    protected:
-        Task(int fd, WaitFor wait_for, std::optional<TimePoint> expire_time = std::nullopt);
+        Task(const Task&) = delete;
+        Task& operator=(const Task&) = delete;
+        Task& operator=(Task&&) = delete;
 
-        int                      _fd;
+    protected:
+        explicit Task(int fd, WaitFor wait_for,
+                      std::optional<TimePoint> expire_time = std::nullopt);
+        Task(File&& file, WaitFor wait_for, std::optional<TimePoint> expire_time = std::nullopt);
+
+        File                     _fd;
         WaitFor                  _wait_for;
         bool                     _is_complete;
         std::optional<TimePoint> _expire_time;

@@ -54,8 +54,6 @@ const Config& Server::config() const
 
 Server::~Server()
 {
-    if (_fd != -1)
-        (void)close(_fd);
     freeaddrinfo(_address_info);
     INFO("Graceful exit");
 }

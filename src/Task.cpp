@@ -1,9 +1,15 @@
 #include <unistd.h>
+#include <utility>
 #include "Task.hpp"
 #include "Log.hpp"
 
 Task::Task(int fd, WaitFor wait_for, std::optional<TimePoint> expire_time)
     : _fd(fd), _wait_for(wait_for), _is_complete(false), _expire_time(expire_time)
+{
+}
+
+Task::Task(File&& fd, WaitFor wait_for, std::optional<TimePoint> expire_time)
+    : _fd(std::move(fd)), _wait_for(wait_for), _is_complete(false), _expire_time(expire_time)
 {
 }
 
@@ -14,7 +20,7 @@ bool Task::operator==(int fd)
 
 int Task::fd() const
 {
-    return _fd;
+    return _fd; // FIXME: throwing behavior here can be a bit unexpected
 }
 
 bool Task::is_complete() const
@@ -38,5 +44,4 @@ void Task::abort()
 {
     INFO("Task for fd " << _fd << " timed out");
     _is_complete = true;
-    (void)close(_fd);
 }

@@ -1,11 +1,13 @@
 #include <unistd.h>
 #include <cassert>
 #include <chrono>
+#include <utility>
 #include "ServerSendResponseTask.hpp"
 #include "Log.hpp"
 
-ServerSendResponseTask::ServerSendResponseTask(const Config& config, int fd, Response* response)
-    : Task(fd, Writable, std::chrono::system_clock::now() + config.send_timeout()),
+ServerSendResponseTask::ServerSendResponseTask(const Config& config, File&& file,
+                                               Response* response)
+    : Task(std::move(file), Writable, std::chrono::system_clock::now() + config.send_timeout()),
       _response(response)
 {
 }
@@ -31,12 +33,10 @@ void ServerSendResponseTask::run()
         assert(false);
     }
     _is_complete = true;
-    (void)close(_fd);
 }
 
 void ServerSendResponseTask::abort()
 {
     INFO("ServerSendResponseTask for fd " << _fd << " timed out.");
     _is_complete = true;
-    (void)close(_fd);
 }
