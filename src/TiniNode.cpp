@@ -358,34 +358,34 @@ void TiniNodeTest::deepcopy_test()
         twodeep_map["third"] = new TiniNode(TiniNode::T_STRING);
 
 
-        TiniNode* final = new TiniNode();
-        *final = *root;
+        TiniNode* rootcopy = new TiniNode();
+        *rootcopy = *root;
 
-        auto& finalmap = final->getMapValue();
+        auto& rootcopymap = rootcopy->getMapValue();
 
-        EXPECT(finalmap["nested_map"] != root_map["nested_map"]);
-        EXPECT(finalmap["vector"] != root_map["vector"]);
-        EXPECT(finalmap["string"] != root_map["string"]);
-        EXPECT(finalmap["string"]->getType() == TiniNode::T_STRING);
-        EXPECT(finalmap["vector"]->getType() == TiniNode::T_VECTOR);
-        EXPECT(finalmap["nested_map"]->getType() == TiniNode::T_MAP);
+        EXPECT(rootcopymap["nested_map"] != root_map["nested_map"]);
+        EXPECT(rootcopymap["vector"] != root_map["vector"]);
+        EXPECT(rootcopymap["string"] != root_map["string"]);
+        EXPECT(rootcopymap["string"]->getType() == TiniNode::T_STRING);
+        EXPECT(rootcopymap["vector"]->getType() == TiniNode::T_VECTOR);
+        EXPECT(rootcopymap["nested_map"]->getType() == TiniNode::T_MAP);
 
-        TiniNode* final_nested = finalmap["nested_map"];
-        auto& final_nested_map = final_nested->getMapValue();
+        TiniNode* rootcopy_nested = rootcopymap["nested_map"];
+        auto& rootcopy_nested_map = rootcopy_nested->getMapValue();
 
-        TiniNode* final_twodeep = final_nested_map["twodeep"];
-        auto& final_twodeep_map = final_twodeep->getMapValue();
-        EXPECT(final_twodeep_map["first"] != twodeep_map["first"]);
-        EXPECT(final_twodeep_map["second"] != twodeep_map["second"]);
-        EXPECT(final_twodeep_map["third"] != twodeep_map["third"]);
+        TiniNode* rootcopy_twodeep = rootcopy_nested_map["twodeep"];
+        auto& rootcopy_twodeep_map = rootcopy_twodeep->getMapValue();
+        EXPECT(rootcopy_twodeep_map["first"] != twodeep_map["first"]);
+        EXPECT(rootcopy_twodeep_map["second"] != twodeep_map["second"]);
+        EXPECT(rootcopy_twodeep_map["third"] != twodeep_map["third"]);
 
 
-        EXPECT(final_nested != nullptr);
-        EXPECT(final_nested != nested);
+        EXPECT(rootcopy_nested != nullptr);
+        EXPECT(rootcopy_nested != nested);
 
 
         delete root;
-        delete final;
+        delete rootcopy;
     END
 }
 
