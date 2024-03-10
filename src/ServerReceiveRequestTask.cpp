@@ -97,8 +97,7 @@ void ServerReceiveRequestTask::receive_headers()
             {
                 INFO("End of headers");
                 response = _request.into_response(_server);
-                Runtime::enqueue(
-                    new ServerSendResponseTask(_server.config(), std::move(_fd), response));
+                Runtime::enqueue(new ServerSendResponseTask(_server, std::move(_fd), response));
                 _is_complete = true;
                 return;
             }
@@ -155,18 +154,14 @@ void ServerReceiveRequestTask::run()
         std::optional<Path> error_path = _server.config().error_page(error.status());
 
         WARN(error.what());
+
+        Response* response;
         if (error_path.has_value())
-        {
-            Runtime::enqueue(
-                new ServerSendResponseTask(_server.config(), std::move(_fd),
-                                           new ErrorResponse(error_path.value(), error.status())));
-        }
+            response = new ErrorResponse(error_path.value(), error.status());
         else
-        {
-            Runtime::enqueue(new ServerSendResponseTask(
-                _server.config(), std::move(_fd),
-                new ErrorResponse(_server.config().error_str(), error.status())));
-        }
+            response = new ErrorResponse(_server.config().error_str(), error.status());
+
+        Runtime::enqueue(new ServerSendResponseTask(_server, std::move(_fd), response));
         _is_complete = true;
     }
     catch (const std::exception& error)
@@ -180,6 +175,5 @@ void ServerReceiveRequestTask::abort()
 {
     INFO("ReceiveRequestTask for fd " << _fd << " timed out");
     _is_complete = true;
-    Runtime::enqueue(
-        new ServerSendResponseTask(_server.config(), std::move(_fd), new TimeoutResponse()));
+    Runtime::enqueue(new ServerSendResponseTask(_server, std::move(_fd), new TimeoutResponse()));
 }
