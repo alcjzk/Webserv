@@ -29,7 +29,7 @@ int main() {
 
 SUFFIX = """
     std::cout << \"\\nTests OK.\\n\";
-    int status = system(\"leaks test > /dev/null\") != 0 ? 1 : 0;
+    int status = system(\"leaks -quiet test \") != 0 ? 1 : 0;
     status == 0 ? std::cout << \"Leaks OK.\\n\" : std::cerr << \"Leaks FAIL\\n\";
     exit(status);
     #endif
