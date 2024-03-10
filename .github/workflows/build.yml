@@ -12,11 +12,12 @@ jobs:
         - uses: actions/checkout@v3
         - name: make
           run: make
-        - name: unit-tests
-          run: make t
     build_macos:
         runs-on: macos-12
         steps:
         - uses: actions/checkout@v3
         - name: make
           run: make
+        - name: unit-tests
+          run: export MallocStackLogging=1
+          run: make t
