@@ -1,11 +1,15 @@
 #include <iterator>
-#include <mutex>
 #include <stdexcept>
 #include "Reader.hpp"
 
 using std::optional;
 using std::string;
 using std::vector;
+
+const char* Reader::LineLimitError::what() const noexcept
+{
+    return "line length exceeds limit argument";
+}
 
 Reader::Reader(const vector<char>& buffer) : _buffer(buffer), _head(_buffer.begin()) {}
 

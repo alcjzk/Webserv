@@ -63,7 +63,7 @@ void ServerReceiveRequestTask::receive_start_line()
     try
     {
         _reader.trim_empty_lines();
-        _request._request_line = RequestLine(_reader.line().value());
+        _request._request_line = RequestLine(_reader.line(RequestLine::MAX_LENGTH).value());
         if (!_request.http_version().is_compatible_with(Server::http_version()))
         {
             throw HTTPError(Status::HTTP_VERSION_NOT_SUPPORTED);
@@ -75,6 +75,10 @@ void ServerReceiveRequestTask::receive_start_line()
     catch (const std::bad_optional_access&)
     {
         _is_partial_data = true;
+    }
+    catch (const Reader::LineLimitError&)
+    {
+        throw HTTPError(Status::URI_TOO_LONG);
     }
 }
 

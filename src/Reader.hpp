@@ -1,6 +1,7 @@
 #pragma once
 
 #include <limits>
+#include <stdexcept>
 #include <vector>
 #include <string>
 #include <limits>
@@ -9,6 +10,12 @@
 class Reader
 {
     public:
+        class LineLimitError : public std::runtime_error
+        {
+            public:
+                virtual const char* what() const noexcept override;
+        };
+
         /// Constructs the reader by copying a buffer.
         Reader(const std::vector<char>& buffer);
 
