@@ -381,6 +381,7 @@ void TiniNodeTest::deepcopy_test()
         EXPECT(final_nested != nested);
 
 
+        TiniNode* leak = new TiniNode(TiniNode::T_MAP);
         delete root;
         delete final;
     END
