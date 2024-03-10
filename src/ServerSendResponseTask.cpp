@@ -9,7 +9,8 @@
 
 ServerSendResponseTask::ServerSendResponseTask(const Server& server, File&& file,
                                                Response* response)
-    : Task(std::move(file), Writable, std::chrono::system_clock::now() + server.config().send_timeout()),
+    : Task(std::move(file), Writable,
+           std::chrono::system_clock::now() + server.config().send_timeout()),
       _response(response), _server(server)
 {
 }

@@ -16,7 +16,7 @@ class Response
 
         virtual ~Response();
 
-        Response(Status = Status::OK);
+        Response(Status = Status::OK, Connection connection = Connection::KeepAlive);
         Response(Response&&) = delete;
         Response(const Response&) = delete;
 
@@ -41,7 +41,7 @@ class Response
 
         void                       content_length(size_t content_length);
 
-        Connection                 _connection = Connection::KeepAlive;
+        Connection                 _connection;
 
     private:
         Status              _status;
