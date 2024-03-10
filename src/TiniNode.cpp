@@ -357,12 +357,32 @@ void TiniNodeTest::deepcopy_test()
         twodeep_map["second"] = new TiniNode(TiniNode::T_STRING);
         twodeep_map["third"] = new TiniNode(TiniNode::T_STRING);
 
-        TiniNode* funny = new TiniNode();
-        *funny = *root;
-        auto& funnimap = funny->getMapValue();
-        TiniNode* funni_nested = funnimap["nested_map"];
-        EXPECT(funni_nested != nullptr);
-        EXPECT(funni_nested != nested);
+
+        TiniNode* final = new TiniNode();
+        *final = *root;
+
+        auto& finalmap = final->getMapValue();
+
+        EXPECT(finalmap["nested_map"] != root_map["nested_map"]);
+        EXPECT(finalmap["vector"] != root_map["vector"]);
+        EXPECT(finalmap["string"] != root_map["string"]);
+        EXPECT(finalmap["string"]->getType() == TiniNode::T_STRING);
+        EXPECT(finalmap["vector"]->getType() == TiniNode::T_VECTOR);
+        EXPECT(finalmap["nested_map"]->getType() == TiniNode::T_MAP);
+
+        TiniNode* final_nested = finalmap["nested_map"];
+        auto& final_nested_map = final_nested->getMapValue();
+
+        TiniNode* final_twodeep = final_nested_map["twodeep"];
+        auto& final_twodeep_map = final_twodeep->getMapValue();
+
+
+        EXPECT(final_nested != nullptr);
+        EXPECT(final_nested != nested);
+
+
+        delete root;
+        delete final;
     END
 }
 
