@@ -19,5 +19,4 @@ jobs:
         - name: make
           run: make
         - name: unit-tests
-          run: export MallocStackLogging=1
           run: make t
