@@ -375,6 +375,9 @@ void TiniNodeTest::deepcopy_test()
 
         TiniNode* final_twodeep = final_nested_map["twodeep"];
         auto& final_twodeep_map = final_twodeep->getMapValue();
+        EXPECT(final_twodeep_map["first"] != twodeep_map["first"]);
+        EXPECT(final_twodeep_map["second"] != twodeep_map["second"]);
+        EXPECT(final_twodeep_map["third"] != twodeep_map["third"]);
 
 
         EXPECT(final_nested != nullptr);
