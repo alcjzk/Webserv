@@ -1,9 +1,15 @@
 #include <iterator>
+#include <stdexcept>
 #include "Reader.hpp"
 
 using std::optional;
 using std::string;
 using std::vector;
+
+const char* Reader::LineLimitError::what() const noexcept
+{
+    return "line length exceeds limit argument";
+}
 
 Reader::Reader(const vector<char>& buffer) : _buffer(buffer), _head(_buffer.begin()) {}
 
@@ -33,7 +39,7 @@ char* Reader::data() noexcept
     return _buffer.data();
 }
 
-optional<string> Reader::line()
+optional<string> Reader::line(size_t limit)
 {
     vector<char>::iterator start = _head;
     vector<char>::iterator pos = _head;
@@ -52,6 +58,8 @@ optional<string> Reader::line()
                 _head = std::next(pos);
                 return string(start, std::prev(pos));
             }
+            if (limit-- == 0)
+                throw std::runtime_error("line too long");
             *std::prev(pos) = ' ';
             continue;
         }
@@ -60,6 +68,8 @@ optional<string> Reader::line()
             _head = std::next(pos);
             return string(start, pos);
         }
+        if (limit-- == 0)
+            throw std::runtime_error("line too long");
         std::advance(pos, 1);
     }
     return std::nullopt;
@@ -150,6 +160,40 @@ void ReaderTest::trim_empty_lines_test()
 
     reader.trim_empty_lines();
     EXPECT(reader.line() == "line2");
+
+    END
+}
+
+void ReaderTest::line_limit_test()
+{
+    BEGIN
+
+    const char* content = "ab\r\n"
+                          "ab\n"
+                          "ab\r\n"
+                          "ab\n";
+    Reader      reader(buffer(content));
+
+    EXPECT(reader.line(2) == "ab");
+    EXPECT(reader.line(2) == "ab");
+
+    try
+    {
+        (void)reader.line(1);
+        EXPECT(false);
+    }
+    catch (const std::runtime_error&)
+    {
+    }
+
+    try
+    {
+        (void)reader.line(1);
+        EXPECT(false);
+    }
+    catch (const std::runtime_error&)
+    {
+    }
 
     END
 }

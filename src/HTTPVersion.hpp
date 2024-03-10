@@ -8,6 +8,7 @@ class HTTPVersion
     public:
         static constexpr const char* const PREFIX = "HTTP/";
         static const char                  DELIMITER = '.';
+        static const size_t                MAX_LENGTH = 8;
 
         HTTPVersion() = default;
         HTTPVersion(const std::string& version);

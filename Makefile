@@ -21,7 +21,6 @@ Task.cpp						\
 Reader.cpp						\
 Method.cpp						\
 HTTPVersion.cpp					\
-URI.cpp							\
 RequestLine.cpp					\
 Error.cpp						\
 Status.cpp						\
@@ -48,6 +47,7 @@ ServerAcceptTask.cpp 			\
 ServerReceiveRequestTask.cpp	\
 ServerSendResponseTask.cpp		\
 TemplateEngine.cpp              \
+HttpUri.cpp						\
 main.cpp
 
 SRCS_TEST = test/testmain.cpp
