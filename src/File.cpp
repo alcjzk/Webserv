@@ -12,7 +12,9 @@ File::~File()
     if (_fd)
     {
         if (close(*_fd) != 0)
+        {
             WARN("fd '" << *_fd << "' did not close properly: " << strerror(errno));
+        }
         INFO("closed fd '" << *_fd << "'");
     }
 }
