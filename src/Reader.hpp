@@ -1,7 +1,9 @@
 #pragma once
 
+#include <limits>
 #include <vector>
 #include <string>
+#include <limits>
 #include <optional>
 
 class Reader
@@ -15,9 +17,13 @@ class Reader
 
         /// Extracts a line from the buffer, advancing the reader accordinly.
         ///
+        /// @param limit - Maximum length of the line, not including the linefeed sequence.
+        ///
+        /// @throws std::runtime_exception if the line is too long.
+        ///
         /// Any CR not followed by a LF is converted to a SP. The terminating CRLF/LF is removed
         /// from the returned line.
-        std::optional<std::string> line();
+        std::optional<std::string> line(size_t limit = std::numeric_limits<size_t>::max());
 
         /// Advances the reader from the current position, skipping any empty
         /// lines (CRLF/LF).
@@ -45,6 +51,7 @@ class ReaderTest : public Reader
         static void line_noline_test();
         static void line_strip_bare_cr_test();
         static void trim_empty_lines_test();
+        static void line_limit_test();
 
     private:
         static std::vector<char> buffer(const char* content);
