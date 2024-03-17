@@ -80,7 +80,6 @@ class TiniNodeTest : public TiniNode
 {
     public:
         static void deepcopy_test();
-        static void duplicate_insterion_test();
         static void ownership_change_test();
 };
 
