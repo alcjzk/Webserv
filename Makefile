@@ -157,7 +157,7 @@ r: run
 
 .PHONY: fmt
 fmt:
-	clang-format -i $(SRC_DIR)/*.cpp $(SRC_DIR)/*.hpp test/*.cpp test/*.hpp
+	clang-format -i src/*.cpp src/*.hpp src/*/*.cpp src/*/*.hpp test/*.hpp
 
 vpath %.cpp $(SRC_DIR) test
 
