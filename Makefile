@@ -128,7 +128,7 @@ fclean: clean
 .PHONY: re
 re: fclean all
 
-HEADERS = $(wildcard src/**.hpp)
+HEADERS = $(wildcard src/*.hpp) $(wildcard src/*/*.hpp)
 
 test/testmain.cpp: $(HEADERS)
 	@echo $^
