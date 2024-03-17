@@ -49,8 +49,17 @@ void Request::Builder::request_line(RequestLine&& request_line)
     _request_line = std::move(request_line);
 }
 
-Request::Request(Builder&& builder)
-    : _uri(*builder._uri), _connection(builder._connection), _headers(builder._headers)
+Request Request::Builder::build() &&
+{
+    if (!_uri)
+        throw HTTPError(Status::BAD_REQUEST);
+    return Request(std::move(*_uri), _connection, std::move(_request_line), std::move(_headers));
+}
+
+Request::Request(HttpUri&& uri, Connection connection, RequestLine&& request_line,
+                 std::vector<Header>&& headers)
+    : _uri(std::move(uri)), _connection(connection), _request_line(std::move(request_line)),
+      _headers(std::move(headers))
 {
 }
 

@@ -91,7 +91,7 @@ void ReceiveRequestTask::receive_headers()
             if (line.empty())
             {
                 INFO("End of headers");
-                Request request(*std::move(_builder));
+                Request request = std::exchange(_builder, std::nullopt).value().build();
                 Runtime::enqueue(request.process(_server, std::move(_fd)));
                 _is_complete = true;
                 return;

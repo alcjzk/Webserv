@@ -22,13 +22,13 @@ class Request
                 void                   header(Header&& header);
                 void                   request_line(RequestLine&& request_line);
 
+                Request                build() &&;
+
                 std::vector<Header>    _headers;
                 RequestLine            _request_line;
                 Connection             _connection = Connection::KeepAlive;
                 std::optional<HttpUri> _uri;
         };
-
-        Request(Builder&& builder);
 
         Task*               process(const Server& server, File&& file);
         const Method&       method() const;
@@ -38,4 +38,8 @@ class Request
         Connection          _connection;
         RequestLine         _request_line;
         std::vector<Header> _headers;
+
+    private:
+        Request(HttpUri&& uri, Connection connection, RequestLine&& request_line,
+                std::vector<Header>&& headers);
 };
