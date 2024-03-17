@@ -37,7 +37,7 @@ Response* Request::into_response(const Server& server) const
         }
 
         if (route->_type == Route::REDIRECTION)
-            return new RedirectionResponse(route->_redir.value());
+            return new RedirectionResponse(route->_redir.value(), connection);
 
         Path target = route->map(uri.path());
 
@@ -48,7 +48,7 @@ Response* Request::into_response(const Server& server) const
             throw HTTPError(Status::NOT_FOUND);
 
         if (target.type() == Path::Type::REGULAR)
-            return new FileResponse(target);
+            return new FileResponse(target, connection);
 
         if (target.type() != Path::Type::DIRECTORY)
             throw HTTPError(Status::FORBIDDEN);
@@ -56,18 +56,18 @@ Response* Request::into_response(const Server& server) const
         try
         {
             if (route->_default_file.has_value())
-                return new FileResponse(target + Path(route->_default_file.value()));
+                return new FileResponse(target + Path(route->_default_file.value()), connection);
         }
         catch (const std::exception& e)
         {
             INFO("Request::into_response: " << e.what());
             if (server.map_attributes(uri.host()).dirlist())
-                return new DirectoryResponse(target, uri.path());
+                return new DirectoryResponse(target, uri.path(), connection);
             throw HTTPError(Status::NOT_FOUND);
         }
         if (!server.map_attributes(uri.host()).dirlist())
             throw HTTPError(Status::FORBIDDEN);
-        return new DirectoryResponse(target, uri.path());
+        return new DirectoryResponse(target, uri.path(), connection);
     }
     catch (const std::runtime_error& error)
     {

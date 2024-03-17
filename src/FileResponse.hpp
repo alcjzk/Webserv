@@ -7,5 +7,5 @@
 class FileResponse : public Response
 {
     public:
-        FileResponse(const Path& path, Status status = Status::OK);
+        FileResponse(const Path& path, Connection connection, Status status = Status::OK);
 };

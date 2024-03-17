@@ -7,6 +7,6 @@
 class DirectoryResponse : public Response
 {
     public:
-        DirectoryResponse(const Path& target_path, const Path& request_path,
+        DirectoryResponse(const Path& target_path, const Path& request_path, Connection connection,
                           Status status = Status::OK);
 };

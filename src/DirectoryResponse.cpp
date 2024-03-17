@@ -1,9 +1,6 @@
 #include "DirectoryResponse.hpp"
 #include <dirent.h>
-#include <stdlib.h>
 #include <sstream>
-#include <cstring>
-#include <algorithm>
 #include "Log.hpp"
 #include "HTTPError.hpp"
 
@@ -12,8 +9,8 @@ using std::ifstream;
 using std::vector;
 
 DirectoryResponse::DirectoryResponse(const Path& target_path, const Path& request_path,
-                                     Status status)
-    : Response(status)
+                                     Connection connection, Status status)
+    : Response(connection, status)
 {
     std::string cwd_path(target_path);
     const char* cwd_cstr = cwd_path.c_str();

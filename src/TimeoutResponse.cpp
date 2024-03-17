@@ -1,3 +1,3 @@
 #include "TimeoutResponse.hpp"
 
-TimeoutResponse::TimeoutResponse() : Response(Status::REQUEST_TIMEOUT, Connection::Close) {}
+TimeoutResponse::TimeoutResponse() : Response(Connection::Close, Status::REQUEST_TIMEOUT) {}

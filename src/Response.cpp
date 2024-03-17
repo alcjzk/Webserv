@@ -14,7 +14,7 @@ Response::~Response()
     _buffer = nullptr;
 }
 
-Response::Response(Status status, Connection connection)
+Response::Response(Connection connection, Status status)
     : _connection(connection), _status(status), _buffer(nullptr), _size(0), _size_remaining(0),
       _is_built(false)
 {

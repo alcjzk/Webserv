@@ -6,7 +6,8 @@ using std::filebuf;
 using std::ifstream;
 using std::vector;
 
-ErrorResponse::ErrorResponse(const Path& error_page, Status status) : Response(status)
+ErrorResponse::ErrorResponse(const Path& error_page, Status status)
+    : Response(Connection::KeepAlive, status)
 {
     filebuf*     file_rdbuf;
     size_t       file_size;
@@ -32,6 +33,7 @@ ErrorResponse::ErrorResponse(const Path& error_page, Status status) : Response(s
 }
 
 ErrorResponse::ErrorResponse(const std::string& template_str, Status status)
+    : Response(Connection::KeepAlive, status)
 {
     TemplateEngine    engine(template_str);
     std::vector<char> body;

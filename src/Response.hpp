@@ -16,7 +16,7 @@ class Response
 
         virtual ~Response();
 
-        Response(Status = Status::OK, Connection connection = Connection::KeepAlive);
+        Response(Connection connection, Status = Status::OK);
         Response(Response&&) = delete;
         Response(const Response&) = delete;
 
