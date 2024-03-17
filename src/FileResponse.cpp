@@ -5,7 +5,8 @@ using std::filebuf;
 using std::ifstream;
 using std::vector;
 
-FileResponse::FileResponse(const Path& path, Status status) : Response(status)
+FileResponse::FileResponse(const Path& path, Connection connection, Status status)
+    : Response(connection, status)
 {
     filebuf*     file_rdbuf;
     size_t       file_size;

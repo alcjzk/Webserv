@@ -48,6 +48,7 @@ ServerReceiveRequestTask.cpp	\
 ServerSendResponseTask.cpp		\
 TemplateEngine.cpp              \
 HttpUri.cpp						\
+File.cpp						\
 main.cpp
 
 SRCS_TEST = test/testmain.cpp

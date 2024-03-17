@@ -19,8 +19,9 @@
 using std::string;
 using std::vector;
 
-ServerReceiveRequestTask::ServerReceiveRequestTask(const Server& server, int fd)
-    : Task(fd, Readable, std::chrono::system_clock::now() + server.config().keepalive_timeout()),
+ServerReceiveRequestTask::ServerReceiveRequestTask(const Server& server, File&& file)
+    : Task(std::move(file), Readable,
+           std::chrono::system_clock::now() + server.config().keepalive_timeout()),
       _expect(REQUEST_LINE), _bytes_received_total(0), _reader(vector<char>(_header_buffer_size)),
       _is_partial_data(true), _server(server)
 {
@@ -96,7 +97,7 @@ void ServerReceiveRequestTask::receive_headers()
             {
                 INFO("End of headers");
                 response = _request.into_response(_server);
-                Runtime::enqueue(new ServerSendResponseTask(_server.config(), _fd, response));
+                Runtime::enqueue(new ServerSendResponseTask(_server, std::move(_fd), response));
                 _is_complete = true;
                 return;
             }
@@ -146,7 +147,6 @@ void ServerReceiveRequestTask::run()
         // Client closed the connection
         assert(error == Error::CLOSED);
         WARN(error.what());
-        close(_fd);
         _is_complete = true;
     }
     catch (const HTTPError& error)
@@ -154,23 +154,19 @@ void ServerReceiveRequestTask::run()
         std::optional<Path> error_path = _server.config().error_page(error.status());
 
         WARN(error.what());
+
+        Response* response;
         if (error_path.has_value())
-        {
-            Runtime::enqueue(new ServerSendResponseTask(
-                _server.config(), _fd, new ErrorResponse(error_path.value(), error.status())));
-        }
+            response = new ErrorResponse(error_path.value(), error.status());
         else
-        {
-            Runtime::enqueue(new ServerSendResponseTask(
-                _server.config(), _fd,
-                new ErrorResponse(_server.config().error_str(), error.status())));
-        }
+            response = new ErrorResponse(_server.config().error_str(), error.status());
+
+        Runtime::enqueue(new ServerSendResponseTask(_server, std::move(_fd), response));
         _is_complete = true;
     }
     catch (const std::exception& error)
     {
         ERR(error.what());
-        close(_fd);
         _is_complete = true;
     }
 }
@@ -179,7 +175,5 @@ void ServerReceiveRequestTask::abort()
 {
     INFO("ReceiveRequestTask for fd " << _fd << " timed out");
     _is_complete = true;
-    Runtime::enqueue(new ServerSendResponseTask(_server.config(), _fd, new TimeoutResponse()));
+    Runtime::enqueue(new ServerSendResponseTask(_server, std::move(_fd), new TimeoutResponse()));
 }
-
-ServerReceiveRequestTask::~ServerReceiveRequestTask() {}

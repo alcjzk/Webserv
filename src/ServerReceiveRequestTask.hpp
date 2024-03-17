@@ -5,21 +5,15 @@
 #include "Server.hpp"
 #include "Reader.hpp"
 #include "Request.hpp"
+#include "File.hpp"
 
 class ServerReceiveRequestTask : public Task
 {
     public:
-        virtual ~ServerReceiveRequestTask() override;
+        ServerReceiveRequestTask(const Server& server, File&& file);
 
-        ServerReceiveRequestTask(const Server& server, int fd);
-        ServerReceiveRequestTask(const ServerReceiveRequestTask&) = delete;
-        ServerReceiveRequestTask(ServerReceiveRequestTask&&) = delete;
-
-        ServerReceiveRequestTask& operator=(const ServerReceiveRequestTask&) = delete;
-        ServerReceiveRequestTask& operator=(ServerReceiveRequestTask&&) = delete;
-
-        virtual void              run() override;
-        virtual void              abort() override;
+        virtual void run() override;
+        virtual void abort() override;
 
     private:
         typedef enum Expect

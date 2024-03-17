@@ -2,14 +2,15 @@
 
 #include "Task.hpp"
 #include "Response.hpp"
-#include "Config.hpp"
+#include "Server.hpp"
+#include "File.hpp"
 
 class ServerSendResponseTask : public Task
 {
     public:
         virtual ~ServerSendResponseTask() override;
 
-        ServerSendResponseTask(const Config& config, int fd, Response* response);
+        ServerSendResponseTask(const Server& server, File&& file, Response* response);
         ServerSendResponseTask(const ServerSendResponseTask&) = delete;
         ServerSendResponseTask(ServerSendResponseTask&&) = delete;
 
@@ -20,5 +21,6 @@ class ServerSendResponseTask : public Task
         virtual void            abort() override;
 
     private:
-        Response* _response;
+        Response*     _response; // TODO: Replace with unique_ptr
+        const Server& _server;
 };
