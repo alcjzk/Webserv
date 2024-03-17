@@ -55,8 +55,9 @@ class TiniNode
         TiniNode(TiniNodeType type);
         TiniNode(const TiniNode& other);
         TiniNode& operator=(const TiniNode& other);
-        TiniNode(TiniNode&& other) = default;
-        TiniNode& operator=(TiniNode&& other) = default;
+        TiniNode& operator=(const TiniNode* other);
+        TiniNode(TiniNode&& other) noexcept;
+        TiniNode& operator=(TiniNode&& other) noexcept;
         TiniNode(std::string s);
         TiniNode                          operator[](size_t i) const;
         TiniNode&                         operator[](size_t i);
