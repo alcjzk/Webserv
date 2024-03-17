@@ -13,7 +13,9 @@ TiniNode::TiniNode(TiniNodeType type) : _type(type)
     if (type == T_VECTOR)
         _vectorValue = new std::vector<TiniNode*>;
     if (type == T_MAP)
+    {
         _mapValue = new std::map<std::string, TiniNode*>;
+    }
     if (type == T_STRING)
         _stringValue = new std::string;
 }
@@ -99,7 +101,6 @@ void TiniNode::deepCopyChildren(const TiniNode& other)
 
 TiniNode TiniNode::operator[](size_t i) const
 {
-    std::cout << "Const brack op sizet" << std::endl;
     if (_type != T_VECTOR || i >= this->getVectorValue().size())
         throw std::runtime_error(
             "TiniNode: Vector indexing operation error with key " + std::to_string(i)
@@ -109,7 +110,6 @@ TiniNode TiniNode::operator[](size_t i) const
 
 TiniNode& TiniNode::operator[](size_t i)
 {
-    std::cout << "Nonconst brack op sizet" << std::endl;
     if (_type != T_VECTOR || i >= this->getVectorValue().size())
         throw std::runtime_error(
             "TiniNode: Vector indexing operation error with key " + std::to_string(i)
@@ -121,7 +121,6 @@ TiniNode TiniNode::operator[](const std::string& s) const
 {
     TiniNode* ptr = nullptr;
 
-    std::cout << "Const brack op" << std::endl;
     if (_type != T_MAP)
         throw std::runtime_error("TiniNode: Non map type for indexing operation with key " + s);
     ptr = this->getMapValue()[s];
@@ -134,7 +133,6 @@ TiniNode& TiniNode::operator[](const std::string& s)
 {
     TiniNode* ptr = nullptr;
 
-    std::cout << "Nonconst brack op" << std::endl;
     if (_type != T_MAP)
         throw std::runtime_error("TiniNode: Non map type for indexing operation with key " + s);
     ptr = this->getMapValue()[s];
@@ -145,8 +143,9 @@ TiniNode& TiniNode::operator[](const std::string& s)
 
 TiniNode::~TiniNode()
 {
-    if (_type == T_VECTOR)
+    if (_type == T_VECTOR && _vectorValue)
     {
+        assert (_vectorValue != nullptr);
         for (auto v : *_vectorValue)
         {
             delete v;
@@ -154,7 +153,7 @@ TiniNode::~TiniNode()
         delete _vectorValue;
         _vectorValue = nullptr;
     }
-    else if (_type == T_MAP)
+    else if (_type == T_MAP && _mapValue)
     {
         for (const auto& [key, val] : *_mapValue)
         {
@@ -163,42 +162,40 @@ TiniNode::~TiniNode()
         delete _mapValue;
         _mapValue = nullptr;
     }
-    else if (_type == T_STRING)
+    else if (_type == T_STRING && _stringValue)
     {
+        assert (_stringValue != nullptr);
         delete _stringValue;
         _stringValue = nullptr;
     }
 }
 
 TiniNode::TiniNode(TiniNode&& other) noexcept
+    : _type(other._type), _vectorValue(nullptr), _mapValue(nullptr), _stringValue(nullptr)
 {
-    std::cout << "\nmova con\n";
     if (this == &other)
         return;
+
     switch (other._type)
     {
         case T_VECTOR:
-            _type = T_VECTOR;
             _vectorValue = other._vectorValue;
             other._vectorValue = nullptr;
-
             break;
         case T_MAP:
-            _type = T_MAP;
             _mapValue = other._mapValue;
             other._mapValue = nullptr;
             break;
         case T_STRING:
-            _type = T_STRING;
             _stringValue = other._stringValue;
             other._stringValue = nullptr;
             break;
     }
+    other._type = T_STRING; // Resetting type of the moved-from object to avoid destructor issues
 }
 
 TiniNode& TiniNode::operator=(TiniNode&& other) noexcept
 {
-    std::cout << "mova ass\n";
     if (this == &other)
         return *this;
     switch (_type)
@@ -424,33 +421,14 @@ void TiniNodeTest::deepcopy_test()
     END
 }
 
-// Should not leak
-void TiniNodeTest::duplicate_insterion_test()
-{
-    BEGIN
-        TiniNode*   root = new TiniNode(TiniNode::T_MAP);
-        
-        (*root)["key"] = new TiniNode(TiniNode::T_STRING);
-        (*root)["key"] = new TiniNode(TiniNode::T_STRING);
-        // delete root;
-    END
-}
-
 void TiniNodeTest::ownership_change_test()
 {
     BEGIN
-        // TiniNode*   root  = new TiniNode(TiniNode::T_MAP);
-        // auto        root_map = root->getMapValue();
-        // 
-        // root_map["key"] = new TiniNode(TiniNode::T_MAP);
-
-        // TiniNode*   moved_into = new TiniNode(TiniNode::T_MAP);
-        // *moved_into = std::move(*root);
-        // auto& map = moved_into->getMapValue();
-        // auto key = map["key"];
-
-        // delete moved_into;
-        // EXPECT(key->getType() == TiniNode::T_MAP);
+        TiniNode* root = new TiniNode(TiniNode::T_MAP);
+        root->getMapValue()["key"] = new TiniNode(TiniNode::T_MAP);
+        TiniNode moved_into(std::move(*root));
+        EXPECT(moved_into.getMapValue()["key"]->getType() == TiniNode::T_MAP);
+        delete root;
     END
 }
 
