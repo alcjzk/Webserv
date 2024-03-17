@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cctype>
 #include <stdexcept>
 #include "Log.hpp"
 #include "Server.hpp"
@@ -15,7 +16,9 @@ Response* Request::into_response(const Server& server) const
 {
     try
     {
-        const Header* host = header("Host");
+        Response::Connection connection = Response::Connection::KeepAlive;
+        const Header*        host = header("Host");
+
         if (!host)
             throw HTTPError(Status::BAD_REQUEST);
 
@@ -23,6 +26,15 @@ Response* Request::into_response(const Server& server) const
         const Route* route = server.route(uri.path(), uri.host());
         if (!route)
             throw HTTPError(Status::BAD_REQUEST);
+
+        if (const Header* connection_header = header("Connection"))
+        {
+            string value(connection_header->_value);
+
+            (void)std::transform(value.begin(), value.end(), value.begin(), toupper);
+            if (connection_header->_value == "close")
+                connection = Response::Connection::Close;
+        }
 
         if (route->_type == Route::REDIRECTION)
             return new RedirectionResponse(route->_redir.value());
