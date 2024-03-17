@@ -432,8 +432,7 @@ void TiniNodeTest::duplicate_insterion_test()
         
         (*root)["key"] = new TiniNode(TiniNode::T_STRING);
         (*root)["key"] = new TiniNode(TiniNode::T_STRING);
-        // delete root_map["key"];
-        delete root;
+        // delete root;
     END
 }
 
