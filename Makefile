@@ -10,7 +10,7 @@
 NAME = webserv
 
 OBJ_DIR = obj
-SRC_DIR = src
+SRC_DIR = $(sort $(dir $(wildcard src/*/)))
 BIN_DIR = bin
 
 SRCS =							\
@@ -64,8 +64,8 @@ CC		= c++
 STD		= c++17
 SHELL	= /bin/sh
 
-$(DEBUG_TARGET) $(TEST_TARGET): CFLAGS = $(STD:%=-std=%) -MP -MMD -Wall -Wextra -Werror -g -Wno-unused-variable -Wno-unused-parameter -O0 -D TEST -I$(SRC_DIR) -Itest -D LOG_ENABLE -D LOGLEVEL_INFO
-$(RELEASE_TARGET): CFLAGS = $(STD:%=-std=%) -MP -MMD -Wall -Wextra -Werror -Wpedantic -Wno-unused-variable -Wno-unused-parameter -O3 -I$(SRC_DIR) -D LOG_ENABLE -D LOGLEVEL_ERR
+$(DEBUG_TARGET) $(TEST_TARGET): CFLAGS = $(STD:%=-std=%) -MP -MMD -Wall -Wextra -Werror -g -Wno-unused-variable -Wno-unused-parameter -O0 -D TEST $(SRC_DIR:%=-I%) -Itest -D LOG_ENABLE -D LOGLEVEL_INFO
+$(RELEASE_TARGET): CFLAGS = $(STD:%=-std=%) -MP -MMD -Wall -Wextra -Werror -Wpedantic -Wno-unused-variable -Wno-unused-parameter -O3 $(SRC_DIR:%=-I%) -D LOG_ENABLE -D LOGLEVEL_ERR
 
 OBJS_DEBUG = $(SRCS:%.cpp=$(OBJ_DIR)/debug/%.o)
 OBJS_RELEASE = $(SRCS:%.cpp=$(OBJ_DIR)/release/%.o)
@@ -128,9 +128,10 @@ fclean: clean
 .PHONY: re
 re: fclean all
 
-HEADERS = $(patsubst %.cpp,$(abspath $(SRC_DIR))/%.hpp,$(filter-out main.cpp,$(SRCS)))
+HEADERS = $(wildcard src/**.hpp)
 
 test/testmain.cpp: $(HEADERS)
+	@echo $^
 	@python3 test/testgen.py test/testmain.cpp $(HEADERS)
 	@echo Generated $@
 
@@ -159,6 +160,7 @@ fmt:
 	clang-format -i $(SRC_DIR)/*.cpp $(SRC_DIR)/*.hpp test/*.cpp test/*.hpp
 
 vpath %.cpp $(SRC_DIR) test
+
 -include $(SRCS:%.cpp=$(OBJ_DIR)/debug/%.d)
 -include $(SRCS:%.cpp=$(OBJ_DIR)/release/%.d)
 -include $(SRCS_TEST:%.cpp=$(OBJ_DIR)/%.d)
