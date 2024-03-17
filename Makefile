@@ -10,7 +10,7 @@
 NAME = webserv
 
 OBJ_DIR = obj
-SRC_DIR = $(sort $(dir $(wildcard src/*/)))
+SRC_DIR = $(sort $(dir $(wildcard src/*/))) src
 BIN_DIR = bin
 
 SRCS =							\
