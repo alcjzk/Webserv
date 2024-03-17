@@ -7,10 +7,10 @@
 #include "Request.hpp"
 #include "File.hpp"
 
-class ServerReceiveRequestTask : public Task
+class ReceiveRequestTask : public Task
 {
     public:
-        ServerReceiveRequestTask(const Server& server, File&& file);
+        ReceiveRequestTask(const Server& server, File&& file);
 
         virtual void run() override;
         virtual void abort() override;

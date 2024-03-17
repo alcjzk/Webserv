@@ -5,8 +5,8 @@
 #include <stdexcept>
 #include <vector>
 #include <string>
-#include "ServerReceiveRequestTask.hpp"
-#include "ServerSendResponseTask.hpp"
+#include "ReceiveRequestTask.hpp"
+#include "SendResponseTask.hpp"
 #include "TimeoutResponse.hpp"
 #include "HTTPError.hpp"
 #include "RequestLine.hpp"
@@ -19,7 +19,7 @@
 using std::string;
 using std::vector;
 
-ServerReceiveRequestTask::ServerReceiveRequestTask(const Server& server, File&& file)
+ReceiveRequestTask::ReceiveRequestTask(const Server& server, File&& file)
     : Task(std::move(file), Readable,
            std::chrono::system_clock::now() + server.config().keepalive_timeout()),
       _expect(REQUEST_LINE), _bytes_received_total(0), _reader(vector<char>(_header_buffer_size)),
@@ -27,17 +27,17 @@ ServerReceiveRequestTask::ServerReceiveRequestTask(const Server& server, File&& 
 {
 }
 
-size_t ServerReceiveRequestTask::buffer_size_available()
+size_t ReceiveRequestTask::buffer_size_available()
 {
     return _header_buffer_size - _bytes_received_total;
 }
 
-char* ServerReceiveRequestTask::buffer_head()
+char* ReceiveRequestTask::buffer_head()
 {
     return _reader.data() + _bytes_received_total;
 }
 
-void ServerReceiveRequestTask::fill_buffer()
+void ReceiveRequestTask::fill_buffer()
 {
     ssize_t bytes_received = 0;
 
@@ -59,7 +59,7 @@ void ServerReceiveRequestTask::fill_buffer()
     _is_partial_data = false;
 }
 
-void ServerReceiveRequestTask::receive_start_line()
+void ReceiveRequestTask::receive_start_line()
 {
     try
     {
@@ -83,7 +83,7 @@ void ServerReceiveRequestTask::receive_start_line()
     }
 }
 
-void ServerReceiveRequestTask::receive_headers()
+void ReceiveRequestTask::receive_headers()
 {
     string    line;
     Response* response;
@@ -97,7 +97,7 @@ void ServerReceiveRequestTask::receive_headers()
             {
                 INFO("End of headers");
                 response = _request.into_response(_server);
-                Runtime::enqueue(new ServerSendResponseTask(_server, std::move(_fd), response));
+                Runtime::enqueue(new SendResponseTask(_server, std::move(_fd), response));
                 _is_complete = true;
                 return;
             }
@@ -119,7 +119,7 @@ void ServerReceiveRequestTask::receive_headers()
     }
 }
 
-void ServerReceiveRequestTask::run()
+void ReceiveRequestTask::run()
 {
     try
     {
@@ -161,7 +161,7 @@ void ServerReceiveRequestTask::run()
         else
             response = new ErrorResponse(_server.config().error_str(), error.status());
 
-        Runtime::enqueue(new ServerSendResponseTask(_server, std::move(_fd), response));
+        Runtime::enqueue(new SendResponseTask(_server, std::move(_fd), response));
         _is_complete = true;
     }
     catch (const std::exception& error)
@@ -171,9 +171,9 @@ void ServerReceiveRequestTask::run()
     }
 }
 
-void ServerReceiveRequestTask::abort()
+void ReceiveRequestTask::abort()
 {
     INFO("ReceiveRequestTask for fd " << _fd << " timed out");
     _is_complete = true;
-    Runtime::enqueue(new ServerSendResponseTask(_server, std::move(_fd), new TimeoutResponse()));
+    Runtime::enqueue(new SendResponseTask(_server, std::move(_fd), new TimeoutResponse()));
 }

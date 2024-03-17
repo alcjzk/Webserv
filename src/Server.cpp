@@ -7,7 +7,7 @@
 #include "Server.hpp"
 #include "Log.hpp"
 #include "Runtime.hpp"
-#include "ServerAcceptTask.hpp"
+#include "AcceptTask.hpp"
 
 using std::string;
 
@@ -39,7 +39,7 @@ Server::Server(Config&& config) : _config(std::move(config)), _port(_config.port
     if (listen(_fd, _config.backlog()) == -1)
         throw std::runtime_error(strerror(errno));
     INFO("Listening on " << _fd);
-    Runtime::enqueue(new ServerAcceptTask(*this));
+    Runtime::enqueue(new AcceptTask(*this));
 }
 
 const HTTPVersion Server::http_version()

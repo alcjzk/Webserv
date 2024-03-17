@@ -43,9 +43,9 @@ DirectoryResponse.cpp			\
 RedirectionResponse.cpp			\
 ErrorResponse.cpp			    \
 TimeoutResponse.cpp 			\
-ServerAcceptTask.cpp 			\
-ServerReceiveRequestTask.cpp	\
-ServerSendResponseTask.cpp		\
+AcceptTask.cpp					\
+ReceiveRequestTask.cpp			\
+SendResponseTask.cpp			\
 TemplateEngine.cpp              \
 HttpUri.cpp						\
 File.cpp						\

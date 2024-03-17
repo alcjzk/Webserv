@@ -3,10 +3,10 @@
 #include "Task.hpp"
 #include "Server.hpp"
 
-class ServerAcceptTask : public Task
+class AcceptTask : public Task
 {
     public:
-        ServerAcceptTask(const Server& server);
+        AcceptTask(const Server& server);
 
         virtual void run() override;
 

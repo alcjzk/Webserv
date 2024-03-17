@@ -2,25 +2,24 @@
 #include <cassert>
 #include <chrono>
 #include <utility>
-#include "ServerSendResponseTask.hpp"
+#include "SendResponseTask.hpp"
 #include "Log.hpp"
 #include "Runtime.hpp"
-#include "ServerReceiveRequestTask.hpp"
+#include "ReceiveRequestTask.hpp"
 
-ServerSendResponseTask::ServerSendResponseTask(const Server& server, File&& file,
-                                               Response* response)
+SendResponseTask::SendResponseTask(const Server& server, File&& file, Response* response)
     : Task(std::move(file), Writable,
            std::chrono::system_clock::now() + server.config().send_timeout()),
       _response(response), _server(server)
 {
 }
 
-ServerSendResponseTask::~ServerSendResponseTask()
+SendResponseTask::~SendResponseTask()
 {
     delete _response;
 }
 
-void ServerSendResponseTask::run()
+void SendResponseTask::run()
 {
     try
     {
@@ -37,12 +36,12 @@ void ServerSendResponseTask::run()
     }
     if (_response->_connection == Response::Connection::KeepAlive)
     {
-        Runtime::enqueue(new ServerReceiveRequestTask(_server, std::move(_fd)));
+        Runtime::enqueue(new ReceiveRequestTask(_server, std::move(_fd)));
     }
     _is_complete = true;
 }
 
-void ServerSendResponseTask::abort()
+void SendResponseTask::abort()
 {
     INFO("ServerSendResponseTask for fd " << _fd << " timed out.");
     _is_complete = true;

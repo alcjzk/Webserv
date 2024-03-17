@@ -3,17 +3,14 @@
 #include <fcntl.h>
 #include <string.h>
 #include <utility>
-#include "ServerAcceptTask.hpp"
+#include "AcceptTask.hpp"
 #include "Log.hpp"
 #include "Runtime.hpp"
-#include "ServerReceiveRequestTask.hpp"
+#include "ReceiveRequestTask.hpp"
 
-ServerAcceptTask::ServerAcceptTask(const Server& server)
-    : Task(server.fd(), Readable), _server(server)
-{
-}
+AcceptTask::AcceptTask(const Server& server) : Task(server.fd(), Readable), _server(server) {}
 
-void ServerAcceptTask::run()
+void AcceptTask::run()
 {
     int fd;
 
@@ -30,7 +27,7 @@ void ServerAcceptTask::run()
             throw std::runtime_error(strerror(errno));
         }
         INFO("Client connected on fd " << file);
-        Runtime::enqueue(new ServerReceiveRequestTask(_server, std::move(file)));
+        Runtime::enqueue(new ReceiveRequestTask(_server, std::move(file)));
     }
     catch (const std::runtime_error& error)
     {
