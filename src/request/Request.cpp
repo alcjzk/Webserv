@@ -1,89 +1,116 @@
 #include <algorithm>
 #include <cctype>
 #include <stdexcept>
+#include <utility>
 #include "Log.hpp"
+#include "RequestLine.hpp"
 #include "Server.hpp"
 #include "FileResponse.hpp"
 #include "DirectoryResponse.hpp"
 #include "RedirectionResponse.hpp"
+#include "SendResponseTask.hpp"
 #include "HTTPError.hpp"
 #include "Request.hpp"
 #include "HttpUri.hpp"
 
 using std::string;
 
-Response* Request::into_response(const Server& server) const
+void Request::Builder::header(Header&& header)
 {
+    // TODO: Protect against duplicates
     try
     {
-        Response::Connection connection = Response::Connection::KeepAlive;
-        const Header*        host = header("Host");
-
-        if (!host)
-            throw HTTPError(Status::BAD_REQUEST);
-
-        HttpUri      uri(_request_line.request_target(), host->_value);
-        const Route* route = server.route(uri.path(), uri.host());
-        if (!route)
-            throw HTTPError(Status::BAD_REQUEST);
-
-        if (const Header* connection_header = header("Connection"))
+        if (header._name == "Host")
         {
-            string value(connection_header->_value);
-
-            (void)std::transform(value.begin(), value.end(), value.begin(), toupper);
-            if (connection_header->_value == "close")
-                connection = Response::Connection::Close;
+            _uri = HttpUri(_request_line.request_target(), header._value);
         }
-
-        if (route->_type == Route::REDIRECTION)
-            return new RedirectionResponse(route->_redir.value(), connection);
-
-        Path target = route->map(uri.path());
-
-        if (!route->method_get())
-            throw HTTPError(Status::FORBIDDEN);
-
-        if (target.type() == Path::Type::NOT_FOUND)
-            throw HTTPError(Status::NOT_FOUND);
-
-        if (target.type() == Path::Type::REGULAR)
-            return new FileResponse(target, connection);
-
-        if (target.type() != Path::Type::DIRECTORY)
-            throw HTTPError(Status::FORBIDDEN);
-
-        try
+        else if (header._name == "Connection")
         {
-            if (route->_default_file.has_value())
-                return new FileResponse(target + Path(route->_default_file.value()), connection);
+            (void)std::transform(header._value.begin(), header._value.end(), header._value.begin(),
+                                 toupper);
+            if (header._value == "close")
+            {
+                _connection = Connection::Close;
+            }
         }
-        catch (const std::exception& e)
-        {
-            INFO("Request::into_response: " << e.what());
-            if (server.map_attributes(uri.host()).dirlist())
-                return new DirectoryResponse(target, uri.path(), connection);
-            throw HTTPError(Status::NOT_FOUND);
-        }
-        if (!server.map_attributes(uri.host()).dirlist())
-            throw HTTPError(Status::FORBIDDEN);
-        return new DirectoryResponse(target, uri.path(), connection);
+        _headers.push_back(std::move(header));
     }
     catch (const std::runtime_error& error)
     {
-        WARN("Request::into_response: " << error.what());
+        WARN("RequestBuilder::header: `" << header._value << "`: " << error.what());
         throw HTTPError(Status::BAD_REQUEST);
     }
+}
+
+void Request::Builder::request_line(RequestLine&& request_line)
+{
+    if (!request_line.http_version().is_compatible_with(Server::http_version()))
+        throw HTTPError(Status::HTTP_VERSION_NOT_SUPPORTED);
+    _request_line = std::move(request_line);
+}
+
+Request::Request(Builder&& builder)
+    : _uri(*builder._uri), _connection(builder._connection), _headers(builder._headers)
+{
+}
+
+Task* Request::process(const Server& server, File&& file)
+{
+    Response*    response;
+
+    const Route* route = server.route(_uri.path(), _uri.host());
+
+    if (route->_type == Route::REDIRECTION)
+    {
+        response = new RedirectionResponse(route->_redir.value(), _connection);
+        return new SendResponseTask(server, std::move(file), response);
+    }
+
+    Path target = route->map(_uri.path());
+    if (!route->method_get())
+        throw HTTPError(Status::FORBIDDEN);
+
+    if (target.type() == Path::Type::NOT_FOUND)
+        throw HTTPError(Status::NOT_FOUND);
+
+    if (target.type() == Path::Type::REGULAR)
+    {
+        response = new FileResponse(target, _connection);
+        return new SendResponseTask(server, std::move(file), response);
+    }
+
+    if (target.type() != Path::Type::DIRECTORY)
+        throw HTTPError(Status::FORBIDDEN);
+
+    try
+    {
+        if (route->_default_file.has_value())
+        {
+            response = new FileResponse(target + Path(route->_default_file.value()), _connection);
+            return new SendResponseTask(server, std::move(file), response);
+        }
+    }
+    catch (const std::exception& e)
+    {
+        INFO("Request::into_response: " << e.what());
+        if (server.map_attributes(_uri.host()).dirlist())
+        {
+            response = new DirectoryResponse(target, _uri.path(), _connection);
+            return new SendResponseTask(server, std::move(file), response);
+        }
+        throw HTTPError(Status::NOT_FOUND);
+    }
+
+    if (!server.map_attributes(_uri.host()).dirlist())
+        throw HTTPError(Status::FORBIDDEN);
+
+    response = new DirectoryResponse(target, _uri.path(), _connection);
+    return new SendResponseTask(server, std::move(file), response);
 }
 
 const Method& Request::method() const
 {
     return _request_line.method();
-}
-
-const HTTPVersion& Request::http_version() const
-{
-    return _request_line.http_version();
 }
 
 const Header* Request::header(const string& name) const
