@@ -13,7 +13,6 @@
 #include "Runtime.hpp"
 #include "Error.hpp"
 #include "Log.hpp"
-#include "http.hpp"
 #include "ErrorResponse.hpp"
 
 using std::string;
@@ -64,12 +63,8 @@ void ReceiveRequestTask::receive_start_line()
     try
     {
         _reader.trim_empty_lines();
-        _request._request_line = RequestLine(_reader.line(RequestLine::MAX_LENGTH).value());
-        if (!_request.http_version().is_compatible_with(Server::http_version()))
-        {
-            throw HTTPError(Status::HTTP_VERSION_NOT_SUPPORTED);
-        }
-        INFO(_request._request_line);
+        _builder->request_line(_reader.line(RequestLine::MAX_LENGTH).value());
+        INFO(_builder->_request_line);
         _expect = HEADERS;
         _expire_time = std::chrono::system_clock::now() + _server.config().client_header_timeout();
     }
@@ -96,21 +91,13 @@ void ReceiveRequestTask::receive_headers()
             if (line.empty())
             {
                 INFO("End of headers");
-                response = _request.into_response(_server);
-                Runtime::enqueue(new SendResponseTask(_server, std::move(_fd), response));
+                Request request = std::exchange(_builder, std::nullopt).value().build();
+                Runtime::enqueue(request.process(_server, std::move(_fd)));
                 _is_complete = true;
                 return;
             }
-            // Append to pre-existing headers when header is prefixed by SP/HT
-            if ((line[0] == http::SP || line[0] == http::HT) && !_request._headers.empty())
-            {
-                _request._headers.back().append(line);
-            }
-            else
-            {
-                _request._headers.push_back(Header(line));
-            }
-            INFO(_request._headers.back());
+            _builder->header(line);
+            INFO(_builder->_headers.back());
         }
     }
     catch (const std::bad_optional_access&)
