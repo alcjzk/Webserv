@@ -64,7 +64,7 @@ CC		= c++
 STD		= c++17
 SHELL	= /bin/sh
 
-$(DEBUG_TARGET) $(TEST_TARGET): CFLAGS = $(STD:%=-std=%) -MP -MMD -Wall -Wextra -Werror -g -Wno-unused-variable -Wno-unused-parameter -O0 -D TEST $(SRC_DIR:%=-I%) -Itest -D LOG_ENABLE -D LOGLEVEL_INFO
+$(DEBUG_TARGET) $(TEST_TARGET): CFLAGS = $(STD:%=-std=%) -MP -MMD -Wall -Wextra -Werror -g -Wno-unused-variable -Wno-unused-parameter -O0 -D TEST $(SRC_DIR:%=-I%) -Itest -D LOG_ENABLE -D LOGLEVEL_INFO -fsanitize=address
 $(RELEASE_TARGET): CFLAGS = $(STD:%=-std=%) -MP -MMD -Wall -Wextra -Werror -Wpedantic -Wno-unused-variable -Wno-unused-parameter -O3 $(SRC_DIR:%=-I%) -D LOG_ENABLE -D LOGLEVEL_ERR
 
 OBJS_DEBUG = $(SRCS:%.cpp=$(OBJ_DIR)/debug/%.o)

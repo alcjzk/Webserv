@@ -206,3 +206,17 @@ void TiniTree::trySetFirst(TiniNode* current, std::string key)
     if (!current->getFirstValue().has_value() && key[0] != '/')
         current->setFirstValue(*current->getMapValue().find(key));
 }
+
+#ifdef TEST
+
+void TiniTreeTest::first_insertion_test()
+{
+
+}
+
+void TiniTreeTest::double_insertion_test()
+{
+
+}
+
+#endif
