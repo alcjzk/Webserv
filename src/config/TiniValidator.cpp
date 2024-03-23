@@ -30,7 +30,7 @@ int TiniValidator::validateContext(std::string ctx, int row)
                 if (a == _next_state)
                 {
                     good = 1;
-                    break ;
+                    break;
                 }
             }
             if (good != 1)
