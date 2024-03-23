@@ -44,6 +44,7 @@ CGIWriteTask::CGIWriteTask(Request&& request, int client_fd)
         }
         exit(0);
         }
+        run();
     }
 
 // convert std::vector<char*> to char**

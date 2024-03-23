@@ -26,6 +26,6 @@ void CGIReadTask::run()
     //{
     //    body.insert(body.end(), buffer, buffer + bytesRead);
     //}
-
+    ServerSendResponseTask();
 
 }
