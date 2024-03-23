@@ -24,6 +24,8 @@ class CGIWriteTask : public Task
         // Write body from request to cgi, enqueue CGIReadTask
         virtual void            run() override;
 
+        char** Environment();
+
         // TODO: override Task::abort (signal child to exit)
 
     private:
