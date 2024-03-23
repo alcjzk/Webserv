@@ -1,52 +1,46 @@
-[servers.alpha]
-    host = 127.0.0.1
-    port = 8080
-    [servers.alpha./errorpages]
-        404 = err/404.html
-        403 = err/403.html
-    [servers.alpha.localhost]
-        directory_listing = true
-        [servers.alpha.localhost.routes./]
-            type = normal
-            path = www/
-            methods = GET, POST, DELETE
-            upload = www/uploads/
-            default_file = index.html
-            [servers.alpha.localhost.routes./.cgi]
-                .py=/bin/python3
-        [servers.alpha.localhost.routes./source]
-            type = normal
-            path = src/
-            methods = GET
-        [servers.alpha.localhost.routes./redirection]
-            type = redirection
-            path = http://www.google.com
-            methods = GET
-    [servers.alpha.alternative]
-        directory_listing = false
-        [servers.alpha.alternative.routes./]
-            type = normal
-            path = /
-            methods = GET
-            default_file = index.html
+[GXzTGU.LpzUUGO.h.BnQk.NV.Cz.B.sm.P.ztq.zjOiqdt.HFM.rOIeWIzcJ.QlE]
+JGOlpE=AZQuyL
+YiPIHd=MktiiX
+LAQnKr=hzncSV
+Gajijo=sOBGmC
+[KglEvj.y.qMY.V.CJIboa.yJAYOOMlChuUSuoP.s.l.omYxhRmTsWq.HJ.KXpG.CZjQYpP.Hq.hlxnk.aZs.UB.JBLpNxQrJiSnMY.b.cjeHxJ.qw.w.mQRDSfyx.peqEVP.R.srSiCCL.zd.K.IWyeuiOh.LX.T.GYhUoVN.V.q.NKHUCD.OgnTETT.Z.UUk.lED]
+PnbCLm=NlFEmp
+bWAaXp=ysTapx
+QFIxpk=QzBzLI
+HjFVLr=cssgii
+[[v.Z.UhACcEGksFUjK.GcHgsgW.HeSq.v.BvFWTxSPX.sjnbyTtY.gphn.AF.Yex.cMPF.tJRTDmjy.K.a.a.LP.l.Ppm.TnJlIgWCF.C.aS.nXc.PIzx.LPSO.Arm.M.tm.zElYSR.QA.dJC.FX.avrD.u.Sozoazy.b.OHFK.epBX.J.uQu.FF.GPAZFbFqC]]
+uRyDjW=GWvFLQ
+ItsODG=htaANN
+GmrXau=HHzLWC
+MCyTGC=zoANYX
+[[hQeOpBX.ywYBU.XJp.I.vU.UV.wbr.x.HCHLKJL.i.xtWITdC.DsdgkyuZv.K.OOQB.uN.hwhrD.ZuXo.bVhYN.ss.r.klwWxRAfxVD.o.gJPHHDA.P.gkU.e.IjqFXual]]
+qsVYmL=FVKlrr
+hxAUmI=diJjqT
+RxWrkv=ppPwJW
+ZSrrUA=JfpwMi
+[[eNB.M.b.E.R.E.j.sfmi.S.SmtMCE.WIJ.sNe.oV.sO.FhNr.S.gS.z.w.xNvt.Lg.GtJmJwAaCAHv.jD.sa.ATHAPrE.hz.LFMg.LXXtj.JKJaGH.MVFjlDG.M.lZV.wjPnqy.XKNdsMnl.Z.kZE.Mvhk.fLy.zEztak.WzRXiZKi.jP.FYc.M.fo]]
+tLgZEy=fybBNr
+LYjNjp=XyRmqm
+WdsNLl=ODCUbK
+CFlAkf=owZGeX
+[tb.jxs.r.sym.AOqj.cHa.Iq.cp.zXTtqAe.pd.F.tqDVnzxCBE.dvsYydSOSPWwo.uEzJWR.AMR.OW.p.nTYzMjzlxMbghYH.uO.p.hSV.bLyd.TZ.Hif.xSZPpz.jgiHhTLd.A.AOQ.LEnU.HYZV.J.UKCfZb.cONdU.VtHZGTt.Bk.L.MkCd.M.M.lAV.rjlg]
+XTtbog=XHrcsM
+KFYwRv=ypFLtx
+cuscyH=Acllyd
+VOLAVy=gdCCrL
+[[SucUtsfcYquJZPlwdN.y.p.cqHoVJ.Q.m.Vs.AeE.NixW.f]]
+hHNdyG=KjbRuL
+MifhZm=nFDHqO
+bbjxbg=fBwOcS
+HahQWR=YpdIXB
+[JUuRwn.E.zDOao.h.ItKwqE.MZVciPXzY.RU.rBX.CokkABX.z.aJqrqJrHwGnY.dSW.bK.z.MWj.uiH.E.UZ.FmkiCg.jjwQIdK.rBi.mn.TZaNLfiJ.nZiR.VffmFsZ.L.B]
+IlbFkV=XKDKJZ
+dXUGRv=KVLluc
+vaSsFg=FJCcst
+QLTLFe=wqwjTU
+[[vd.S.Q.Yf.MrKsLKUAmokLHwL.q.J.Oocq.PJUSD.l.ePqiO.e.kGn.njpPKvq.jO.ivboMW.WIxFk.j.eVL.ngHPtgdGBCs.C.FYDAtL.W.J.EXGOQuzE.STL.y.Lo.DHlsRp.KNgM.p.yliXmGMP.cgJn.lFDtprHQ.I.ol.VEx.VOd.laNGh]]
+XavonV=JtcxaL
+vQiyPX=EXPhhJ
+pOntEx=jKCrph
+DPcFNE=xgZMls
 
-[servers.beta]
-    host = 127.0.0.1
-    port = 8081
-    [servers.beta./errorpages]
-        404 = err/404.html
-        403 = err/403.html
-    [servers.beta.www\.example\.com]
-        directory_listing = true
-        [servers.beta.www\.example\.com.routes./]
-            type = normal
-            path = www/
-            methods = GET, POST, DELETE
-            upload = www/uploads/
-            default_file = index.html
-        [servers.beta.www\.example\.com.routes./source]
-            type = normal
-            path = src/
-            methods = GET
-        [servers.beta.www\.example\.com.routes./forbidden]
-            path = /

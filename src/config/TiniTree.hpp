@@ -31,4 +31,16 @@ class TiniTree
         TiniNode& getRoot();
 };
 
+#ifdef TEST
+
+class TiniTreeTest : public TiniTree
+{
+    public:
+        static void first_insertion_test();
+        static void double_insertion_test();
+};
+
+#endif
+
+
 #endif

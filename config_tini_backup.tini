@@ -1,0 +1,52 @@
+[servers.alpha]
+    host = 127.0.0.1
+    port = 8080
+    [servers.alpha./errorpages]
+        404 = err/404.html
+        403 = err/403.html
+    [servers.alpha.localhost]
+        directory_listing = true
+        [servers.alpha.localhost.routes./]
+            type = normal
+            path = www/
+            methods = GET, POST, DELETE
+            upload = www/uploads/
+            default_file = index.html
+            [servers.alpha.localhost.routes./.cgi]
+                .py=/bin/python3
+        [servers.alpha.localhost.routes./source]
+            type = normal
+            path = src/
+            methods = GET
+        [servers.alpha.localhost.routes./redirection]
+            type = redirection
+            path = http://www.google.com
+            methods = GET
+    [servers.alpha.alternative]
+        directory_listing = false
+        [servers.alpha.alternative.routes./]
+            type = normal
+            path = /
+            methods = GET
+            default_file = index.html
+
+[servers.beta]
+    host = 127.0.0.1
+    port = 8081
+    [servers.beta./errorpages]
+        404 = err/404.html
+        403 = err/403.html
+    [servers.beta.www\.example\.com]
+        directory_listing = true
+        [servers.beta.www\.example\.com.routes./]
+            type = normal
+            path = www/
+            methods = GET, POST, DELETE
+            upload = www/uploads/
+            default_file = index.html
+        [servers.beta.www\.example\.com.routes./source]
+            type = normal
+            path = src/
+            methods = GET
+        [servers.beta.www\.example\.com.routes./forbidden]
+            path = /
