@@ -11,7 +11,10 @@ int TiniValidator::validateContext(std::string ctx, int row)
     _next_state = TiniNode::S_NONE;
     for (std::string::iterator it = ctx.begin(); it != ctx.end(); ++it)
     {
-        _cur_state = tiniutils::chr_to_ctx_state(*it, *(it - 1));
+        if (it == ctx.begin())
+            _cur_state = tiniutils::chr_to_ctx_state(*it, '\0');
+        else
+            _cur_state = tiniutils::chr_to_ctx_state(*it, *(it - 1));
         _next_state = tiniutils::chr_to_ctx_state(*(it + 1), *it);
         map_idx = _context_transitions.find(_cur_state);
         if (it < ctx.end() - 1)
@@ -25,7 +28,10 @@ int TiniValidator::validateContext(std::string ctx, int row)
             for (auto a : _context_transitions[_cur_state])
             {
                 if (a == _next_state)
+                {
                     good = 1;
+                    break;
+                }
             }
             if (good != 1)
             {
