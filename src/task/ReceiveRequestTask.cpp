@@ -143,7 +143,7 @@ void ReceiveRequestTask::run()
         WARN(error.what());
 
         Response* response;
-        if (error_path.has_value())
+        if (error_path.has_value() && error_path.value().type() == Path::REGULAR)
             response = new ErrorResponse(error_path.value(), error.status());
         else
             response = new ErrorResponse(_server.config().error_str(), error.status());
