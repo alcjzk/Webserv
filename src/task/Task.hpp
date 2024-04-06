@@ -19,7 +19,7 @@ class Task
 
         bool is_expired_at(TimePoint time_point) const;
 
-       /// TODO: Used?
+        /// TODO: Used?
         bool operator==(int fd);
 
         virtual void                     run() = 0;
