@@ -5,7 +5,16 @@
 #include <stdexcept>
 #include <vector>
 #include <string>
+#include <optional>
+#include <exception>
+#include <errno.h>
+#include <sys/socket.h>
+#include "Status.hpp"
+#include "Response.hpp"
+#include "Reader.hpp"
+#include "Request.hpp"
 #include "ReceiveRequestTask.hpp"
+#include "ErrorResponseTask.hpp"
 #include "SendResponseTask.hpp"
 #include "TimeoutResponse.hpp"
 #include "HTTPError.hpp"
@@ -13,14 +22,18 @@
 #include "Runtime.hpp"
 #include "Error.hpp"
 #include "Log.hpp"
-#include "ErrorResponse.hpp"
+#include <utility>
+#include "BasicTask.hpp"
+#include "Server.hpp"
+#include "File.hpp"
+#include "Task.hpp"
 
 using std::string;
 using std::vector;
 
 ReceiveRequestTask::ReceiveRequestTask(const Server& server, File&& file)
-    : Task(
-          std::move(file), Readable,
+    : BasicTask(
+          std::move(file), WaitFor::Readable,
           std::chrono::system_clock::now() + server.config().keepalive_timeout()
       ),
       _expect(REQUEST_LINE), _bytes_received_total(0), _reader(vector<char>(_header_buffer_size)),
@@ -140,17 +153,8 @@ void ReceiveRequestTask::run()
     }
     catch (const HTTPError& error)
     {
-        std::optional<Path> error_path = _server.config().error_page(error.status());
-
         WARN(error.what());
-
-        Response* response;
-        if (error_path.has_value() && error_path.value().type() == Path::REGULAR)
-            response = new ErrorResponse(error_path.value(), error.status());
-        else
-            response = new ErrorResponse(_server.config().error_str(), error.status());
-
-        Runtime::enqueue(new SendResponseTask(_server, std::move(_fd), response));
+        Runtime::enqueue(new ErrorResponseTask(std::move(_fd), _server, error.status()));
         _is_complete = true;
     }
     catch (const std::exception& error)

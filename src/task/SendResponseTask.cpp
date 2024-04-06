@@ -2,23 +2,24 @@
 #include <cassert>
 #include <chrono>
 #include <utility>
+#include <stdexcept>
 #include "SendResponseTask.hpp"
 #include "Log.hpp"
 #include "Runtime.hpp"
+#include "File.hpp"
+#include "Response.hpp"
+#include "Server.hpp"
+#include "BasicTask.hpp"
+#include "Task.hpp"
 #include "ReceiveRequestTask.hpp"
 
 SendResponseTask::SendResponseTask(const Server& server, File&& file, Response* response)
-    : Task(
-          std::move(file), Writable,
+    : BasicTask(
+          std::move(file), WaitFor::Writable,
           std::chrono::system_clock::now() + server.config().send_timeout()
       ),
       _response(response), _server(server)
 {
-}
-
-SendResponseTask::~SendResponseTask()
-{
-    delete _response;
 }
 
 void SendResponseTask::run()
