@@ -41,7 +41,6 @@ Path.cpp						\
 HostAttributes.cpp				\
 DirectoryResponse.cpp			\
 RedirectionResponse.cpp			\
-ErrorResponse.cpp			    \
 TimeoutResponse.cpp 			\
 AcceptTask.cpp					\
 ReceiveRequestTask.cpp			\
@@ -49,6 +48,10 @@ SendResponseTask.cpp			\
 TemplateEngine.cpp              \
 HttpUri.cpp						\
 File.cpp						\
+ReadTask.cpp					\
+FileResponseTask.cpp			\
+ErrorResponseTask.cpp			\
+BasicTask.cpp					\
 main.cpp
 
 SRCS_TEST = test/testmain.cpp
