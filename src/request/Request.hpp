@@ -7,6 +7,8 @@
 #include "Response.hpp"
 #include "Header.hpp"
 #include "HttpUri.hpp"
+#include "File.hpp"
+#include "Method.hpp"
 #include "Task.hpp"
 
 class Server;

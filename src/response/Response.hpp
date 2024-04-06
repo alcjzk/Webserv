@@ -14,14 +14,14 @@ class Response
             Close,
         };
 
-        virtual ~Response();
+        virtual ~Response() = default;
 
         Response(Connection connection, Status = Status::OK);
-        Response(Response&&) = delete;
-        Response(const Response&) = delete;
+        Response(Response&&) = default;
+        Response(const Response&) = default;
 
-        Response& operator=(Response&& other) = delete;
-        Response& operator=(const Response& other) = delete;
+        Response& operator=(Response&& other) = default;
+        Response& operator=(const Response& other) = default;
 
         /// Sends the response using SEND(3).
         ///
@@ -45,7 +45,7 @@ class Response
 
     private:
         Status              _status;
-        char*               _buffer;
+        std::vector<char>   _buffer;
         size_t              _size;
         size_t              _size_remaining;
         bool                _is_built;
