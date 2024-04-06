@@ -147,6 +147,11 @@ Config::Seconds Config::cgi_write_timeout() const
     return _cgi_write_timeout;
 }
 
+Config::Seconds Config::io_read_timeout() const
+{
+    return _io_read_timeout;
+}
+
 const std::vector<HostAttributes>& Config::attrs() const
 {
     return _attrs;
