@@ -6,6 +6,8 @@
 class RedirectionResponse : public Response
 {
     public:
-        RedirectionResponse(const std::string value, Connection connection,
-                            Status status = Status::MOVED_PERMANENTLY);
+        RedirectionResponse(
+            const std::string value, Connection connection,
+            Status status = Status::MOVED_PERMANENTLY
+        );
 };

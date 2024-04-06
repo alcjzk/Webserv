@@ -26,8 +26,9 @@ void Request::Builder::header(Header&& header)
         }
         else if (header._name == "Connection")
         {
-            (void)std::transform(header._value.begin(), header._value.end(), header._value.begin(),
-                                 toupper);
+            (void)std::transform(
+                header._value.begin(), header._value.end(), header._value.begin(), toupper
+            );
             if (header._value == "close")
             {
                 _connection = Connection::Close;
@@ -56,8 +57,9 @@ Request Request::Builder::build() &&
     return Request(std::move(*_uri), _connection, std::move(_request_line), std::move(_headers));
 }
 
-Request::Request(HttpUri&& uri, Connection connection, RequestLine&& request_line,
-                 std::vector<Header>&& headers)
+Request::Request(
+    HttpUri&& uri, Connection connection, RequestLine&& request_line, std::vector<Header>&& headers
+)
     : _uri(std::move(uri)), _connection(connection), _request_line(std::move(request_line)),
       _headers(std::move(headers))
 {
@@ -65,7 +67,7 @@ Request::Request(HttpUri&& uri, Connection connection, RequestLine&& request_lin
 
 Task* Request::process(const Server& server, File&& file)
 {
-    Response*    response;
+    Response* response;
 
     const Route* route = server.route(_uri.path(), _uri.host());
 
@@ -124,8 +126,10 @@ const Method& Request::method() const
 
 const Header* Request::header(const string& name) const
 {
-    auto header = std::find_if(_headers.cbegin(), _headers.cend(),
-                               [name](const Header& header) { return header._name == name; });
+    auto header = std::find_if(
+        _headers.cbegin(), _headers.cend(),
+        [name](const Header& header) { return header._name == name; }
+    );
 
     return header != _headers.cend() ? &(*header) : nullptr;
 }

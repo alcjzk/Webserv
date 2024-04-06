@@ -16,8 +16,8 @@ RequestLine::RequestLine(const string& line)
     size_t head;
     size_t end;
 
-    auto   it_end = line.begin() + std::min(line.length(), Method::MAX_LENGTH + 1);
-    auto   it = std::find_first_of(line.begin(), line.end(), http::LWS.begin(), http::LWS.end());
+    auto it_end = line.begin() + std::min(line.length(), Method::MAX_LENGTH + 1);
+    auto it = std::find_first_of(line.begin(), line.end(), http::LWS.begin(), http::LWS.end());
     if (it == it_end)
         throw HTTPError(Status::NOT_IMPLEMENTED);
     _method = Method(string(line.begin(), it));

@@ -35,13 +35,13 @@ class File
         /// Returns a copy of the raw file descriptor. Same as `operator int()`.
         ///
         /// @throws `std::bad_optional_access` if there is no associated file descriptor.
-        int                  fd() const;
+        int fd() const;
 
         /// Returns ownership of the raw file descriptor. This allows dropping the wrapper without
         /// closing the fd.
         ///
         /// @throws `std::bad_optional_access` if there is no associated file descriptor.
-        int                  take_fd();
+        int take_fd();
 
         /// Inserts a text representation of `File` into the output stream.
         friend std::ostream& operator<<(std::ostream& os, const File& file);
@@ -51,7 +51,7 @@ class File
         File& operator=(const File&) = delete;
 
     private:
-        void               close();
+        void close();
 
         std::optional<int> _fd;
 };

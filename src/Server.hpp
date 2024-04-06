@@ -21,8 +21,8 @@ class Server
         Server(const Server&) = delete;
         Server(Server&&) = delete;
 
-        Server&                  operator=(const Server&) = delete;
-        Server&                  operator=(Server&&) = delete;
+        Server& operator=(const Server&) = delete;
+        Server& operator=(Server&&) = delete;
 
         int                      fd() const;
         const Route*             route(const std::string& uri_path, const std::string& host) const;

@@ -41,7 +41,7 @@ class TiniNode
         };
 
     private:
-        TiniNodeType                                     _type;
+        TiniNodeType _type;
         // Could be union or some sort of variant type, but feel like the dynamic
         // casting is not worth the space savings here
         std::optional<std::pair<std::string, TiniNode*>> _firstMapValue = std::nullopt;

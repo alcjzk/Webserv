@@ -47,7 +47,7 @@ HostAttributes::HostAttributes(const std::string& hostname, const TiniNode* node
 
 void HostAttributes::_assign_route(const std::string& key, const TiniNode* value)
 {
-    Route           route = Route(Path(key));
+    Route route = Route(Path(key));
 
     const TiniNode* type = value->getMapValue()["type"];
     const TiniNode* path = value->getMapValue()["path"];

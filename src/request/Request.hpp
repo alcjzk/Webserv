@@ -19,10 +19,10 @@ class Request
         class Builder
         {
             public:
-                void                   header(Header&& header);
-                void                   request_line(RequestLine&& request_line);
+                void header(Header&& header);
+                void request_line(RequestLine&& request_line);
 
-                Request                build() &&;
+                Request build() &&;
 
                 std::vector<Header>    _headers;
                 RequestLine            _request_line;
@@ -30,9 +30,9 @@ class Request
                 std::optional<HttpUri> _uri;
         };
 
-        Task*               process(const Server& server, File&& file);
-        const Method&       method() const;
-        const Header*       header(const std::string& name) const;
+        Task*         process(const Server& server, File&& file);
+        const Method& method() const;
+        const Header* header(const std::string& name) const;
 
         HttpUri             _uri;
         Connection          _connection;
@@ -40,6 +40,8 @@ class Request
         std::vector<Header> _headers;
 
     private:
-        Request(HttpUri&& uri, Connection connection, RequestLine&& request_line,
-                std::vector<Header>&& headers);
+        Request(
+            HttpUri&& uri, Connection connection, RequestLine&& request_line,
+            std::vector<Header>&& headers
+        );
 };

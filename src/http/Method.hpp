@@ -15,7 +15,7 @@ class Method
 
         std::string to_string() const;
 
-        bool        operator==(const Method& other);
+        bool operator==(const Method& other);
         typedef enum Type
         {
             GET,

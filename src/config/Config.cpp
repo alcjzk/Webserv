@@ -4,8 +4,10 @@
 
 using std::string;
 
-Config::Config(std::map<std::string, TiniNode*>& server, std::map<std::string, TiniNode*>& root,
-               std::pair<std::string, TiniNode*> first_pair)
+Config::Config(
+    std::map<std::string, TiniNode*>& server, std::map<std::string, TiniNode*>& root,
+    std::pair<std::string, TiniNode*> first_pair
+)
     : _port(string("8000")), _host(string("127.0.0.1")),
       _first_attr(HostAttributes(first_pair.first, first_pair.second)), _backlog(128),
       _body_size(4096)

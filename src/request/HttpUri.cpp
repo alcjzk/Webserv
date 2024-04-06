@@ -35,8 +35,9 @@ HttpUri::HttpUri(const std::string& request_target, const std::string& host)
         else
             _path = "/";
 
-        authority(std::string_view(request_target.c_str() + PREFIX.length(),
-                                   path_offset - PREFIX.length()));
+        authority(std::string_view(
+            request_target.c_str() + PREFIX.length(), path_offset - PREFIX.length()
+        ));
     }
 }
 

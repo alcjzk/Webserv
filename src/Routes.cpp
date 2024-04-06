@@ -16,22 +16,26 @@ Routes::Routes(vector<Route>&& routes) : _routes(std::move(routes))
 
 const Route* Routes::find(const string& uri_path) const
 {
-    auto route = std::find_if(_routes.cbegin(), _routes.cend(),
-                              [uri_path](const auto& route) { return route.match(uri_path); });
+    auto route = std::find_if(
+        _routes.cbegin(), _routes.cend(),
+        [uri_path](const auto& route) { return route.match(uri_path); }
+    );
 
     return route != _routes.cend() ? &(*route) : nullptr;
 }
 
 void Routes::push(Route&& route)
 {
-    auto before = std::find_if(_routes.cbegin(), _routes.cend(),
-                               [route](const auto& other) { return other >= route; });
+    auto before = std::find_if(
+        _routes.cbegin(), _routes.cend(), [route](const auto& other) { return other >= route; }
+    );
     _routes.insert(before, std::move(route));
 }
 
 void Routes::push(const Route& route)
 {
-    auto before = std::find_if(_routes.cbegin(), _routes.cend(),
-                               [route](const auto& other) { return other >= route; });
+    auto before = std::find_if(
+        _routes.cbegin(), _routes.cend(), [route](const auto& other) { return other >= route; }
+    );
     _routes.insert(before, route);
 }
