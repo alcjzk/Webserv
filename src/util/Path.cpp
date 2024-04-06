@@ -1,16 +1,33 @@
 #include <algorithm>
 #include <system_error>
+#include <optional>
 #include <stdexcept>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <errno.h>
+#include <string>
 #include <iostream>
+#include <fcntl.h>
 #include "Path.hpp"
-#include "Log.hpp"
 
 using std::ostream;
 using std::string;
+
+size_t Path::Status::size() const
+{
+    return st_size;
+}
+
+bool Path::Status::is_regular() const
+{
+    return S_ISREG(st_mode);
+}
+
+bool Path::Status::is_directory() const
+{
+    return S_ISDIR(st_mode);
+}
 
 Path::Path(const string& path)
 {
@@ -60,18 +77,32 @@ Path::const_iterator Path::cend() const noexcept
     return _segments.cend();
 }
 
-Path::Type Path::type()
-{
-    if (_type == NONE)
-    {
-        _type = fetch_type();
-    }
-    return _type;
-}
-
 bool Path::is_root() const noexcept
 {
     return _is_root;
+}
+
+std::optional<Path::Status> Path::status() const
+{
+    Status status;
+
+    if (::stat(static_cast<string>(*this).c_str(), &status) != 0)
+    {
+        if (errno != ENOENT && errno != ENOTDIR)
+            throw std::system_error(errno, std::system_category());
+        return std::nullopt;
+    }
+    return status;
+}
+
+int Path::open(int flags) const
+{
+    int fd = ::open(static_cast<string>(*this).c_str(), flags);
+    if (fd < 0)
+    {
+        throw std::system_error(errno, std::system_category());
+    }
+    return fd;
 }
 
 void Path::is_root(bool value) noexcept
@@ -162,39 +193,6 @@ Path Path::canonical(const Path& path)
 ostream& operator<<(ostream& os, const Path& path)
 {
     return os << static_cast<string>(path);
-}
-
-Path::Type Path::fetch_type() const
-{
-    struct stat buffer;
-    mode_t      mode;
-
-    if (stat(static_cast<string>(*this).c_str(), &buffer) != 0)
-    {
-        if (errno != ENOENT && errno != ENOTDIR)
-        {
-            throw std::system_error(errno, std::system_category());
-        }
-        return NOT_FOUND;
-    }
-
-    mode = buffer.st_mode;
-    if (S_ISREG(mode))
-        return REGULAR;
-    if (S_ISDIR(mode))
-        return DIRECTORY;
-    if (S_ISCHR(mode))
-        return CHARACTER;
-    if (S_ISBLK(mode))
-        return BLOCK;
-    if (S_ISFIFO(mode))
-        return FIFO;
-    if (S_ISLNK(mode))
-        return LINK;
-    if (S_ISSOCK(mode))
-        return SOCKET;
-
-    return UNKNOWN;
 }
 
 #ifdef TEST
