@@ -4,6 +4,7 @@
 !Makefile
 !*.cpp
 !*.hpp
+!*.tpp
 !*.tini
 !*.html
 !.editorconfig
