@@ -15,9 +15,9 @@ void CompositeTask<States...>::set_complete()
     _is_complete = true;
 }
 
-template <typename... States> template <typename T> void CompositeTask<States...>::state(
-    T&& state
-    )
+template <typename... States>
+template <typename T>
+void CompositeTask<States...>::state(T&& state)
 {
     _state.template emplace<T>(std::forward<T>(state));
 }
