@@ -7,7 +7,7 @@
 class HostAttributes
 {
     private:
-        void        _assign_route(const std::string& key, const TiniNode* value);
+        void _assign_route(const std::string& key, const TiniNode* value);
 
         bool        _directory_listing;
         std::string _hostname;

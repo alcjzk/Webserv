@@ -43,14 +43,14 @@ class Path
 
         operator std::string() const;
 
-        Path        operator+(const Path& rhs) const;
-        bool        operator==(const Path& rhs) const;
+        Path operator+(const Path& rhs) const;
+        bool operator==(const Path& rhs) const;
 
         static Path relative(const Path& path, const Path& base);
         static Path canonical(const Path& path);
 
     private:
-        Type                     fetch_type() const;
+        Type fetch_type() const;
 
         std::vector<std::string> _segments;
         bool                     _is_root = false;

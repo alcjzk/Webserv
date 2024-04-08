@@ -17,8 +17,8 @@ class SendResponseTask : public Task
         SendResponseTask& operator=(const SendResponseTask&) = delete;
         SendResponseTask& operator=(SendResponseTask&&) = delete;
 
-        virtual void      run() override;
-        virtual void      abort() override;
+        virtual void run() override;
+        virtual void abort() override;
 
     private:
         Response*     _response; // TODO: Replace with unique_ptr

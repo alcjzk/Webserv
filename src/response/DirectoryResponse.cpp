@@ -8,8 +8,9 @@ using std::filebuf;
 using std::ifstream;
 using std::vector;
 
-DirectoryResponse::DirectoryResponse(const Path& target_path, const Path& request_path,
-                                     Connection connection, Status status)
+DirectoryResponse::DirectoryResponse(
+    const Path& target_path, const Path& request_path, Connection connection, Status status
+)
     : Response(connection, status)
 {
     std::string cwd_path(target_path);

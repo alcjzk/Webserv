@@ -19,12 +19,12 @@ class Task
 
         Task(Task&&) noexcept = default;
 
-        int          fd() const;
-        bool         is_complete() const;
-        bool         is_expired_at(TimePoint time_point) const;
-        WaitFor      wait_for() const;
+        int     fd() const;
+        bool    is_complete() const;
+        bool    is_expired_at(TimePoint time_point) const;
+        WaitFor wait_for() const;
 
-        bool         operator==(int fd);
+        bool operator==(int fd);
 
         virtual void abort();
         virtual void run() = 0;
@@ -34,8 +34,9 @@ class Task
         Task& operator=(Task&&) = delete;
 
     protected:
-        explicit Task(int fd, WaitFor wait_for,
-                      std::optional<TimePoint> expire_time = std::nullopt);
+        explicit Task(
+            int fd, WaitFor wait_for, std::optional<TimePoint> expire_time = std::nullopt
+        );
         Task(File&& file, WaitFor wait_for, std::optional<TimePoint> expire_time = std::nullopt);
 
         File                     _fd;

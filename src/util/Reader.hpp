@@ -38,10 +38,10 @@ class Reader
         /// If there are no empty lines at the current
         /// position or the reader has been exhausted, this function has no
         /// effect.
-        void                       trim_empty_lines();
+        void trim_empty_lines();
 
         /// Returns a raw pointer to the internal buffer.
-        char*                      data() noexcept;
+        char* data() noexcept;
 
     private:
         std::vector<char>           _buffer;

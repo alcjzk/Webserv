@@ -10,7 +10,7 @@
 
 using std::vector;
 
-bool     Runtime::_is_interrupt_signaled = false;
+bool Runtime::_is_interrupt_signaled = false;
 
 Runtime& Runtime::instance()
 {
@@ -59,9 +59,10 @@ void Runtime::run_impl()
 
         for (const auto& pollfd : pollfds)
         {
-            auto task =
-                std::find_if(_tasks.begin(), _tasks.end(),
-                             [&pollfd](const auto& task) { return task->fd() == pollfd.fd; });
+            auto task = std::find_if(
+                _tasks.begin(), _tasks.end(),
+                [&pollfd](const auto& task) { return task->fd() == pollfd.fd; }
+            );
             assert(task != _tasks.end());
 
             if (pollfd.revents)
@@ -70,9 +71,12 @@ void Runtime::run_impl()
                 (*task)->abort();
         }
 
-        _tasks.erase(std::remove_if(_tasks.begin(), _tasks.end(),
-                                    [](const auto& task) { return task->is_complete(); }),
-                     _tasks.end());
+        _tasks.erase(
+            std::remove_if(
+                _tasks.begin(), _tasks.end(), [](const auto& task) { return task->is_complete(); }
+            ),
+            _tasks.end()
+        );
     }
 }
 

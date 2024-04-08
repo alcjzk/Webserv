@@ -66,9 +66,10 @@ int Server::fd() const
 const HostAttributes& Server::map_attributes(std::string host_name) const
 {
     const std::vector<HostAttributes>& attributes = _config.attrs();
-    const auto&                        attr =
-        std::find_if(attributes.begin(), attributes.end(),
-                     [host_name](const auto& a) { return a.hostname() == host_name; });
+    const auto&                        attr = std::find_if(
+        attributes.begin(), attributes.end(),
+        [host_name](const auto& a) { return a.hostname() == host_name; }
+    );
     if (attr == attributes.end())
         return attributes.front();
     return *attr;
@@ -77,9 +78,10 @@ const HostAttributes& Server::map_attributes(std::string host_name) const
 const Route* Server::route(const std::string& uri_path, const std::string& host) const
 {
     const std::vector<HostAttributes>& attributes = _config.attrs();
-    const auto                         attr =
-        std::find_if(attributes.begin(), attributes.end(),
-                     [host](const HostAttributes& a) { return (a.hostname() == host); });
+    const auto                         attr = std::find_if(
+        attributes.begin(), attributes.end(),
+        [host](const HostAttributes& a) { return (a.hostname() == host); }
+    );
     if (attr == attributes.end())
     {
         INFO("Attribute not found returning " << _config.first_attr().hostname());

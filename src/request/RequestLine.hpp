@@ -7,7 +7,7 @@
 class RequestLine
 {
     public:
-        static const size_t     MAX_LENGTH = 8000;
+        static const size_t MAX_LENGTH = 8000;
 
         static constexpr size_t uri_max_length();
 

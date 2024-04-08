@@ -19,8 +19,8 @@ class HTTPVersion
         unsigned int major() const;
         unsigned int minor() const;
 
-        bool         is_compatible_with(const HTTPVersion& other) const;
-        std::string  to_string() const;
+        bool        is_compatible_with(const HTTPVersion& other) const;
+        std::string to_string() const;
 
     private:
         unsigned int _major;

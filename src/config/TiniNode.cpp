@@ -71,16 +71,18 @@ void TiniNode::deepCopyChildren(const TiniNode& other)
 TiniNode TiniNode::operator[](size_t i) const
 {
     if (_type != T_VECTOR || i >= this->getVectorValue().size())
-        throw std::runtime_error("TiniNode: Vector indexing operation error with key " +
-                                 std::to_string(i));
+        throw std::runtime_error(
+            "TiniNode: Vector indexing operation error with key " + std::to_string(i)
+        );
     return *(this->getVectorValue()[i]);
 }
 
 TiniNode& TiniNode::operator[](size_t i)
 {
     if (_type != T_VECTOR || i >= this->getVectorValue().size())
-        throw std::runtime_error("TiniNode: Vector indexing operation error with key " +
-                                 std::to_string(i));
+        throw std::runtime_error(
+            "TiniNode: Vector indexing operation error with key " + std::to_string(i)
+        );
     return *(this->getVectorValue()[i]);
 }
 
@@ -231,8 +233,8 @@ TiniNode& TiniNode::fetchTiniNode(std::string key)
 std::vector<TiniNode*>& TiniNode::getVectorValue() const
 {
     if (_type != T_VECTOR)
-        throw std::runtime_error(
-            "TiniNode: getVectorValue: Tried to get non vector value as string");
+        throw std::runtime_error("TiniNode: getVectorValue: Tried to get non vector value as string"
+        );
     if (_vectorValue == nullptr)
         throw std::runtime_error("TiniNode: getVectorValue: Attempted to get a null vector");
     return *_vectorValue;
@@ -250,8 +252,8 @@ std::map<std::string, TiniNode*>& TiniNode::getMapValue() const
 std::string& TiniNode::getStringValue() const
 {
     if (_type != T_STRING)
-        throw std::runtime_error(
-            "TiniNode: getStringValue: Tried to get non string value as string");
+        throw std::runtime_error("TiniNode: getStringValue: Tried to get non string value as string"
+        );
     if (_stringValue == nullptr)
         throw std::runtime_error("TiniNode: getStringValue: Attempted to get a null string value");
     return *_stringValue;

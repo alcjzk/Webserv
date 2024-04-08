@@ -19,8 +19,10 @@ using std::string;
 using std::vector;
 
 ReceiveRequestTask::ReceiveRequestTask(const Server& server, File&& file)
-    : Task(std::move(file), Readable,
-           std::chrono::system_clock::now() + server.config().keepalive_timeout()),
+    : Task(
+          std::move(file), Readable,
+          std::chrono::system_clock::now() + server.config().keepalive_timeout()
+      ),
       _expect(REQUEST_LINE), _bytes_received_total(0), _reader(vector<char>(_header_buffer_size)),
       _is_partial_data(true), _server(server)
 {

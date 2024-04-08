@@ -24,14 +24,14 @@ class ReceiveRequestTask : public Task
         } Expect;
 
         // State impl
-        void                            receive_start_line();
-        void                            receive_headers();
+        void receive_start_line();
+        void receive_headers();
         // TODO: void receive_body()
 
         // Util
-        void                            fill_buffer();
-        char*                           buffer_head();
-        size_t                          buffer_size_available();
+        void   fill_buffer();
+        char*  buffer_head();
+        size_t buffer_size_available();
 
         // TODO: Use value from config + expanding buffersize?
         static const size_t             _header_buffer_size = 4096;

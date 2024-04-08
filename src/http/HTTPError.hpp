@@ -10,7 +10,7 @@ class HTTPError : public std::exception
 
         virtual const char* what() const noexcept;
 
-        Status              status() const;
+        Status status() const;
 
     private:
         Status _status;

@@ -19,12 +19,13 @@ class HttpUri
         const std::string& query() const;
 
     private:
-        std::string                     _host;
-        std::string                     _port;
-        std::string                     _path;
-        std::string                     _query;
+        std::string _host;
+        std::string _port;
+        std::string _path;
+        std::string _query;
 
-        template <typename String> void authority(const String& authority)
+        template <typename String>
+        void authority(const String& authority)
         {
             size_t host_length;
 
