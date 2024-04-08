@@ -1,48 +1,31 @@
-#ifndef TASK_H
-#define TASK_H
+#pragma once
 
 #include <chrono>
 #include <optional>
-#include "File.hpp"
 
+/// Interface for a runtime task.
 class Task
 {
     public:
         typedef std::chrono::time_point<std::chrono::system_clock> TimePoint;
-        typedef enum WaitFor
+
+        enum class WaitFor
         {
             Readable,
-            Writable
-        } WaitFor;
+            Writable,
+        };
 
         virtual ~Task() = default;
 
-        Task(Task&&) noexcept = default;
+        bool is_expired_at(TimePoint time_point) const;
 
-        int     fd() const;
-        bool    is_complete() const;
-        bool    is_expired_at(TimePoint time_point) const;
-        WaitFor wait_for() const;
-
+        /// TODO: Used?
         bool operator==(int fd);
 
-        virtual void abort();
-        virtual void run() = 0;
-
-        Task(const Task&) = delete;
-        Task& operator=(const Task&) = delete;
-        Task& operator=(Task&&) = delete;
-
-    protected:
-        explicit Task(
-            int fd, WaitFor wait_for, std::optional<TimePoint> expire_time = std::nullopt
-        );
-        Task(File&& file, WaitFor wait_for, std::optional<TimePoint> expire_time = std::nullopt);
-
-        File                     _fd;
-        WaitFor                  _wait_for;
-        bool                     _is_complete;
-        std::optional<TimePoint> _expire_time;
+        virtual void                     run() = 0;
+        virtual void                     abort() = 0;
+        virtual int                      fd() const = 0;
+        virtual WaitFor                  wait_for() const = 0;
+        virtual bool                     is_complete() const = 0;
+        virtual std::optional<TimePoint> expire_time() const = 0;
 };
-
-#endif

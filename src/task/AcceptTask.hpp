@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Task.hpp"
+#include "BasicTask.hpp"
 #include "Server.hpp"
 
-class AcceptTask : public Task
+class AcceptTask : public BasicTask
 {
     public:
         AcceptTask(const Server& server);

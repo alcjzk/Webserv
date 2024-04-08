@@ -2,21 +2,16 @@
 #include <string.h>
 #include <stdexcept>
 #include <cassert>
+#include <string>
 #include <sstream>
+#include <utility>
 #include <cstring>
 #include <errno.h>
 #include "http.hpp"
 #include "Response.hpp"
 
-Response::~Response()
-{
-    delete[] _buffer;
-    _buffer = nullptr;
-}
-
 Response::Response(Connection connection, Status status)
-    : _connection(connection), _status(status), _buffer(nullptr), _size(0), _size_remaining(0),
-      _is_built(false)
+    : _connection(connection), _status(status), _size(0), _size_remaining(0), _is_built(false)
 {
     if (_connection == Connection::Close)
         header(Header("Connection", "close"));
@@ -101,10 +96,10 @@ void Response::build()
 
     _size = headers_size + body.size();
     _size_remaining = _size;
-    _buffer = new char[_size];
+    _buffer.resize(_size);
 
     headers_rdbuf->pubseekpos(0, headers_stream.in);
-    headers_rdbuf->sgetn(_buffer, headers_size);
+    headers_rdbuf->sgetn(_buffer.data(), headers_size);
 
     std::memcpy(&_buffer[headers_size], body.data(), body.size());
     _is_built = true;
