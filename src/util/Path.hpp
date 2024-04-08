@@ -3,6 +3,11 @@
 #include <vector>
 #include <string>
 #include <ostream>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <cstddef>
+#include <optional>
 
 class Path
 {
@@ -10,18 +15,14 @@ class Path
         typedef std::vector<std::string>::iterator       iterator;
         typedef std::vector<std::string>::const_iterator const_iterator;
 
-        enum Type
+        using Stat = struct stat;
+
+        class Status : public Stat
         {
-            NONE,
-            NOT_FOUND,
-            REGULAR,
-            DIRECTORY,
-            CHARACTER,
-            BLOCK,
-            FIFO,
-            LINK,
-            SOCKET,
-            UNKNOWN,
+            public:
+                size_t size() const;
+                bool   is_regular() const;
+                bool   is_directory() const;
         };
 
         Path() = default;
@@ -33,13 +34,14 @@ class Path
         Path(const char* path);
         Path(const_iterator first, const_iterator last);
 
-        iterator       begin() noexcept;
-        iterator       end() noexcept;
-        const_iterator cbegin() const noexcept;
-        const_iterator cend() const noexcept;
-        Type           type();
-        bool           is_root() const noexcept;
-        void           is_root(bool value) noexcept;
+        iterator              begin() noexcept;
+        iterator              end() noexcept;
+        const_iterator        cbegin() const noexcept;
+        const_iterator        cend() const noexcept;
+        bool                  is_root() const noexcept;
+        void                  is_root(bool value) noexcept;
+        std::optional<Status> status() const;
+        int                   open(int flags) const;
 
         operator std::string() const;
 
@@ -50,11 +52,8 @@ class Path
         static Path canonical(const Path& path);
 
     private:
-        Type fetch_type() const;
-
         std::vector<std::string> _segments;
         bool                     _is_root = false;
-        Type                     _type = NONE;
 };
 
 std::ostream& operator<<(std::ostream& os, const Path& path);

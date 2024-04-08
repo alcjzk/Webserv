@@ -1,26 +1,20 @@
 #pragma once
 
-#include "Task.hpp"
+#include <memory>
 #include "Response.hpp"
 #include "Server.hpp"
+#include "BasicTask.hpp"
 #include "File.hpp"
 
-class SendResponseTask : public Task
+class SendResponseTask : public BasicTask
 {
     public:
-        virtual ~SendResponseTask() override;
-
         SendResponseTask(const Server& server, File&& file, Response* response);
-        SendResponseTask(const SendResponseTask&) = delete;
-        SendResponseTask(SendResponseTask&&) = delete;
-
-        SendResponseTask& operator=(const SendResponseTask&) = delete;
-        SendResponseTask& operator=(SendResponseTask&&) = delete;
 
         virtual void run() override;
         virtual void abort() override;
 
     private:
-        Response*     _response; // TODO: Replace with unique_ptr
-        const Server& _server;
+        std::unique_ptr<Response> _response;
+        const Server&             _server;
 };

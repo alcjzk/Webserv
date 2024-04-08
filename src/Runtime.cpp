@@ -1,5 +1,7 @@
 #include <algorithm>
 #include <cassert>
+#include <utility>
+#include <memory>
 #include <system_error>
 #include <errno.h>
 #include <signal.h>
@@ -7,6 +9,8 @@
 #include <chrono>
 #include "Runtime.hpp"
 #include "Task.hpp"
+
+using WaitFor = Task::WaitFor;
 
 using std::vector;
 
@@ -41,9 +45,9 @@ void Runtime::run_impl()
         for (const auto& task : _tasks)
         {
             short events = 0;
-            if (task->wait_for() == Task::Readable)
+            if (task->wait_for() == WaitFor::Readable)
                 events = POLLIN;
-            else if (task->wait_for() == Task::Writable)
+            else if (task->wait_for() == WaitFor::Writable)
                 events = POLLOUT;
             pollfds.push_back({task->fd(), events, 0});
         }

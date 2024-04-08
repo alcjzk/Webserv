@@ -1,14 +1,25 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <fcntl.h>
-#include <string.h>
+#include <errno.h>
+#include <stdexcept>
 #include <utility>
+#include <string.h>
+#include "File.hpp"
 #include "AcceptTask.hpp"
 #include "Log.hpp"
 #include "Runtime.hpp"
+#include "BasicTask.hpp"
+#include "Server.hpp"
+#include "Task.hpp"
 #include "ReceiveRequestTask.hpp"
 
-AcceptTask::AcceptTask(const Server& server) : Task(server.fd(), Readable), _server(server) {}
+using WaitFor = Task::WaitFor;
+
+AcceptTask::AcceptTask(const Server& server)
+    : BasicTask(server.fd(), WaitFor::Readable), _server(server)
+{
+}
 
 void AcceptTask::run()
 {

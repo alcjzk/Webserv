@@ -1,9 +1,18 @@
 #include <algorithm>
+#include <fcntl.h>
 #include <cctype>
 #include <stdexcept>
+#include <exception>
+#include <sys/fcntl.h>
 #include <utility>
+#include <string>
+#include <vector>
 #include "Log.hpp"
+#include "Header.hpp"
 #include "RequestLine.hpp"
+#include "Method.hpp"
+#include "Response.hpp"
+#include "Status.hpp"
 #include "Server.hpp"
 #include "FileResponse.hpp"
 #include "DirectoryResponse.hpp"
@@ -12,8 +21,14 @@
 #include "HTTPError.hpp"
 #include "Request.hpp"
 #include "HttpUri.hpp"
+#include "File.hpp"
+#include "Task.hpp"
+#include "Route.hpp"
+#include "Path.hpp"
+#include "FileResponseTask.hpp"
 
 using std::string;
+using std::vector;
 
 void Request::Builder::header(Header&& header)
 {
@@ -58,7 +73,7 @@ Request Request::Builder::build() &&
 }
 
 Request::Request(
-    HttpUri&& uri, Connection connection, RequestLine&& request_line, std::vector<Header>&& headers
+    HttpUri&& uri, Connection connection, RequestLine&& request_line, vector<Header>&& headers
 )
     : _uri(std::move(uri)), _connection(connection), _request_line(std::move(request_line)),
       _headers(std::move(headers))
@@ -81,16 +96,18 @@ Task* Request::process(const Server& server, File&& file)
     if (!route->method_get())
         throw HTTPError(Status::FORBIDDEN);
 
-    if (target.type() == Path::Type::NOT_FOUND)
+    auto target_status = target.status();
+    if (!target_status)
         throw HTTPError(Status::NOT_FOUND);
 
-    if (target.type() == Path::Type::REGULAR)
+    if (target_status->is_regular())
     {
-        response = new FileResponse(target, _connection);
-        return new SendResponseTask(server, std::move(file), response);
+        int    fd = target.open(O_RDONLY);
+        size_t size = target_status->size();
+        return new FileResponseTask(fd, size, std::move(file), server, _connection);
     }
 
-    if (target.type() != Path::Type::DIRECTORY)
+    if (!target_status->is_directory())
         throw HTTPError(Status::FORBIDDEN);
 
     try

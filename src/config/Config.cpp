@@ -34,7 +34,8 @@ Config::Config(
                     continue;
                 }
                 Path error_path(value->getStringValue());
-                if (error_path.type() != Path::REGULAR)
+                auto error_path_status = error_path.status();
+                if (!error_path_status || !error_path_status->is_regular())
                 {
                     ERR("Invalid error page path: " << value->getStringValue() << ", ignoring")
                     continue;
@@ -145,6 +146,11 @@ Config::Seconds Config::cgi_read_timeout() const
 Config::Seconds Config::cgi_write_timeout() const
 {
     return _cgi_write_timeout;
+}
+
+Config::Seconds Config::io_read_timeout() const
+{
+    return _io_read_timeout;
 }
 
 const std::vector<HostAttributes>& Config::attrs() const

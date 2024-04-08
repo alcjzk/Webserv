@@ -2,13 +2,13 @@
 
 #include <cstddef>
 #include <optional>
-#include "Task.hpp"
 #include "Server.hpp"
 #include "Reader.hpp"
 #include "Request.hpp"
+#include "BasicTask.hpp"
 #include "File.hpp"
 
-class ReceiveRequestTask : public Task
+class ReceiveRequestTask : public BasicTask
 {
     public:
         ReceiveRequestTask(const Server& server, File&& file);

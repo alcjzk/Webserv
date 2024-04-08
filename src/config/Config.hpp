@@ -56,6 +56,9 @@ class Config
         // TODO: Not used until CGI is implemented.
         Seconds cgi_write_timeout() const;
 
+        /// Returns a timeout in seconds between successive internal io reads.
+        Seconds io_read_timeout() const;
+
     private:
         // Timeouts
         Seconds _keepalive_timeout = Seconds(75);
@@ -65,6 +68,7 @@ class Config
         Seconds _lingering_timeout = Seconds(5);
         Seconds _cgi_read_timeout = Seconds(60);
         Seconds _cgi_write_timeout = Seconds(60);
+        Seconds _io_read_timeout = Seconds(60);
 
         std::string                 _port;
         std::string                 _host;
