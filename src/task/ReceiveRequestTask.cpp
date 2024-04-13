@@ -36,8 +36,7 @@ ReceiveRequestTask::ReceiveRequestTask(const Server& server, File&& file)
           std::move(file), WaitFor::Readable,
           std::chrono::system_clock::now() + server.config().keepalive_timeout()
       ),
-      _expect(REQUEST_LINE), _bytes_received_total(0), _reader(vector<char>(_header_buffer_size)),
-      _is_partial_data(true), _server(server)
+      _reader(vector<char>(_header_buffer_size)), _server(server)
 {
 }
 
@@ -80,7 +79,7 @@ void ReceiveRequestTask::receive_start_line()
         _reader.trim_empty_lines();
         _builder->request_line(_reader.line(RequestLine::MAX_LENGTH).value());
         INFO(_builder->_request_line);
-        _expect = HEADERS;
+        _expect = Expect::Headers;
         _expire_time = std::chrono::system_clock::now() + _server.config().client_header_timeout();
     }
     catch (const std::bad_optional_access&)
@@ -132,10 +131,10 @@ void ReceiveRequestTask::run()
         {
             switch (_expect)
             {
-                case REQUEST_LINE:
+                case Expect::RequestLine:
                     receive_start_line();
                     continue;
-                case HEADERS:
+                case Expect::Headers:
                     receive_headers();
                     continue;
                 default:

@@ -17,11 +17,12 @@ class ReceiveRequestTask : public BasicTask
         virtual void abort() override;
 
     private:
-        typedef enum Expect
+        enum class Expect
         {
-            REQUEST_LINE,
-            HEADERS
-        } Expect;
+            RequestLine,
+            Headers,
+            Body,
+        };
 
         // State impl
         void receive_start_line();
@@ -36,10 +37,10 @@ class ReceiveRequestTask : public BasicTask
 
         // TODO: Use value from config + expanding buffersize?
         static const size_t             _header_buffer_size = 4096;
-        Expect                          _expect;
-        size_t                          _bytes_received_total;
+        Expect                          _expect = Expect::RequestLine;
+        size_t                          _bytes_received_total = 0;
         Reader                          _reader;
         std::optional<Request::Builder> _builder = Request::Builder();
-        bool                            _is_partial_data;
+        bool                            _is_partial_data = true;
         const Server&                   _server;
 };
