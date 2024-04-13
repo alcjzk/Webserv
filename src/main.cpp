@@ -10,16 +10,23 @@
 #include <assert.h>
 #include <memory>
 
-int main()
+int main(int argc, char *argv[])
 {
     std::vector<std::unique_ptr<Server>> v_servers;
     std::set<std::string>                opened_ports;
+    std::unique_ptr<TiniTree>            tree;
 
     signal(SIGPIPE, SIG_IGN);
     try
     {
-        TiniTree        tree;
-        const TiniNode& root = tree.getRoot();
+        if (argc > 1)
+            tree = std::make_unique<TiniTree>(std::string(argv[1]));
+        else
+        {
+            INFO("configuration location not given, defaulting to config.tini");
+            tree = std::make_unique<TiniTree>();
+        }
+        const TiniNode& root = tree->getRoot();
         const TiniNode* servers = root.getMapValue()["servers"];
 
         if (!servers)
