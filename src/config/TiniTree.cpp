@@ -209,14 +209,8 @@ void TiniTree::trySetFirst(TiniNode* current, std::string key)
 
 #ifdef TEST
 
-void TiniTreeTest::first_insertion_test()
-{
+void TiniTreeTest::first_insertion_test() {}
 
-}
-
-void TiniTreeTest::double_insertion_test()
-{
-
-}
+void TiniTreeTest::double_insertion_test() {}
 
 #endif

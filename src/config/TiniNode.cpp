@@ -147,7 +147,7 @@ TiniNode::~TiniNode()
 {
     if (_type == T_VECTOR && _vectorValue)
     {
-        assert (_vectorValue != nullptr);
+        assert(_vectorValue != nullptr);
         for (auto v : *_vectorValue)
         {
             delete v;
@@ -166,7 +166,7 @@ TiniNode::~TiniNode()
     }
     else if (_type == T_STRING && _stringValue)
     {
-        assert (_stringValue != nullptr);
+        assert(_stringValue != nullptr);
         delete _stringValue;
         _stringValue = nullptr;
     }
@@ -426,11 +426,11 @@ void TiniNodeTest::deepcopy_test()
 void TiniNodeTest::ownership_change_test()
 {
     BEGIN
-        TiniNode* root = new TiniNode(TiniNode::T_MAP);
-        EXPECT(root != nullptr);
-        root->getMapValue()["key"] = new TiniNode(TiniNode::T_MAP);
-        TiniNode moved_into(std::move(*root));
-        EXPECT(moved_into.getMapValue()["key"]->getType() == TiniNode::T_MAP);
+    TiniNode* root = new TiniNode(TiniNode::T_MAP);
+    EXPECT(root != nullptr);
+    root->getMapValue()["key"] = new TiniNode(TiniNode::T_MAP);
+    TiniNode moved_into(std::move(*root));
+    EXPECT(moved_into.getMapValue()["key"]->getType() == TiniNode::T_MAP);
     END
 }
 

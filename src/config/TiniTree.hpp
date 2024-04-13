@@ -42,5 +42,4 @@ class TiniTreeTest : public TiniTree
 
 #endif
 
-
 #endif

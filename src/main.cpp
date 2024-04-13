@@ -11,7 +11,7 @@
 #include <assert.h>
 #include <memory>
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     std::vector<std::unique_ptr<Server>> v_servers;
     std::set<std::string>                opened_ports;
