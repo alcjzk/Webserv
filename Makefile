@@ -165,6 +165,8 @@ fmt:
 .PHONY: fuzz
 fuzz:
 	cd test && sh ./fuzz.sh 25
+.PHONY: f
+f: fuzz
 
 vpath %.cpp $(SRC_DIR) test
 
