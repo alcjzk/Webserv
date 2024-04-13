@@ -112,7 +112,6 @@ void ReceiveRequestTask::receive_headers()
                 return;
             }
             _builder->header(line);
-            INFO(_builder->_headers.back());
         }
     }
     catch (const std::bad_optional_access&)

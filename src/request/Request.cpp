@@ -32,7 +32,6 @@ using std::vector;
 
 void Request::Builder::header(Header&& header)
 {
-    // TODO: Protect against duplicates
     try
     {
         if (header._name == "host")
@@ -49,7 +48,8 @@ void Request::Builder::header(Header&& header)
                 _connection = Connection::Close;
             }
         }
-        _headers.push_back(std::move(header));
+        if (!_headers.emplace(header._name, header._value).second)
+            throw HTTPError(Status::BAD_REQUEST);
     }
     catch (const std::runtime_error& error)
     {
@@ -65,6 +65,11 @@ void Request::Builder::request_line(RequestLine&& request_line)
     _request_line = std::move(request_line);
 }
 
+const Request::Headers& Request::Builder::headers() const
+{
+    return _headers;
+}
+
 Request Request::Builder::build() &&
 {
     if (!_uri)
@@ -73,7 +78,7 @@ Request Request::Builder::build() &&
 }
 
 Request::Request(
-    HttpUri&& uri, Connection connection, RequestLine&& request_line, vector<Header>&& headers
+    HttpUri&& uri, Connection connection, RequestLine&& request_line, Headers&& headers
 )
     : _uri(std::move(uri)), _connection(connection), _request_line(std::move(request_line)),
       _headers(std::move(headers))
@@ -141,12 +146,7 @@ const Method& Request::method() const
     return _request_line.method();
 }
 
-const Header* Request::header(const string& name) const
+const Request::Headers& Request::headers() const
 {
-    auto header = std::find_if(
-        _headers.cbegin(), _headers.cend(),
-        [name](const Header& header) { return header._name == name; }
-    );
-
-    return header != _headers.cend() ? &(*header) : nullptr;
+    return _headers;
 }
