@@ -41,3 +41,5 @@ fi
 echo "\nSUCCESS: Didn't find bad matches"
 
 echo "\nOutput in ./test/fuzz.err and ./test/fuzz.out"
+
+rm -f ./fuzz.tini
