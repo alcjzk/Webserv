@@ -1,3 +1,5 @@
+#include <algorithm>
+#include <cctype>
 #include "http.hpp"
 #include "HTTPError.hpp"
 #include "Header.hpp"
@@ -16,6 +18,9 @@ Header::Header(const string& text)
         throw HTTPError(Status::BAD_REQUEST);
     }
     _name = text.substr(0, end_pos);
+    std::transform(
+        _name.begin(), _name.end(), _name.begin(), [](unsigned char c) { return std::tolower(c); }
+    );
     if (!http::is_token(_name))
     {
         throw HTTPError(Status::BAD_REQUEST);
