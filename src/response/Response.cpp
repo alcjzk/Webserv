@@ -14,7 +14,7 @@ Response::Response(Connection connection, Status status)
     : _connection(connection), _status(status), _size(0), _size_remaining(0), _is_built(false)
 {
     if (_connection == Connection::Close)
-        header(Header("Connection", "close"));
+        header(Header("connection", "close"));
 }
 
 bool Response::send(int fd)
@@ -70,7 +70,7 @@ const std::vector<char>& Response::body() const
 
 void Response::content_length(size_t content_length)
 {
-    header(Header("Content-Length", std::to_string(content_length)));
+    header(Header("content-length", std::to_string(content_length)));
 }
 
 void Response::build()

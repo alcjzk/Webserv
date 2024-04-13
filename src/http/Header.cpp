@@ -1,10 +1,17 @@
+#include <algorithm>
+#include <cctype>
 #include "http.hpp"
 #include "HTTPError.hpp"
 #include "Header.hpp"
 
 using std::string;
 
-Header::Header(string name, string value) : _name(name), _value(value) {}
+Header::Header(string name, string value) : _name(name), _value(value)
+{
+    std::transform(
+        _name.begin(), _name.end(), _name.begin(), [](unsigned char c) { return std::tolower(c); }
+    );
+}
 
 Header::Header(const string& text)
 {
@@ -16,6 +23,9 @@ Header::Header(const string& text)
         throw HTTPError(Status::BAD_REQUEST);
     }
     _name = text.substr(0, end_pos);
+    std::transform(
+        _name.begin(), _name.end(), _name.begin(), [](unsigned char c) { return std::tolower(c); }
+    );
     if (!http::is_token(_name))
     {
         throw HTTPError(Status::BAD_REQUEST);
@@ -45,3 +55,27 @@ std::ostream& operator<<(std::ostream& os, const Header& header)
 {
     return os << header._name << ": " << header._value;
 }
+
+#ifdef TEST
+
+#include "testutils.hpp"
+
+void HeaderTest::text_construct_case_insensitive_test()
+{
+    BEGIN
+
+    EXPECT(Header("NAME: v")._name == Header("name: v")._name);
+
+    END
+}
+
+void HeaderTest::pair_construct_case_insensitive_test()
+{
+    BEGIN
+
+    EXPECT(Header("NAME", "v")._name == Header("name", "v")._name);
+
+    END
+}
+
+#endif
