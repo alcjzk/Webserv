@@ -15,6 +15,7 @@ int main()
     std::vector<std::unique_ptr<Server>> v_servers;
     std::set<std::string>                opened_ports;
 
+    signal(SIGPIPE, SIG_IGN);
     try
     {
         TiniTree        tree;
@@ -43,6 +44,11 @@ int main()
     catch (const std::exception& e)
     {
         ERR(e.what());
+        return EXIT_FAILURE;
+    }
+    catch (...)
+    {
+        ERR("STATIC TEXT");
         return EXIT_FAILURE;
     }
 
