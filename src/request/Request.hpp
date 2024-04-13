@@ -19,6 +19,7 @@ class Request
     public:
         using Connection = Response::Connection;
         using Headers = std::unordered_map<std::string, std::string>;
+        using Body = std::vector<char>;
 
         class Builder
         {
@@ -34,6 +35,7 @@ class Request
                 RequestLine            _request_line;
                 Connection             _connection = Connection::KeepAlive;
                 std::optional<HttpUri> _uri;
+                Body                   _body;
         };
 
         Task*          process(const Server& server, File&& file);
@@ -44,9 +46,11 @@ class Request
         Connection  _connection;
         RequestLine _request_line;
         Headers     _headers;
+        Body        _body;
 
     private:
         Request(
-            HttpUri&& uri, Connection connection, RequestLine&& request_line, Headers&& headers
+            HttpUri&& uri, Connection connection, RequestLine&& request_line, Headers&& headers,
+            Body&& body
         );
 };

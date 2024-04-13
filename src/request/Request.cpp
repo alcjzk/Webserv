@@ -74,14 +74,17 @@ Request Request::Builder::build() &&
 {
     if (!_uri)
         throw HTTPError(Status::BAD_REQUEST);
-    return Request(std::move(*_uri), _connection, std::move(_request_line), std::move(_headers));
+    return Request(
+        std::move(*_uri), _connection, std::move(_request_line), std::move(_headers),
+        std::move(_body)
+    );
 }
 
 Request::Request(
-    HttpUri&& uri, Connection connection, RequestLine&& request_line, Headers&& headers
+    HttpUri&& uri, Connection connection, RequestLine&& request_line, Headers&& headers, Body&& body
 )
     : _uri(std::move(uri)), _connection(connection), _request_line(std::move(request_line)),
-      _headers(std::move(headers))
+      _headers(std::move(headers)), _body(std::move(body))
 {
 }
 
