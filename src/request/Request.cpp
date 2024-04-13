@@ -74,6 +74,18 @@ Request Request::Builder::build() &&
 {
     if (!_uri)
         throw HTTPError(Status::BAD_REQUEST);
+    if (const auto it = _headers.find("content-length"); it != _headers.end())
+    {
+        const auto [name, value] = *it;
+
+        // TODO: Validate content-length
+        size_t content_length = std::stoull(value);
+
+        if (content_length != 0)
+        {
+            _body.resize(content_length);
+        }
+    }
     return Request(
         std::move(*_uri), _connection, std::move(_request_line), std::move(_headers),
         std::move(_body)
