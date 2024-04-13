@@ -30,12 +30,11 @@ done
 
 kill $WEBSERV 1>/dev/null 2>/dev/null
 
-grep -a "fuzz.out" fuzz.err fuzz.out 1>/dev/null 2>/dev/null
+grep -a "ERROR: AddressSanitizer" fuzz.err fuzz.out 1>/dev/null 2>/dev/null
 
 if [ $? -ne 1 ]
 then
     echo "FAIL: Found bad matches in files:"
-    grep -a "fuzz.out" fuzz.err fuzz.out
     exit 2
 fi
 echo "\nSUCCESS: Didn't find bad matches"
