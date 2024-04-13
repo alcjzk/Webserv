@@ -6,7 +6,12 @@
 
 using std::string;
 
-Header::Header(string name, string value) : _name(name), _value(value) {}
+Header::Header(string name, string value) : _name(name), _value(value)
+{
+    std::transform(
+        _name.begin(), _name.end(), _name.begin(), [](unsigned char c) { return std::tolower(c); }
+    );
+}
 
 Header::Header(const string& text)
 {
