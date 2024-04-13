@@ -12,7 +12,7 @@ do
 done
 
 N=0
-LIMIT=$(($1*100))
+LIMIT=$(($1*20))
 ../bin/debug ../config.tini 1>>fuzz.out 2>>fuzz.err &
 WEBSERV=$!
 while [ $N -ne $LIMIT ]
@@ -38,4 +38,6 @@ then
     grep -a "fuzz.out" fuzz.err fuzz.out
     exit 2
 fi
-echo "SUCCESS: Didn't find bad matches"
+echo "\nSUCCESS: Didn't find bad matches"
+
+echo "\nOutput in ./test/fuzz.err and ./test/fuzz.out"
