@@ -45,3 +45,18 @@ std::ostream& operator<<(std::ostream& os, const Header& header)
 {
     return os << header._name << ": " << header._value;
 }
+
+#ifdef TEST
+
+#include "testutils.hpp"
+
+void HeaderTest::text_construct_case_insensitive_test()
+{
+    BEGIN
+
+    EXPECT(Header("NAME: v")._name == Header("name: v")._name);
+
+    END
+}
+
+#endif

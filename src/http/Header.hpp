@@ -38,3 +38,13 @@ class Header
 };
 
 std::ostream& operator<<(std::ostream& os, const Header& header);
+
+#ifdef TEST
+
+class HeaderTest : public Header
+{
+    public:
+        static void text_construct_case_insensitive_test();
+};
+
+#endif
