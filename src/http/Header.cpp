@@ -64,4 +64,13 @@ void HeaderTest::text_construct_case_insensitive_test()
     END
 }
 
+void HeaderTest::pair_construct_case_insensitive_test()
+{
+    BEGIN
+
+    EXPECT(Header("NAME", "v")._name == Header("name", "v")._name);
+
+    END
+}
+
 #endif

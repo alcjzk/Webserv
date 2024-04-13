@@ -45,6 +45,7 @@ class HeaderTest : public Header
 {
     public:
         static void text_construct_case_insensitive_test();
+        static void pair_construct_case_insensitive_test();
 };
 
 #endif
