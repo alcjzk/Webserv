@@ -425,6 +425,7 @@ void TiniNodeTest::ownership_change_test()
 {
     BEGIN
         TiniNode* root = new TiniNode(TiniNode::T_MAP);
+        EXPECT(root != NULL);
         root->getMapValue()["key"] = new TiniNode(TiniNode::T_MAP);
         TiniNode moved_into(std::move(*root));
         EXPECT(moved_into.getMapValue()["key"]->getType() == TiniNode::T_MAP);
