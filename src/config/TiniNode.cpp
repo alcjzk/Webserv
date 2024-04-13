@@ -4,6 +4,8 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <cassert>
+
 TiniNode::TiniNode() : _type(T_STRING), _stringValue(new std::string()) {}
 
 TiniNode::TiniNode(std::string s) : _type(T_STRING), _stringValue(new std::string(s)) {}

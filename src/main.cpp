@@ -7,6 +7,7 @@
 #include <exception>
 #include <stdexcept>
 #include <set>
+#include <signal.h>
 #include <assert.h>
 #include <memory>
 
