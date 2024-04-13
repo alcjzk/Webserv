@@ -162,6 +162,10 @@ r: run
 fmt:
 	clang-format -i src/*.cpp src/*.hpp src/*/*.cpp src/*/*.hpp test/*.hpp
 
+.PHONY: fuzz
+fuzz:
+	cd test && sh ./fuzz.sh 25
+
 vpath %.cpp $(SRC_DIR) test
 
 -include $(SRCS:%.cpp=$(OBJ_DIR)/debug/%.d)
