@@ -35,11 +35,11 @@ void Request::Builder::header(Header&& header)
     // TODO: Protect against duplicates
     try
     {
-        if (header._name == "Host")
+        if (header._name == "host")
         {
             _uri = HttpUri(_request_line.request_target(), header._value);
         }
-        else if (header._name == "Connection")
+        else if (header._name == "connection")
         {
             (void)std::transform(
                 header._value.begin(), header._value.end(), header._value.begin(), toupper

@@ -5,5 +5,5 @@ RedirectionResponse::RedirectionResponse(
 )
     : Response(connection, status)
 {
-    header(Header("Location", value));
+    header(Header("location", value));
 }
