@@ -4,7 +4,6 @@
 #include <map>
 #include <string>
 #include <vector>
-#include <cassert>
 
 TiniNode::TiniNode() : _type(T_STRING), _stringValue(new std::string()) {}
 
@@ -147,7 +146,6 @@ TiniNode::~TiniNode()
 {
     if (_type == T_VECTOR && _vectorValue)
     {
-        assert(_vectorValue != nullptr);
         for (auto v : *_vectorValue)
         {
             delete v;
@@ -166,7 +164,6 @@ TiniNode::~TiniNode()
     }
     else if (_type == T_STRING && _stringValue)
     {
-        assert(_stringValue != nullptr);
         delete _stringValue;
         _stringValue = nullptr;
     }
