@@ -28,6 +28,10 @@ void SendResponseTask::run()
     {
         if (!_response->send(_fd))
             return;
+        if (_response->_connection == Response::Connection::KeepAlive)
+        {
+            Runtime::enqueue(new ReceiveRequestTask(_server, std::move(_fd)));
+        }
     }
     catch (const std::runtime_error& error)
     {
@@ -36,10 +40,6 @@ void SendResponseTask::run()
     catch (...)
     {
         assert(false);
-    }
-    if (_response->_connection == Response::Connection::KeepAlive)
-    {
-        Runtime::enqueue(new ReceiveRequestTask(_server, std::move(_fd)));
     }
     _is_complete = true;
 }

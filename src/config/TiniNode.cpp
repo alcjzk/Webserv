@@ -14,7 +14,9 @@ TiniNode::TiniNode(TiniNodeType type) : _type(type)
     if (type == T_VECTOR)
         _vectorValue = new std::vector<TiniNode*>;
     if (type == T_MAP)
+    {
         _mapValue = new std::map<std::string, TiniNode*>;
+    }
     if (type == T_STRING)
         _stringValue = new std::string;
 }
@@ -34,6 +36,36 @@ TiniNode& TiniNode::operator=(const TiniNode& other)
         _mapValue = nullptr;
         _stringValue = nullptr;
         deepCopyChildren(other);
+    }
+    return *this;
+}
+
+TiniNode& TiniNode::operator=(const TiniNode* other)
+{
+    if (this != other && other != nullptr)
+    {
+        if (_type == T_VECTOR)
+        {
+            delete _vectorValue;
+            _vectorValue = other->_vectorValue;
+            _mapValue = nullptr;
+            _stringValue = nullptr;
+        }
+        else if (_type == T_MAP)
+        {
+            delete _mapValue;
+            _mapValue = other->_mapValue;
+            _vectorValue = nullptr;
+            _stringValue = nullptr;
+        }
+        else if (_type == T_STRING)
+        {
+            delete _stringValue;
+            _stringValue = other->_stringValue;
+            _vectorValue = nullptr;
+            _mapValue = nullptr;
+        }
+        _type = other->_type;
     }
     return *this;
 }
@@ -112,7 +144,7 @@ TiniNode& TiniNode::operator[](const std::string& s)
 
 TiniNode::~TiniNode()
 {
-    if (_type == T_VECTOR)
+    if (_type == T_VECTOR && _vectorValue)
     {
         for (auto v : *_vectorValue)
         {
@@ -121,7 +153,7 @@ TiniNode::~TiniNode()
         delete _vectorValue;
         _vectorValue = nullptr;
     }
-    else if (_type == T_MAP)
+    else if (_type == T_MAP && _mapValue)
     {
         for (const auto& [key, val] : *_mapValue)
         {
@@ -130,38 +162,38 @@ TiniNode::~TiniNode()
         delete _mapValue;
         _mapValue = nullptr;
     }
-    else if (_type == T_STRING)
+    else if (_type == T_STRING && _stringValue)
     {
         delete _stringValue;
         _stringValue = nullptr;
     }
 }
 
-TiniNode::TiniNode(TiniNode&& other)
+TiniNode::TiniNode(TiniNode&& other) noexcept
+    : _type(other._type), _vectorValue(nullptr), _mapValue(nullptr), _stringValue(nullptr)
 {
     if (this == &other)
         return;
+
     switch (other._type)
     {
         case T_VECTOR:
-            _type = T_VECTOR;
             _vectorValue = other._vectorValue;
             other._vectorValue = nullptr;
             break;
         case T_MAP:
-            _type = T_MAP;
             _mapValue = other._mapValue;
             other._mapValue = nullptr;
             break;
         case T_STRING:
-            _type = T_STRING;
             _stringValue = other._stringValue;
             other._stringValue = nullptr;
             break;
     }
+    other._type = T_STRING; // Resetting type of the moved-from object to avoid destructor issues
 }
 
-TiniNode& TiniNode::operator=(TiniNode&& other)
+TiniNode& TiniNode::operator=(TiniNode&& other) noexcept
 {
     if (this == &other)
         return *this;
@@ -385,6 +417,17 @@ void TiniNodeTest::deepcopy_test()
 
     delete root;
     delete rootcopy;
+    END
+}
+
+void TiniNodeTest::ownership_change_test()
+{
+    BEGIN
+    TiniNode* root = new TiniNode(TiniNode::T_MAP);
+    EXPECT(root != nullptr);
+    root->getMapValue()["key"] = new TiniNode(TiniNode::T_MAP);
+    TiniNode moved_into(std::move(*root));
+    EXPECT(moved_into.getMapValue()["key"]->getType() == TiniNode::T_MAP);
     END
 }
 

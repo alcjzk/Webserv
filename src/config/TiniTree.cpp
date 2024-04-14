@@ -30,21 +30,25 @@ TiniTree::TiniTree() : _current(nullptr), _root(nullptr)
 
 TiniTree::TiniTree(std::string config_location) : _current(nullptr), _root(nullptr)
 {
-    try
+    if (config_location != "")
     {
-        std::ifstream     f(config_location);
-        std::stringstream ss;
+        try
+        {
+            std::ifstream     f(config_location);
+            std::stringstream ss;
 
-        ss << f.rdbuf();
-        std::string input_string = ss.str();
-        _split_input = tiniutils::removeSpaces(tiniutils::split(input_string, "\n"));
+            ss << f.rdbuf();
+            std::string input_string = ss.str();
+            _split_input = tiniutils::removeSpaces(tiniutils::split(input_string, "\n"));
+        }
+        catch (std::exception& e)
+        {
+            std::cerr << "TiniTree: FATAL: " << e.what() << std::endl;
+            return;
+        }
     }
-    catch (std::exception& e)
-    {
-        std::cerr << "TiniTree: FATAL: " << e.what() << std::endl;
-        return;
-    }
-
+    else
+        _split_input = tiniutils::removeSpaces(tiniutils::split("\n", "\n"));
     constructTree();
     if (!_root)
         throw std::runtime_error("TiniTree: FATAL ");
@@ -56,7 +60,7 @@ TiniTree::~TiniTree()
         delete _root;
 }
 
-int TiniTree::contextSwitch(std::string ctx, int row)
+int TiniTree::contextSwitch(std::string ctx)
 {
     std::string              processed;
     std::vector<std::string> map_ops;
@@ -132,7 +136,7 @@ int TiniTree::contextSwitch(std::string ctx, int row)
     return (0);
 }
 
-int TiniTree::valueInsertion(std::string act, int row)
+int TiniTree::valueInsertion(std::string act)
 {
     std::vector<std::string> pair = tiniutils::split(act, "=");
     switch (_current->getType())
@@ -177,10 +181,10 @@ void TiniTree::constructTree()
             switch (tiniutils::match_input(_split_input[i]))
             {
                 case TiniNode::O_CTX:
-                    contextSwitch(_split_input[i], i);
+                    contextSwitch(_split_input[i]);
                     break;
                 case TiniNode::O_INS:
-                    valueInsertion(_split_input[i], i);
+                    valueInsertion(_split_input[i]);
                     break;
                 default:
                     break;
@@ -206,3 +210,48 @@ void TiniTree::trySetFirst(TiniNode* current, std::string key)
     if (!current->getFirstValue().has_value() && key[0] != '/')
         current->setFirstValue(*current->getMapValue().find(key));
 }
+
+#ifdef TEST
+
+#include "testutils.hpp"
+
+void TiniTreeTest::first_insertion_test()
+{
+    BEGIN
+
+    TiniTree myTree("");
+
+    myTree.contextSwitch("[servers.first]");
+    myTree.valueInsertion("key=value");
+    myTree.contextSwitch("[servers.second]");
+    myTree.contextSwitch("[servers.third]");
+
+    const auto servers = myTree.getRoot().getMapValue()["servers"];
+    EXPECT(servers != nullptr);
+    const auto& first_insertion = servers->getFirstValue();
+    EXPECT(first_insertion.has_value())
+    EXPECT(first_insertion.value().first == "first");
+
+    END
+}
+
+void TiniTreeTest::double_insertion_test()
+{
+    BEGIN
+    TiniTree myTree("");
+
+    myTree.contextSwitch("[test]");
+    myTree.contextSwitch("[test]");
+    try
+    {
+        myTree.valueInsertion("lol=abc");
+        myTree.valueInsertion("lol=def");
+    }
+    catch (std::exception& e)
+    {
+        EXPECT(std::string(e.what()).find("Duplicate") != std::string::npos);
+    }
+    END
+}
+
+#endif
