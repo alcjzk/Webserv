@@ -25,8 +25,8 @@ class TiniTree
         TiniTree& operator=(TiniTree&& other) = delete;
 
         void      constructTree();
-        int       contextSwitch(std::string ctx, int row);
-        int       valueInsertion(std::string act, int row);
+        int       contextSwitch(std::string ctx);
+        int       valueInsertion(std::string act);
         void      trySetFirst(TiniNode* current, std::string key);
         TiniNode& getRoot();
 };
