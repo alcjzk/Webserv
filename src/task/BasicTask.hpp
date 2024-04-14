@@ -17,7 +17,7 @@ class BasicTask : public Task
     protected:
         File                     _fd;
         WaitFor                  _wait_for;
-        bool                     _is_complete;
+        bool                     _is_complete = false;
         std::optional<TimePoint> _expire_time;
 
         BasicTask(File&& fd, WaitFor wait_for, std::optional<TimePoint> expire_time = std::nullopt);
