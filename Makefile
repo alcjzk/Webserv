@@ -4,6 +4,7 @@
 # - release (build release version)
 # - t/test (build and run unit tests)
 # - r/run (build and run)
+# - f/fuzz (build and run fuzz tests)
 # - fmt (run clang-format on sources)
 # + fclean, clean, re, all (default)
 
@@ -163,7 +164,7 @@ fmt:
 	clang-format -i src/*.cpp src/*.hpp src/*/*.cpp src/*/*.hpp test/*.hpp
 
 .PHONY: fuzz
-fuzz:
+fuzz: $(DEBUG_TARGET)
 	cd test && sh ./fuzz.sh 25
 .PHONY: f
 f: fuzz
