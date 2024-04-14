@@ -178,5 +178,7 @@ void ReceiveRequestTask::disable_linger()
     linger.l_onoff = 1;
     linger.l_linger = 0;
     if (setsockopt(_fd, SOL_SOCKET, SO_LINGER, &linger, sizeof(linger)) == -1)
+    {
         WARN("failed to disable linger for fd `" << _fd << "`");
+    }
 }
