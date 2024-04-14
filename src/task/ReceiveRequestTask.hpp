@@ -32,6 +32,7 @@ class ReceiveRequestTask : public BasicTask
         void   fill_buffer();
         char*  buffer_head();
         size_t buffer_size_available();
+        void   disable_linger();
 
         // TODO: Use value from config + expanding buffersize?
         static const size_t             _header_buffer_size = 4096;
