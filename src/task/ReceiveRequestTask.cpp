@@ -146,9 +146,9 @@ void ReceiveRequestTask::run()
     }
     catch (const Error& error)
     {
-        // Client closed the connection
         assert(error == Error::CLOSED);
         WARN(error.what());
+        disable_linger();
         _is_complete = true;
     }
     catch (const HTTPError& error)
@@ -169,4 +169,16 @@ void ReceiveRequestTask::abort()
     INFO("ReceiveRequestTask for fd " << _fd << " timed out");
     _is_complete = true;
     Runtime::enqueue(new SendResponseTask(_server, std::move(_fd), new TimeoutResponse()));
+}
+
+void ReceiveRequestTask::disable_linger()
+{
+    struct linger linger;
+
+    linger.l_onoff = 1;
+    linger.l_linger = 0;
+    if (setsockopt(_fd, SOL_SOCKET, SO_LINGER, &linger, sizeof(linger)) == -1)
+    {
+        WARN("failed to disable linger for fd `" << _fd << "`");
+    }
 }
