@@ -247,7 +247,7 @@ void TiniTreeTest::double_insertion_test()
         myTree.valueInsertion("lol=abc");
         myTree.valueInsertion("lol=def");
     }
-    catch (std::runtime_error e)
+    catch (std::exception& e)
     {
         EXPECT(std::string(e.what()).find("Duplicate") != std::string::npos);
     }
