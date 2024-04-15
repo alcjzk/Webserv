@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iterator>
 #include <stdexcept>
 #include <utility>
@@ -8,6 +9,7 @@
 
 using std::optional;
 using std::string;
+using std::vector;
 
 const char* Reader::LineLimitError::what() const noexcept
 {
@@ -33,6 +35,19 @@ void Reader::trim_empty_lines()
         else
             break;
     }
+}
+
+vector<char> Reader::read_exact(size_t count)
+{
+    if (std::distance(_head, _buffer.end()) < (ssize_t)count)
+    {
+        return vector<char>();
+    }
+
+    vector<char> result(_head, _head + count);
+    std::advance(_head, count);
+
+    return result;
 }
 
 optional<string> Reader::line(size_t limit)
@@ -200,6 +215,38 @@ void ReaderTest::line_limit_test()
     catch (const std::runtime_error&)
     {
     }
+
+    END
+}
+
+void ReaderTest::read_exact_basic_test()
+{
+    BEGIN
+
+    Reader reader(buffer("abcde"));
+
+    EXPECT(reader.read_exact(10).size() == 0);
+
+    auto content = reader.read_exact(3);
+    EXPECT(content.size() == 3);
+    EXPECT(std::equal(content.begin(), content.end(), "abc"));
+
+    EXPECT(reader.read_exact(4).size() == 0);
+
+    auto content2 = reader.read_exact(2);
+    EXPECT(content2.size() == 2);
+    EXPECT(std::equal(content2.begin(), content2.end(), "de"));
+
+    END
+}
+
+void ReaderTest::read_exact_empty_test()
+{
+    BEGIN
+
+    Reader reader(Buffer(0));
+
+    EXPECT(reader.read_exact(3).size() == 0);
 
     END
 }

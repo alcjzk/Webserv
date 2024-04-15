@@ -5,6 +5,8 @@
 #include <string>
 #include <limits>
 #include <optional>
+#include <cstddef>
+#include <vector>
 #include "Buffer.hpp"
 
 class Reader
@@ -37,6 +39,12 @@ class Reader
         /// effect.
         void trim_empty_lines();
 
+        /// Returns exactly `count` bytes from the internal buffer, advancing the reader.
+        ///
+        /// If the buffer does not contain at least `count` unread bytes, the returned vector will
+        /// be empty.
+        std::vector<char> read_exact(size_t count);
+
         /// Returns a reference to the internal buffer.
         Buffer&       buffer();
         const Buffer& buffer() const;
@@ -57,6 +65,8 @@ class ReaderTest : public Reader
         static void line_strip_bare_cr_test();
         static void trim_empty_lines_test();
         static void line_limit_test();
+        static void read_exact_basic_test();
+        static void read_exact_empty_test();
 
     private:
         static Buffer buffer(const std::string& content);
