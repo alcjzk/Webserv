@@ -1,19 +1,20 @@
 #include <iterator>
 #include <stdexcept>
+#include <utility>
+#include <optional>
+#include <string>
+#include "Buffer.hpp"
 #include "Reader.hpp"
 
 using std::optional;
 using std::string;
-using std::vector;
 
 const char* Reader::LineLimitError::what() const noexcept
 {
     return "line length exceeds limit argument";
 }
 
-Reader::Reader(const vector<char>& buffer) : _buffer(buffer), _head(_buffer.begin()) {}
-
-Reader::Reader(vector<char>&& buffer) : _buffer(std::move(buffer)), _head(_buffer.begin()) {}
+Reader::Reader(Buffer&& buffer) : _buffer(std::move(buffer)), _head(_buffer.begin()) {}
 
 void Reader::trim_empty_lines()
 {
@@ -34,15 +35,10 @@ void Reader::trim_empty_lines()
     }
 }
 
-char* Reader::data() noexcept
-{
-    return _buffer.data();
-}
-
 optional<string> Reader::line(size_t limit)
 {
-    vector<char>::iterator start = _head;
-    vector<char>::iterator pos = _head;
+    Buffer::iterator start = _head;
+    Buffer::iterator pos = _head;
 
     while (pos != _buffer.end())
     {
@@ -75,14 +71,24 @@ optional<string> Reader::line(size_t limit)
     return std::nullopt;
 }
 
+Buffer& Reader::buffer()
+{
+    return _buffer;
+}
+
+const Buffer& Reader::buffer() const
+{
+    return _buffer;
+}
+
 #ifdef TEST
 
 #include <cstring>
 #include "testutils.hpp"
 
-vector<char> ReaderTest::buffer(const char* content)
+Buffer ReaderTest::buffer(const std::string& content)
 {
-    return vector<char>(content, content + std::strlen(content));
+    return Buffer(content.begin(), content.end());
 }
 
 void ReaderTest::line_empty_test()
@@ -91,7 +97,7 @@ void ReaderTest::line_empty_test()
 
     Reader reader(buffer("\r\n"));
 
-    EXPECT(reader.line() == "");
+    EXPECT(reader.line().value() == "");
 
     END
 }

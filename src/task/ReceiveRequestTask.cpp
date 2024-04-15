@@ -3,7 +3,6 @@
 #include <cassert>
 #include <chrono>
 #include <stdexcept>
-#include <vector>
 #include <string>
 #include <optional>
 #include <exception>
@@ -23,52 +22,43 @@
 #include "Error.hpp"
 #include "Log.hpp"
 #include <utility>
+#include "Buffer.hpp"
 #include "BasicTask.hpp"
 #include "Server.hpp"
 #include "File.hpp"
 #include "Task.hpp"
 
 using std::string;
-using std::vector;
 
 ReceiveRequestTask::ReceiveRequestTask(const Server& server, File&& file)
     : BasicTask(
           std::move(file), WaitFor::Readable,
           std::chrono::system_clock::now() + server.config().keepalive_timeout()
       ),
-      _reader(vector<char>(_header_buffer_size)), _server(server)
+      _reader(Buffer(_header_buffer_size)), _server(server)
 {
-}
-
-size_t ReceiveRequestTask::buffer_size_available()
-{
-    return _header_buffer_size - _bytes_received_total;
-}
-
-char* ReceiveRequestTask::buffer_head()
-{
-    return _reader.data() + _bytes_received_total;
 }
 
 void ReceiveRequestTask::fill_buffer()
 {
-    ssize_t bytes_received = 0;
+    Buffer& buffer = _reader.buffer();
 
-    bytes_received = recv(_fd, buffer_head(), buffer_size_available(), 0);
+    if (buffer.unfilled_size() == 0)
+    {
+        // TODO: Proper error / buffer management
+        throw HTTPError(Status::BAD_REQUEST);
+    }
+
+    ssize_t bytes_received = recv(_fd, buffer.unfilled(), buffer.unfilled_size(), 0);
     if (bytes_received == 0)
     {
-        if (buffer_size_available() <= 0)
-        {
-            // Out of buffer
-            throw HTTPError(Status::BAD_REQUEST);
-        }
         throw Error(Error::CLOSED);
     }
     else if (bytes_received == -1)
     {
         throw std::runtime_error(strerror(errno));
     }
-    _bytes_received_total += bytes_received;
+    buffer.advance(bytes_received);
     _is_partial_data = false;
 }
 

@@ -2,10 +2,10 @@
 
 #include <limits>
 #include <stdexcept>
-#include <vector>
 #include <string>
 #include <limits>
 #include <optional>
+#include "Buffer.hpp"
 
 class Reader
 {
@@ -16,11 +16,8 @@ class Reader
                 virtual const char* what() const noexcept override;
         };
 
-        /// Constructs the reader by copying a buffer.
-        Reader(const std::vector<char>& buffer);
-
-        /// Constructs the reader by moving a buffer.
-        Reader(std::vector<char>&& buffer);
+        /// Constructs the reader from an existing buffer.
+        Reader(Buffer&& buffer);
 
         /// Extracts a line from the buffer, advancing the reader accordinly.
         ///
@@ -40,12 +37,13 @@ class Reader
         /// effect.
         void trim_empty_lines();
 
-        /// Returns a raw pointer to the internal buffer.
-        char* data() noexcept;
+        /// Returns a reference to the internal buffer.
+        Buffer&       buffer();
+        const Buffer& buffer() const;
 
     private:
-        std::vector<char>           _buffer;
-        std::vector<char>::iterator _head;
+        Buffer           _buffer;
+        Buffer::iterator _head;
 };
 
 #ifdef TEST
@@ -61,7 +59,7 @@ class ReaderTest : public Reader
         static void line_limit_test();
 
     private:
-        static std::vector<char> buffer(const char* content);
+        static Buffer buffer(const std::string& content);
 };
 
 #endif

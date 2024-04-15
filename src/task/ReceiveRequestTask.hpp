@@ -30,15 +30,13 @@ class ReceiveRequestTask : public BasicTask
         // TODO: void receive_body()
 
         // Util
-        void   fill_buffer();
-        char*  buffer_head();
-        size_t buffer_size_available();
-        void   disable_linger();
+        void fill_buffer();
+        void disable_linger();
 
         // TODO: Use value from config + expanding buffersize?
         static const size_t             _header_buffer_size = 4096;
+
         Expect                          _expect = Expect::RequestLine;
-        size_t                          _bytes_received_total = 0;
         Reader                          _reader;
         std::optional<Request::Builder> _builder = Request::Builder();
         bool                            _is_partial_data = true;
