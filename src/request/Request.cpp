@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cstddef>
 #include <fcntl.h>
 #include <cctype>
 #include <stdexcept>
@@ -6,7 +7,6 @@
 #include <sys/fcntl.h>
 #include <utility>
 #include <string>
-#include <vector>
 #include "Log.hpp"
 #include "Header.hpp"
 #include "RequestLine.hpp"
@@ -28,7 +28,11 @@
 #include "FileResponseTask.hpp"
 
 using std::string;
-using std::vector;
+
+void Request::Builder::body(Body&& body)
+{
+    _body = std::move(body);
+}
 
 void Request::Builder::header(Header&& header)
 {
@@ -70,22 +74,20 @@ const Request::Headers& Request::Builder::headers() const
     return _headers;
 }
 
+size_t Request::Builder::content_length() const
+{
+    if (const auto& it = _headers.find("content-length"); it != _headers.end())
+    {
+        const auto& value = it->second;
+        return std::stoull(value); // TODO: validate
+    }
+    return 0;
+}
+
 Request Request::Builder::build() &&
 {
     if (!_uri)
         throw HTTPError(Status::BAD_REQUEST);
-    if (const auto it = _headers.find("content-length"); it != _headers.end())
-    {
-        const auto [name, value] = *it;
-
-        // TODO: Validate content-length
-        size_t content_length = std::stoull(value);
-
-        if (content_length != 0)
-        {
-            _body.resize(content_length);
-        }
-    }
     return Request(
         std::move(*_uri), _connection, std::move(_request_line), std::move(_headers),
         std::move(_body)

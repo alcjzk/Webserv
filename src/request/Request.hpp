@@ -4,6 +4,7 @@
 #include <string>
 #include <optional>
 #include <unordered_map>
+#include <cstddef>
 #include "RequestLine.hpp"
 #include "Response.hpp"
 #include "Header.hpp"
@@ -24,10 +25,12 @@ class Request
         class Builder
         {
             public:
+                void body(Body&& body);
                 void header(Header&& header);
                 void request_line(RequestLine&& request_line);
 
                 const Headers& headers() const;
+                size_t         content_length() const;
 
                 Request build() &&;
 

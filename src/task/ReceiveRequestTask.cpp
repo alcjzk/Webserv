@@ -9,7 +9,6 @@
 #include <errno.h>
 #include <sys/socket.h>
 #include "Status.hpp"
-#include "Response.hpp"
 #include "Reader.hpp"
 #include "Request.hpp"
 #include "ReceiveRequestTask.hpp"
@@ -84,29 +83,47 @@ void ReceiveRequestTask::receive_start_line()
 
 void ReceiveRequestTask::receive_headers()
 {
-    string    line;
-    Response* response;
-
-    try
+    while (true)
     {
-        while (true)
+        auto line = _reader.line();
+        if (!line)
         {
-            line = _reader.line().value();
-            if (line.empty())
+            _is_partial_data = true;
+            return;
+        }
+        if (line->empty())
+        {
+            INFO("End of headers");
+            _body_size = _builder->content_length();
+            if (_body_size != 0)
             {
-                INFO("End of headers");
-                Request request = std::exchange(_builder, std::nullopt).value().build();
-                Runtime::enqueue(request.process(_server, std::move(_fd)));
-                _is_complete = true;
+                INFO("expecting " << _body_size << " bytes of content");
+                _expect = Expect::Body;
                 return;
             }
-            _builder->header(line);
+            Request request = std::exchange(_builder, std::nullopt).value().build();
+            Runtime::enqueue(request.process(_server, std::move(_fd)));
+            _is_complete = true;
+            return;
         }
+        _builder->header(*line);
     }
-    catch (const std::bad_optional_access&)
+}
+
+void ReceiveRequestTask::receive_body()
+{
+    auto body = _reader.read_exact(_body_size);
+    if (body.empty())
     {
         _is_partial_data = true;
+        return;
     }
+
+    _builder->body(std::move(body));
+
+    Request request = std::exchange(_builder, std::nullopt).value().build();
+    Runtime::enqueue(request.process(_server, std::move(_fd)));
+    _is_complete = true;
 }
 
 void ReceiveRequestTask::run()
@@ -126,6 +143,9 @@ void ReceiveRequestTask::run()
                     continue;
                 case Expect::Headers:
                     receive_headers();
+                    continue;
+                case Expect::Body:
+                    receive_body();
                     continue;
                 default:
                     assert(false);
