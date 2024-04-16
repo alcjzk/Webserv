@@ -34,7 +34,7 @@ ReceiveRequestTask::ReceiveRequestTask(const Server& server, File&& file)
           std::move(file), WaitFor::Readable,
           std::chrono::system_clock::now() + server.config().keepalive_timeout()
       ),
-      _reader(Buffer(_header_buffer_size)), _server(server)
+      _reader(Buffer(server.config().header_buffsize())), _server(server)
 {
 }
 

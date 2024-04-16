@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstddef>
 #include <optional>
 #include "Server.hpp"
 #include "Reader.hpp"
@@ -33,9 +32,6 @@ class ReceiveRequestTask : public BasicTask
         // Util
         void fill_buffer();
         void disable_linger();
-
-        // TODO: Use value from config + expanding buffersize?
-        static const size_t _header_buffer_size = 4096;
 
         Expect                          _expect = Expect::RequestLine;
         Reader                          _reader;
