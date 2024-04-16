@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <chrono>
+#include <cstddef>
 #include "Status.hpp"
 #include "HostAttributes.hpp"
 
@@ -29,6 +30,9 @@ class Config
         size_t                             header_buffsize() const;
         const std::string&                 error_str() const;
         std::optional<Path>                error_page(Status status) const;
+
+        /// Returns the maximum request body size.
+        size_t body_size() const;
 
         /// Returns a timeout in seconds for keeping an inactive connection alive.
         Seconds keepalive_timeout() const;

@@ -1,5 +1,6 @@
 #include "Config.hpp"
 #include "Log.hpp"
+#include <cstddef>
 #include <fstream>
 
 using std::string;
@@ -111,6 +112,11 @@ const string& Config::host() const
 int Config::backlog() const
 {
     return _backlog;
+}
+
+size_t Config::body_size() const
+{
+    return _body_size;
 }
 
 Config::Seconds Config::keepalive_timeout() const
