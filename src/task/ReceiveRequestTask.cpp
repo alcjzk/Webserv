@@ -94,10 +94,10 @@ void ReceiveRequestTask::receive_headers()
         if (line->empty())
         {
             INFO("End of headers");
-            _body_size = _builder->content_length();
-            if (_body_size != 0)
+            _content_length = _builder->content_length();
+            if (_content_length != 0)
             {
-                INFO("expecting " << _body_size << " bytes of content");
+                INFO("expecting " << _content_length << " bytes of content");
                 _expect = Expect::Body;
                 return;
             }
@@ -112,7 +112,7 @@ void ReceiveRequestTask::receive_headers()
 
 void ReceiveRequestTask::receive_body()
 {
-    auto body = _reader.read_exact(_body_size);
+    auto body = _reader.read_exact(_content_length);
     if (body.empty())
     {
         _is_partial_data = true;

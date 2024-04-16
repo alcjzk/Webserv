@@ -7,6 +7,7 @@
 #include "Request.hpp"
 #include "BasicTask.hpp"
 #include "File.hpp"
+#include "ContentLength.hpp"
 
 class ReceiveRequestTask : public BasicTask
 {
@@ -38,7 +39,7 @@ class ReceiveRequestTask : public BasicTask
 
         Expect                          _expect = Expect::RequestLine;
         Reader                          _reader;
-        size_t                          _body_size = 0;
+        ContentLength                   _content_length = 0;
         std::optional<Request::Builder> _builder = Request::Builder();
         bool                            _is_partial_data = true;
         const Server&                   _server;
