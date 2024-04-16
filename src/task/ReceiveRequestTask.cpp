@@ -95,6 +95,8 @@ void ReceiveRequestTask::receive_headers()
         {
             INFO("End of headers");
             _content_length = _builder->content_length();
+            if (_content_length > _server.config().body_size())
+                throw HTTPError(Status::CONTENT_TOO_LARGE);
             if (_content_length != 0)
             {
                 INFO("expecting " << _content_length << " bytes of content");
