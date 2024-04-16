@@ -3,14 +3,12 @@
 #include <cassert>
 #include <chrono>
 #include <stdexcept>
-#include <vector>
 #include <string>
 #include <optional>
 #include <exception>
 #include <errno.h>
 #include <sys/socket.h>
 #include "Status.hpp"
-#include "Response.hpp"
 #include "Reader.hpp"
 #include "Request.hpp"
 #include "ReceiveRequestTask.hpp"
@@ -23,53 +21,43 @@
 #include "Error.hpp"
 #include "Log.hpp"
 #include <utility>
+#include "Buffer.hpp"
 #include "BasicTask.hpp"
 #include "Server.hpp"
 #include "File.hpp"
 #include "Task.hpp"
 
 using std::string;
-using std::vector;
 
 ReceiveRequestTask::ReceiveRequestTask(const Server& server, File&& file)
     : BasicTask(
           std::move(file), WaitFor::Readable,
           std::chrono::system_clock::now() + server.config().keepalive_timeout()
       ),
-      _expect(REQUEST_LINE), _bytes_received_total(0), _reader(vector<char>(_header_buffer_size)),
-      _is_partial_data(true), _server(server)
+      _reader(Buffer(_header_buffer_size)), _server(server)
 {
-}
-
-size_t ReceiveRequestTask::buffer_size_available()
-{
-    return _header_buffer_size - _bytes_received_total;
-}
-
-char* ReceiveRequestTask::buffer_head()
-{
-    return _reader.data() + _bytes_received_total;
 }
 
 void ReceiveRequestTask::fill_buffer()
 {
-    ssize_t bytes_received = 0;
+    Buffer& buffer = _reader.buffer();
 
-    bytes_received = recv(_fd, buffer_head(), buffer_size_available(), 0);
+    if (buffer.unfilled_size() == 0)
+    {
+        // TODO: Proper error / buffer management
+        throw HTTPError(Status::BAD_REQUEST);
+    }
+
+    ssize_t bytes_received = recv(_fd, buffer.unfilled(), buffer.unfilled_size(), 0);
     if (bytes_received == 0)
     {
-        if (buffer_size_available() <= 0)
-        {
-            // Out of buffer
-            throw HTTPError(Status::BAD_REQUEST);
-        }
         throw Error(Error::CLOSED);
     }
     else if (bytes_received == -1)
     {
         throw std::runtime_error(strerror(errno));
     }
-    _bytes_received_total += bytes_received;
+    buffer.advance(bytes_received);
     _is_partial_data = false;
 }
 
@@ -80,7 +68,7 @@ void ReceiveRequestTask::receive_start_line()
         _reader.trim_empty_lines();
         _builder->request_line(_reader.line(RequestLine::MAX_LENGTH).value());
         INFO(_builder->_request_line);
-        _expect = HEADERS;
+        _expect = Expect::Headers;
         _expire_time = std::chrono::system_clock::now() + _server.config().client_header_timeout();
     }
     catch (const std::bad_optional_access&)
@@ -95,30 +83,47 @@ void ReceiveRequestTask::receive_start_line()
 
 void ReceiveRequestTask::receive_headers()
 {
-    string    line;
-    Response* response;
-
-    try
+    while (true)
     {
-        while (true)
+        auto line = _reader.line();
+        if (!line)
         {
-            line = _reader.line().value();
-            if (line.empty())
+            _is_partial_data = true;
+            return;
+        }
+        if (line->empty())
+        {
+            INFO("End of headers");
+            _body_size = _builder->content_length();
+            if (_body_size != 0)
             {
-                INFO("End of headers");
-                Request request = std::exchange(_builder, std::nullopt).value().build();
-                Runtime::enqueue(request.process(_server, std::move(_fd)));
-                _is_complete = true;
+                INFO("expecting " << _body_size << " bytes of content");
+                _expect = Expect::Body;
                 return;
             }
-            _builder->header(line);
-            INFO(_builder->_headers.back());
+            Request request = std::exchange(_builder, std::nullopt).value().build();
+            Runtime::enqueue(request.process(_server, std::move(_fd)));
+            _is_complete = true;
+            return;
         }
+        _builder->header(*line);
     }
-    catch (const std::bad_optional_access&)
+}
+
+void ReceiveRequestTask::receive_body()
+{
+    auto body = _reader.read_exact(_body_size);
+    if (body.empty())
     {
         _is_partial_data = true;
+        return;
     }
+
+    _builder->body(std::move(body));
+
+    Request request = std::exchange(_builder, std::nullopt).value().build();
+    Runtime::enqueue(request.process(_server, std::move(_fd)));
+    _is_complete = true;
 }
 
 void ReceiveRequestTask::run()
@@ -133,11 +138,14 @@ void ReceiveRequestTask::run()
         {
             switch (_expect)
             {
-                case REQUEST_LINE:
+                case Expect::RequestLine:
                     receive_start_line();
                     continue;
-                case HEADERS:
+                case Expect::Headers:
                     receive_headers();
+                    continue;
+                case Expect::Body:
+                    receive_body();
                     continue;
                 default:
                     assert(false);

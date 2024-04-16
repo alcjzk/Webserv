@@ -2,10 +2,12 @@
 
 #include <limits>
 #include <stdexcept>
-#include <vector>
 #include <string>
 #include <limits>
 #include <optional>
+#include <cstddef>
+#include <vector>
+#include "Buffer.hpp"
 
 class Reader
 {
@@ -16,11 +18,8 @@ class Reader
                 virtual const char* what() const noexcept override;
         };
 
-        /// Constructs the reader by copying a buffer.
-        Reader(const std::vector<char>& buffer);
-
-        /// Constructs the reader by moving a buffer.
-        Reader(std::vector<char>&& buffer);
+        /// Constructs the reader from an existing buffer.
+        Reader(Buffer&& buffer);
 
         /// Extracts a line from the buffer, advancing the reader accordinly.
         ///
@@ -40,12 +39,19 @@ class Reader
         /// effect.
         void trim_empty_lines();
 
-        /// Returns a raw pointer to the internal buffer.
-        char* data() noexcept;
+        /// Returns exactly `count` bytes from the internal buffer, advancing the reader.
+        ///
+        /// If the buffer does not contain at least `count` unread bytes, the returned vector will
+        /// be empty.
+        std::vector<char> read_exact(size_t count);
+
+        /// Returns a reference to the internal buffer.
+        Buffer&       buffer();
+        const Buffer& buffer() const;
 
     private:
-        std::vector<char>           _buffer;
-        std::vector<char>::iterator _head;
+        Buffer           _buffer;
+        Buffer::iterator _head;
 };
 
 #ifdef TEST
@@ -59,9 +65,11 @@ class ReaderTest : public Reader
         static void line_strip_bare_cr_test();
         static void trim_empty_lines_test();
         static void line_limit_test();
+        static void read_exact_basic_test();
+        static void read_exact_empty_test();
 
     private:
-        static std::vector<char> buffer(const char* content);
+        static Buffer buffer(const std::string& content);
 };
 
 #endif

@@ -53,6 +53,7 @@ ReadTask.cpp					\
 FileResponseTask.cpp			\
 ErrorResponseTask.cpp			\
 BasicTask.cpp					\
+Buffer.cpp						\
 main.cpp
 
 SRCS_TEST = test/testmain.cpp
