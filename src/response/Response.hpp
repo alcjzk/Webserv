@@ -4,6 +4,7 @@
 #include <vector>
 #include "Status.hpp"
 #include "Header.hpp"
+#include "ContentLength.hpp"
 
 class Response
 {
@@ -39,7 +40,7 @@ class Response
 
         const std::vector<char>& body() const;
 
-        void content_length(size_t content_length);
+        void content_length(ContentLength content_length);
 
         Connection _connection;
 

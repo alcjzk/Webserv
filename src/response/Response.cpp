@@ -9,6 +9,7 @@
 #include <errno.h>
 #include "http.hpp"
 #include "Response.hpp"
+#include "ContentLength.hpp"
 
 Response::Response(Connection connection, Status status)
     : _connection(connection), _status(status), _size(0), _size_remaining(0), _is_built(false)
@@ -68,7 +69,7 @@ const std::vector<char>& Response::body() const
     return _body;
 }
 
-void Response::content_length(size_t content_length)
+void Response::content_length(ContentLength content_length)
 {
     header(Header("content-length", std::to_string(content_length)));
 }
