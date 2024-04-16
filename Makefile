@@ -54,6 +54,7 @@ FileResponseTask.cpp			\
 ErrorResponseTask.cpp			\
 BasicTask.cpp					\
 Buffer.cpp						\
+ContentLength.cpp				\
 main.cpp
 
 SRCS_TEST = test/testmain.cpp
