@@ -4,7 +4,7 @@
 #include <string>
 #include <optional>
 #include <unordered_map>
-#include <cstddef>
+#include "ContentLength.hpp"
 #include "RequestLine.hpp"
 #include "Response.hpp"
 #include "Header.hpp"
@@ -30,7 +30,13 @@ class Request
                 void request_line(RequestLine&& request_line);
 
                 const Headers& headers() const;
-                size_t         content_length() const;
+
+                /// Returns the requests content-length based on received headers.
+                ///
+                /// @return value of the content-length header or 0 if not present.
+                ///
+                /// @throws HTTPError (see ContentLength).
+                ContentLength content_length() const;
 
                 Request build() &&;
 

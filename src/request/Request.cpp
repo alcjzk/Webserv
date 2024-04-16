@@ -25,6 +25,7 @@
 #include "Task.hpp"
 #include "Route.hpp"
 #include "Path.hpp"
+#include "ContentLength.hpp"
 #include "FileResponseTask.hpp"
 
 using std::string;
@@ -74,14 +75,13 @@ const Request::Headers& Request::Builder::headers() const
     return _headers;
 }
 
-size_t Request::Builder::content_length() const
+ContentLength Request::Builder::content_length() const
 {
     if (const auto& it = _headers.find("content-length"); it != _headers.end())
     {
-        const auto& value = it->second;
-        return std::stoull(value); // TODO: validate
+        return ContentLength(it->second);
     }
-    return 0;
+    return ContentLength(0);
 }
 
 Request Request::Builder::build() &&
