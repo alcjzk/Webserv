@@ -14,6 +14,7 @@ class Status
             FORBIDDEN = 403,
             NOT_FOUND = 404,
             REQUEST_TIMEOUT = 408,
+            CONTENT_TOO_LARGE = 413,
             URI_TOO_LONG = 414,
             INTERNAL_SERVER_ERROR = 500,
             NOT_IMPLEMENTED = 501,
