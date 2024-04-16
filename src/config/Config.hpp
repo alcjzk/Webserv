@@ -74,12 +74,12 @@ class Config
         Seconds _cgi_write_timeout = Seconds(60);
         Seconds _io_read_timeout = Seconds(60);
 
-        std::string                 _port;
-        std::string                 _host;
+        std::string                 _port = "8000";
+        std::string                 _host = "127.0.0.1";
         std::vector<HostAttributes> _attrs;
         HostAttributes              _first_attr;
-        int                         _backlog;
-        size_t                      _body_size;
+        int                         _backlog = 128;
+        size_t                      _body_size = 4096;
         size_t                      _header_buffer_size;
         std::map<int, Path>         _error_pages;
         std::string                 _error_template = R"(<!DOCTYPE html>
