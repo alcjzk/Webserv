@@ -12,6 +12,9 @@
 class Reader
 {
     public:
+        using iterator = Buffer::iterator;
+        using const_iterator = Buffer::const_iterator;
+
         class LineLimitError : public std::runtime_error
         {
             public:
@@ -46,8 +49,27 @@ class Reader
         std::vector<char> read_exact(size_t count);
 
         /// Returns a reference to the internal buffer.
-        Buffer&       buffer();
-        const Buffer& buffer() const;
+        Buffer&       buffer() &;
+        Buffer&&      buffer() &&;
+        const Buffer& buffer() const&;
+
+        /// Replaces the internal buffer.
+        void buffer(Buffer&& buffer);
+
+        /// Returns the number of unread bytes in the Reader.
+        size_t unread_size() const;
+
+        /// Returns an iterator to the beginning of the unread content.
+        ///
+        /// NOTE: The returned iterators will never advance the reader.
+        iterator       begin();
+        const_iterator begin() const;
+
+        /// Returns an iterator past the end of the unread content.
+        ///
+        /// NOTE: The returned iterators will never advance the reader.
+        iterator       end();
+        const_iterator end() const;
 
     private:
         Buffer           _buffer;

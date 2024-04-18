@@ -39,7 +39,7 @@ void Reader::trim_empty_lines()
 
 vector<char> Reader::read_exact(size_t count)
 {
-    if (std::distance(_head, _buffer.end()) < (ssize_t)count)
+    if (unread_size() < count)
     {
         return vector<char>();
     }
@@ -86,14 +86,50 @@ optional<string> Reader::line(size_t limit)
     return std::nullopt;
 }
 
-Buffer& Reader::buffer()
+Buffer& Reader::buffer() &
 {
     return _buffer;
 }
 
-const Buffer& Reader::buffer() const
+Buffer&& Reader::buffer() &&
+{
+    return std::move(_buffer);
+}
+
+const Buffer& Reader::buffer() const &
 {
     return _buffer;
+}
+
+void Reader::buffer(Buffer&& buffer)
+{
+    _buffer = std::move(buffer);
+    _head = _buffer.begin();
+}
+
+size_t Reader::unread_size() const
+{
+    return std::distance(static_cast<Buffer::const_iterator>(_head), _buffer.end());
+}
+
+Reader::iterator Reader::begin()
+{
+    return _head;
+}
+
+Reader::const_iterator Reader::begin() const
+{
+    return _head;
+}
+
+Reader::iterator Reader::end()
+{
+    return _buffer.end();
+}
+
+Reader::const_iterator Reader::end() const
+{
+    return _buffer.end();
 }
 
 #ifdef TEST
