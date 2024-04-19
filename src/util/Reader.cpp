@@ -18,6 +18,8 @@ const char* Reader::LineLimitError::what() const noexcept
 
 Reader::Reader(Buffer&& buffer) : _buffer(std::move(buffer)), _head(_buffer.begin()) {}
 
+Reader::Reader(size_t buffer_size) : Reader(Buffer(buffer_size)) {}
+
 void Reader::trim_empty_lines()
 {
     while (_head != _buffer.end())
@@ -96,7 +98,7 @@ Buffer&& Reader::buffer() &&
     return std::move(_buffer);
 }
 
-const Buffer& Reader::buffer() const &
+const Buffer& Reader::buffer() const&
 {
     return _buffer;
 }
@@ -130,6 +132,16 @@ Reader::iterator Reader::end()
 Reader::const_iterator Reader::end() const
 {
     return _buffer.end();
+}
+
+void Reader::rewind()
+{
+    _head = _buffer.begin();
+}
+
+bool Reader::is_empty() const
+{
+    return static_cast<Buffer::const_iterator>(_head) == _buffer.end();
 }
 
 #ifdef TEST

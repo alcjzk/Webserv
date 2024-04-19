@@ -24,6 +24,9 @@ class Reader
         /// Constructs the reader from an existing buffer.
         Reader(Buffer&& buffer);
 
+        /// Constructs the reader with a new buffer.
+        Reader(size_t buffer_size);
+
         /// Extracts a line from the buffer, advancing the reader accordinly.
         ///
         /// @param limit - Maximum length of the line, not including the linefeed sequence.
@@ -61,15 +64,21 @@ class Reader
 
         /// Returns an iterator to the beginning of the unread content.
         ///
-        /// NOTE: The returned iterators will never advance the reader.
+        /// @note The returned iterators will never advance the reader.
         iterator       begin();
         const_iterator begin() const;
 
         /// Returns an iterator past the end of the unread content.
         ///
-        /// NOTE: The returned iterators will never advance the reader.
+        /// @note The returned iterators will never advance the reader.
         iterator       end();
         const_iterator end() const;
+
+        /// Rewinds the reader to the beginning.
+        void rewind();
+
+        /// Returns true if the reader has no unread content.
+        bool is_empty() const;
 
     private:
         Buffer           _buffer;
