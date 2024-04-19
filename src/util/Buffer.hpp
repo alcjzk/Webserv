@@ -22,6 +22,18 @@ class Buffer
         template <typename InputIt>
         Buffer(InputIt first, InputIt last);
 
+        /// Replace buffer contents by copying the given range to the beginning.
+        ///
+        /// This function behaves effectively like reconstructing the buffer without reallocating.
+        ///
+        /// @throws out_of_range - Input range is larger than `size()`
+        /// @warn behavior is undefined if `data()` points in range `first` - `last`
+        template <typename InputIt>
+        void replace(InputIt first, InputIt last);
+
+        /// Clears the buffer, setting `filled_size` to 0.
+        void clear();
+
         /// Returns an iterator to the beginning of the buffer's filled portion.
         iterator       begin() noexcept;
         const_iterator begin() const noexcept;
@@ -36,6 +48,9 @@ class Buffer
         /// Returns the number of unfilled bytes in the buffer.
         size_t unfilled_size() const;
 
+        /// Returns true if the buffer is completely filled.
+        bool is_full() const;
+
         /// Returns the total size of the buffer.
         size_t size() const;
 
@@ -49,6 +64,9 @@ class Buffer
         /// Returns a pointer to the unfilled portion of the buffer.
         char*       unfilled();
         const char* unfilled() const;
+
+        /// Returns the internal container of the buffer.
+        Container container() &&;
 
     private:
         Container _container;
