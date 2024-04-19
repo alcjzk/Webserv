@@ -9,15 +9,9 @@
 class Response
 {
     public:
-        enum class Connection
-        {
-            KeepAlive,
-            Close,
-        };
-
         virtual ~Response() = default;
 
-        Response(Connection connection, Status = Status::OK);
+        Response(Status = Status::OK);
         Response(Response&&) = default;
         Response(const Response&) = default;
 
@@ -42,7 +36,7 @@ class Response
 
         void content_length(ContentLength content_length);
 
-        Connection _connection;
+        bool _keep_alive = true;
 
     private:
         Status              _status;

@@ -1,3 +1,4 @@
+#include <optional>
 #include <unistd.h>
 #include <cassert>
 #include <chrono>
@@ -8,17 +9,17 @@
 #include "Runtime.hpp"
 #include "File.hpp"
 #include "Response.hpp"
-#include "Server.hpp"
 #include "BasicTask.hpp"
 #include "Task.hpp"
+#include "Connection.hpp"
 #include "ReceiveRequestTask.hpp"
 
-SendResponseTask::SendResponseTask(const Server& server, File&& file, Response* response)
+SendResponseTask::SendResponseTask(Connection&& connection, Response* response)
     : BasicTask(
-          std::move(file), WaitFor::Writable,
-          std::chrono::system_clock::now() + server.config().send_timeout()
+          File(), WaitFor::Writable,
+          std::chrono::system_clock::now() + connection.config().send_timeout()
       ),
-      _response(response), _server(server)
+      _connection(std::move(connection)), _response(response)
 {
 }
 
@@ -26,12 +27,10 @@ void SendResponseTask::run()
 {
     try
     {
-        if (!_response->send(_fd))
+        if (!_response->send(_connection.client()))
             return;
-        if (_response->_connection == Response::Connection::KeepAlive)
-        {
-            Runtime::enqueue(new ReceiveRequestTask(_server, std::move(_fd)));
-        }
+        if (_response->_keep_alive)
+            Runtime::enqueue(new ReceiveRequestTask(std::move(_connection)));
     }
     catch (const std::runtime_error& error)
     {
@@ -48,4 +47,9 @@ void SendResponseTask::abort()
 {
     INFO("ServerSendResponseTask for fd " << _fd << " timed out.");
     _is_complete = true;
+}
+
+int SendResponseTask::fd() const
+{
+    return _connection.client();
 }

@@ -63,6 +63,7 @@ void Runtime::run_impl()
 
         for (const auto& pollfd : pollfds)
         {
+            // NOTE: There's unnecessary iterations here if pollfds / task are in the same order
             auto task = std::find_if(
                 _tasks.begin(), _tasks.end(),
                 [&pollfd](const auto& task) { return task->fd() == pollfd.fd; }

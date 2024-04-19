@@ -6,11 +6,10 @@
 #include <unordered_map>
 #include "ContentLength.hpp"
 #include "RequestLine.hpp"
-#include "Response.hpp"
 #include "Header.hpp"
 #include "HttpUri.hpp"
-#include "File.hpp"
 #include "Method.hpp"
+#include "Connection.hpp"
 #include "Task.hpp"
 
 class Server;
@@ -18,7 +17,6 @@ class Server;
 class Request
 {
     public:
-        using Connection = Response::Connection;
         using Headers = std::unordered_map<std::string, std::string>;
         using Body = std::vector<char>;
 
@@ -42,24 +40,20 @@ class Request
 
                 Headers                _headers;
                 RequestLine            _request_line;
-                Connection             _connection = Connection::KeepAlive;
+                bool                   _keep_alive = true;
                 std::optional<HttpUri> _uri;
                 Body                   _body;
         };
 
-        Task*          process(const Server& server, File&& file);
+        Task*          process(Connection&& connection);
         const Method&  method() const;
         const Headers& headers() const;
 
         HttpUri     _uri;
-        Connection  _connection;
         RequestLine _request_line;
         Headers     _headers;
         Body        _body;
 
     private:
-        Request(
-            HttpUri&& uri, Connection connection, RequestLine&& request_line, Headers&& headers,
-            Body&& body
-        );
+        Request(HttpUri&& uri, RequestLine&& request_line, Headers&& headers, Body&& body);
 };

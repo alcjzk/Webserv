@@ -1,20 +1,19 @@
 #pragma once
 
 #include <optional>
-#include "Server.hpp"
-#include "Reader.hpp"
 #include "Request.hpp"
 #include "BasicTask.hpp"
-#include "File.hpp"
+#include "Connection.hpp"
 #include "ContentLength.hpp"
 
 class ReceiveRequestTask : public BasicTask
 {
     public:
-        ReceiveRequestTask(const Server& server, File&& file);
+        ReceiveRequestTask(Connection&& connection);
 
         virtual void run() override;
         virtual void abort() override;
+        virtual int  fd() const override;
 
     private:
         enum class Expect
@@ -33,10 +32,9 @@ class ReceiveRequestTask : public BasicTask
         void fill_buffer();
         void disable_linger();
 
+        Connection                      _connection;
         Expect                          _expect = Expect::RequestLine;
-        Reader                          _reader;
         ContentLength                   _content_length = 0;
         std::optional<Request::Builder> _builder = Request::Builder();
-        bool                            _is_partial_data = true;
-        const Server&                   _server;
+        bool                            _is_partial_data = false;
 };

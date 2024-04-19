@@ -3,15 +3,11 @@
 #include "ReadTask.hpp"
 #include "SendResponseTask.hpp"
 #include "CompositeTask.hpp"
-#include "Response.hpp"
-#include "File.hpp"
-#include "Server.hpp"
+#include "Connection.hpp"
 #include "Status.hpp"
 
 namespace error_response_task
 {
-    using Connection = Response::Connection;
-
     struct SendState
     {
         public:
@@ -24,11 +20,9 @@ namespace error_response_task
     struct ReadState
     {
         public:
-            ReadTask      _task;
-            File          _client;
-            Connection    _connection;
-            const Server& _server;
-            Status        _status;
+            ReadTask   _task;
+            Connection _connection;
+            Status     _status;
 
             template <typename Parent>
             void on_complete(Parent& parent);
@@ -37,10 +31,7 @@ namespace error_response_task
     class ErrorResponseTask : public CompositeTask<ReadState, SendState>
     {
         public:
-            ErrorResponseTask(
-                File&& client, const Server& server, Status status,
-                Connection = Connection::KeepAlive
-            );
+            ErrorResponseTask(Connection&& connection, Status status);
     };
 
 } // namespace error_response_task

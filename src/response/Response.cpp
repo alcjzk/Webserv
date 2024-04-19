@@ -7,14 +7,16 @@
 #include <utility>
 #include <cstring>
 #include <errno.h>
+#include <vector>
+#include "Status.hpp"
+#include "Header.hpp"
 #include "http.hpp"
 #include "Response.hpp"
 #include "ContentLength.hpp"
 
-Response::Response(Connection connection, Status status)
-    : _connection(connection), _status(status), _size(0), _size_remaining(0), _is_built(false)
+Response::Response(Status status) : _status(status), _size(0), _size_remaining(0), _is_built(false)
 {
-    if (_connection == Connection::Close)
+    if (!_keep_alive)
         header(Header("connection", "close"));
 }
 
