@@ -104,6 +104,9 @@ Task* Request::process(Connection&& connection)
 
     const Route* route = server.route(_uri.path(), _uri.host());
 
+    if (!route)
+        throw HTTPError(Status::NOT_FOUND);
+
     if (route->_type == Route::REDIRECTION)
     {
         Response* response = new RedirectionResponse(route->_redir.value());
