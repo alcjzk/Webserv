@@ -36,7 +36,6 @@ TiniTree.cpp					\
 TiniUtils.cpp					\
 TiniValidator.cpp				\
 Route.cpp						\
-FileResponse.cpp				\
 Routes.cpp						\
 Path.cpp						\
 HostAttributes.cpp				\
@@ -54,6 +53,8 @@ FileResponseTask.cpp			\
 ErrorResponseTask.cpp			\
 BasicTask.cpp					\
 Buffer.cpp						\
+ContentLength.cpp				\
+Connection.cpp					\
 main.cpp
 
 SRCS_TEST = test/testmain.cpp

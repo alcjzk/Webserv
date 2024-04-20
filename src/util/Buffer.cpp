@@ -19,6 +19,11 @@ Buffer::Buffer(const Container& container) : _container(container)
     _filled_size = container.size();
 }
 
+void Buffer::clear()
+{
+    _filled_size = 0;
+}
+
 iterator Buffer::begin() noexcept
 {
     return _container.begin();
@@ -49,6 +54,11 @@ size_t Buffer::unfilled_size() const
     return _container.size() - _filled_size;
 }
 
+bool Buffer::is_full() const
+{
+    return _filled_size == _container.size();
+}
+
 size_t Buffer::size() const
 {
     return _container.size();
@@ -67,6 +77,11 @@ char* Buffer::filled()
 char* Buffer::unfilled()
 {
     return _container.data() + _filled_size;
+}
+
+Container Buffer::container() &&
+{
+    return std::move(_container);
 }
 
 #ifdef TEST

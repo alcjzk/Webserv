@@ -3,7 +3,6 @@
 #include <fcntl.h>
 #include <cctype>
 #include <stdexcept>
-#include <exception>
 #include <sys/fcntl.h>
 #include <utility>
 #include <string>
@@ -14,10 +13,9 @@
 #include "Response.hpp"
 #include "Status.hpp"
 #include "Server.hpp"
-#include "FileResponse.hpp"
+#include "SendResponseTask.hpp"
 #include "DirectoryResponse.hpp"
 #include "RedirectionResponse.hpp"
-#include "SendResponseTask.hpp"
 #include "HTTPError.hpp"
 #include "Request.hpp"
 #include "HttpUri.hpp"
@@ -25,6 +23,8 @@
 #include "Task.hpp"
 #include "Route.hpp"
 #include "Path.hpp"
+#include "ContentLength.hpp"
+#include "Connection.hpp"
 #include "FileResponseTask.hpp"
 
 using std::string;
@@ -49,7 +49,7 @@ void Request::Builder::header(Header&& header)
             );
             if (header._value == "close")
             {
-                _connection = Connection::Close;
+                _keep_alive = false;
             }
         }
         if (!_headers.emplace(header._name, header._value).second)
@@ -74,14 +74,13 @@ const Request::Headers& Request::Builder::headers() const
     return _headers;
 }
 
-size_t Request::Builder::content_length() const
+ContentLength Request::Builder::content_length() const
 {
     if (const auto& it = _headers.find("content-length"); it != _headers.end())
     {
-        const auto& value = it->second;
-        return std::stoull(value); // TODO: validate
+        return ContentLength(it->second);
     }
-    return 0;
+    return ContentLength(0);
 }
 
 Request Request::Builder::build() &&
@@ -89,29 +88,30 @@ Request Request::Builder::build() &&
     if (!_uri)
         throw HTTPError(Status::BAD_REQUEST);
     return Request(
-        std::move(*_uri), _connection, std::move(_request_line), std::move(_headers),
-        std::move(_body)
+        std::move(*_uri), std::move(_request_line), std::move(_headers), std::move(_body)
     );
 }
 
-Request::Request(
-    HttpUri&& uri, Connection connection, RequestLine&& request_line, Headers&& headers, Body&& body
-)
-    : _uri(std::move(uri)), _connection(connection), _request_line(std::move(request_line)),
-      _headers(std::move(headers)), _body(std::move(body))
+Request::Request(HttpUri&& uri, RequestLine&& request_line, Headers&& headers, Body&& body)
+    : _uri(std::move(uri)), _request_line(std::move(request_line)), _headers(std::move(headers)),
+      _body(std::move(body))
 {
 }
 
-Task* Request::process(const Server& server, File&& file)
+Task* Request::process(Connection&& connection)
 {
-    Response* response;
+    const Server& server = connection.server();
 
     const Route* route = server.route(_uri.path(), _uri.host());
 
+    if (!route)
+        throw HTTPError(Status::NOT_FOUND);
+
     if (route->_type == Route::REDIRECTION)
     {
-        response = new RedirectionResponse(route->_redir.value(), _connection);
-        return new SendResponseTask(server, std::move(file), response);
+        Response* response = new RedirectionResponse(route->_redir.value());
+        response->_keep_alive = connection._keep_alive;
+        return new SendResponseTask(std::move(connection), response);
     }
 
     Path target = route->map(_uri.path());
@@ -124,38 +124,36 @@ Task* Request::process(const Server& server, File&& file)
 
     if (target_status->is_regular())
     {
+        // TODO: Open is assumed to succeed here
         int    fd = target.open(O_RDONLY);
         size_t size = target_status->size();
-        return new FileResponseTask(fd, size, std::move(file), server, _connection);
+        return new FileResponseTask(std::move(connection), fd, size);
     }
 
     if (!target_status->is_directory())
         throw HTTPError(Status::FORBIDDEN);
 
-    try
+    if (route->_default_file)
     {
-        if (route->_default_file.has_value())
+        Path default_file = target + Path(route->_default_file.value());
+        auto status = default_file.status();
+        if (status.has_value() && status->is_regular())
         {
-            response = new FileResponse(target + Path(route->_default_file.value()), _connection);
-            return new SendResponseTask(server, std::move(file), response);
+            // TODO: Expected behavior when default file is set and exists but is not a regular
+            // file?
+            // TODO: Open is assumed to succeed here
+            return new FileResponseTask(
+                std::move(connection), default_file.open(O_RDONLY), status->size()
+            );
         }
-    }
-    catch (const std::exception& e)
-    {
-        INFO("Request::into_response: " << e.what());
-        if (server.map_attributes(_uri.host()).dirlist())
-        {
-            response = new DirectoryResponse(target, _uri.path(), _connection);
-            return new SendResponseTask(server, std::move(file), response);
-        }
-        throw HTTPError(Status::NOT_FOUND);
     }
 
     if (!server.map_attributes(_uri.host()).dirlist())
         throw HTTPError(Status::FORBIDDEN);
 
-    response = new DirectoryResponse(target, _uri.path(), _connection);
-    return new SendResponseTask(server, std::move(file), response);
+    Response* response = new DirectoryResponse(target, _uri.path());
+    response->_keep_alive = connection._keep_alive;
+    return new SendResponseTask(std::move(connection), response);
 }
 
 const Method& Request::method() const

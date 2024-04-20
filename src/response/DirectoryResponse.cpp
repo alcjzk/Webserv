@@ -9,9 +9,9 @@ using std::ifstream;
 using std::vector;
 
 DirectoryResponse::DirectoryResponse(
-    const Path& target_path, const Path& request_path, Connection connection, Status status
+    const Path& target_path, const Path& request_path, Status status
 )
-    : Response(connection, status)
+    : Response(status)
 {
     std::string cwd_path(target_path);
     const char* cwd_cstr = cwd_path.c_str();

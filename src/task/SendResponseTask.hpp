@@ -2,19 +2,19 @@
 
 #include <memory>
 #include "Response.hpp"
-#include "Server.hpp"
+#include "Connection.hpp"
 #include "BasicTask.hpp"
-#include "File.hpp"
 
 class SendResponseTask : public BasicTask
 {
     public:
-        SendResponseTask(const Server& server, File&& file, Response* response);
+        SendResponseTask(Connection&& connection, Response* response);
 
         virtual void run() override;
         virtual void abort() override;
+        virtual int  fd() const override;
 
     private:
+        Connection                _connection;
         std::unique_ptr<Response> _response;
-        const Server&             _server;
 };

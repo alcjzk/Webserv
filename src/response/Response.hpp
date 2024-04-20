@@ -4,19 +4,14 @@
 #include <vector>
 #include "Status.hpp"
 #include "Header.hpp"
+#include "ContentLength.hpp"
 
 class Response
 {
     public:
-        enum class Connection
-        {
-            KeepAlive,
-            Close,
-        };
-
         virtual ~Response() = default;
 
-        Response(Connection connection, Status = Status::OK);
+        Response(Status = Status::OK);
         Response(Response&&) = default;
         Response(const Response&) = default;
 
@@ -39,9 +34,9 @@ class Response
 
         const std::vector<char>& body() const;
 
-        void content_length(size_t content_length);
+        void content_length(ContentLength content_length);
 
-        Connection _connection;
+        bool _keep_alive = true;
 
     private:
         Status              _status;

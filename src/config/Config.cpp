@@ -1,5 +1,6 @@
 #include "Config.hpp"
 #include "Log.hpp"
+#include <cstddef>
 #include <fstream>
 
 using std::string;
@@ -8,9 +9,7 @@ Config::Config(
     std::map<std::string, TiniNode*>& server, std::map<std::string, TiniNode*>& root,
     std::pair<std::string, TiniNode*> first_pair
 )
-    : _port(string("8000")), _host(string("127.0.0.1")),
-      _first_attr(HostAttributes(first_pair.first, first_pair.second)), _backlog(128),
-      _body_size(4096)
+    : _first_attr(HostAttributes(first_pair.first, first_pair.second))
 {
     const TiniNode* body_size = root["body_size"];
     const TiniNode* header_buffer_size = root["header_buffer_size"];
@@ -111,6 +110,11 @@ const string& Config::host() const
 int Config::backlog() const
 {
     return _backlog;
+}
+
+size_t Config::body_size() const
+{
+    return _body_size;
 }
 
 Config::Seconds Config::keepalive_timeout() const

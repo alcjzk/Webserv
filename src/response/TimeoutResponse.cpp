@@ -1,3 +1,8 @@
+#include "Status.hpp"
+#include "Response.hpp"
 #include "TimeoutResponse.hpp"
 
-TimeoutResponse::TimeoutResponse() : Response(Connection::Close, Status::REQUEST_TIMEOUT) {}
+TimeoutResponse::TimeoutResponse() : Response(Status::REQUEST_TIMEOUT)
+{
+    _keep_alive = false;
+}

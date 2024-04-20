@@ -31,17 +31,18 @@ namespace file_response_task
             Status status = Status::INTERNAL_SERVER_ERROR;
 
             ErrorState error_state{
-                ErrorResponseTask(std::move(_client), _server, status, _connection),
+                ErrorResponseTask(std::move(_connection), status),
             };
             return parent.state(std::move(error_state));
         }
 
-        response = new Response(_connection, Status::OK);
+        response = new Response(Status::OK);
+        response->_keep_alive = _connection._keep_alive;
         response->body(std::move(_task).buffer());
 
         SendState send_state{
-            SendResponseTask(_server, std::move(_client), response),
+            SendResponseTask(std::move(_connection), response),
         };
         parent.state(std::move(send_state));
     }
-}
+} // namespace file_response_task

@@ -12,6 +12,7 @@
 #include "BasicTask.hpp"
 #include "Server.hpp"
 #include "Task.hpp"
+#include "Connection.hpp"
 #include "ReceiveRequestTask.hpp"
 
 using WaitFor = Task::WaitFor;
@@ -32,13 +33,14 @@ void AcceptTask::run()
         {
             throw std::runtime_error(strerror(errno));
         }
-        File file(fd);
-        if (fcntl(file, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
+        if (fcntl(fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
         {
+            // TODO: This should probably be handled as a warning
             throw std::runtime_error(strerror(errno));
         }
-        INFO("Client connected on fd " << file);
-        Runtime::enqueue(new ReceiveRequestTask(_server, std::move(file)));
+        INFO("Client connected on fd " << fd);
+        Connection connection(fd, _server);
+        Runtime::enqueue(new ReceiveRequestTask(std::move(connection)));
     }
     catch (const std::runtime_error& error)
     {

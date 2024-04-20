@@ -5,14 +5,11 @@
 #include "ReadTask.hpp"
 #include "SendResponseTask.hpp"
 #include "ErrorResponseTask.hpp"
-#include "Server.hpp"
-#include "Response.hpp"
+#include "Connection.hpp"
 #include "CompositeTask.hpp"
 
 namespace file_response_task
 {
-    using Connection = Response::Connection;
-
     class SendState
     {
         public:
@@ -34,10 +31,8 @@ namespace file_response_task
     class ReadState
     {
         public:
-            ReadTask      _task;
-            File          _client;
-            const Server& _server;
-            Connection    _connection;
+            ReadTask   _task;
+            Connection _connection;
 
             template <typename Parent>
             void on_complete(Parent& parent);
@@ -46,9 +41,7 @@ namespace file_response_task
     class FileResponseTask : public CompositeTask<ReadState, SendState, ErrorState>
     {
         public:
-            FileResponseTask(
-                File&& file, size_t size, File&& client, const Server& server, Connection connection
-            );
+            FileResponseTask(Connection&& connection, File&& file, size_t size);
     };
 } // namespace file_response_task
 

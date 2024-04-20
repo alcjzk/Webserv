@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <chrono>
+#include <cstddef>
 #include "Status.hpp"
 #include "HostAttributes.hpp"
 
@@ -29,6 +30,9 @@ class Config
         size_t                             header_buffsize() const;
         const std::string&                 error_str() const;
         std::optional<Path>                error_page(Status status) const;
+
+        /// Returns the maximum request body size.
+        size_t body_size() const;
 
         /// Returns a timeout in seconds for keeping an inactive connection alive.
         Seconds keepalive_timeout() const;
@@ -70,13 +74,13 @@ class Config
         Seconds _cgi_write_timeout = Seconds(60);
         Seconds _io_read_timeout = Seconds(60);
 
-        std::string                 _port;
-        std::string                 _host;
+        std::string                 _port = "8000";
+        std::string                 _host = "127.0.0.1";
         std::vector<HostAttributes> _attrs;
         HostAttributes              _first_attr;
-        int                         _backlog;
-        size_t                      _body_size;
-        size_t                      _header_buffer_size;
+        int                         _backlog = 128;
+        size_t                      _body_size = 4096;
+        size_t                      _header_buffer_size = 1024;
         std::map<int, Path>         _error_pages;
         std::string                 _error_template = R"(<!DOCTYPE html>
                                                         <html lang="en">
