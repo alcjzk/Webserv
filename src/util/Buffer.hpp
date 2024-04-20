@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <stdexcept>
 #include <cstddef>
 
 /// A vector wrapper to keep track of filled/unfilled portions of a buffer.
