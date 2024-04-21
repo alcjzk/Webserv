@@ -36,6 +36,11 @@ class Request
                 /// @throws HTTPError (see ContentLength).
                 ContentLength content_length() const;
 
+                /// Returns a header value by key. Argument given must always be lowercase, or this
+                /// function will never match.
+                std::string*       header_by_key(const std::string& key);
+                const std::string* header_by_key(const std::string& key) const;
+
                 Request build() &&;
 
                 Headers                _headers;

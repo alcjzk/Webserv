@@ -83,6 +83,18 @@ ContentLength Request::Builder::content_length() const
     return ContentLength(0);
 }
 
+string* Request::Builder::header_by_key(const string& key)
+{
+    auto entry = _headers.find(key);
+    return entry != _headers.end() ? &entry->second : nullptr;
+}
+
+const string* Request::Builder::header_by_key(const string& key) const
+{
+    const auto entry = _headers.find(key);
+    return entry != _headers.end() ? &entry->second : nullptr;
+}
+
 Request Request::Builder::build() &&
 {
     if (!_uri)
