@@ -105,28 +105,32 @@ void ReceiveRequestTask::receive_headers()
         if (line->empty())
         {
             INFO("End of headers");
-            _content_length = _builder->content_length();
-            if (_content_length > _connection.config().body_size())
-                throw HTTPError(Status::CONTENT_TOO_LARGE);
-            if (_content_length != 0)
-            {
-                INFO("expecting " << _content_length << " bytes of content");
+            _builder->parse_headers();
 
-                // If the headers buffer has more content remaining than the body size, the body
-                // can be split out from the buffer directly. Otherwise the headers buffer can be
-                // assumed to only contain body content.
-                if (reader.unread_size() <= _content_length)
+            if (auto content_length = _builder->content_length())
+            {
+                if (*content_length > _connection.config().body_size())
+                    throw HTTPError(Status::CONTENT_TOO_LARGE);
+                if (*content_length != 0)
                 {
-                    // Headers buffer can only contain body content.
-                    Buffer body_buffer(_content_length);
-                    std::copy(reader.begin(), reader.end(), body_buffer.unfilled());
-                    body_buffer.advance(reader.unread_size());
-                    reader.buffer(std::move(body_buffer));
-                    _expect = Expect::Body;
-                    return;
+                    INFO("expecting " << *content_length << " bytes of content");
+
+                    // If the headers buffer has more content remaining than the body size, the body
+                    // can be split out from the buffer directly. Otherwise the headers buffer can
+                    // be assumed to only contain body content.
+                    if (reader.unread_size() <= *content_length)
+                    {
+                        // Headers buffer can only contain body content.
+                        Buffer body_buffer(*content_length);
+                        std::copy(reader.begin(), reader.end(), body_buffer.unfilled());
+                        body_buffer.advance(reader.unread_size());
+                        reader.buffer(std::move(body_buffer));
+                        _expect = Expect::Body;
+                        return;
+                    }
+                    // Headers buffer already contains full body content.
+                    _builder->body(reader.read_exact(*content_length));
                 }
-                // Headers buffer already contains full body content.
-                _builder->body(reader.read_exact(_content_length));
             }
 
             if (reader.is_empty())

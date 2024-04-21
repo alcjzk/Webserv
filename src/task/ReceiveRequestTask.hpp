@@ -4,7 +4,6 @@
 #include "Request.hpp"
 #include "BasicTask.hpp"
 #include "Connection.hpp"
-#include "ContentLength.hpp"
 
 class ReceiveRequestTask : public BasicTask
 {
@@ -34,7 +33,6 @@ class ReceiveRequestTask : public BasicTask
 
         Connection                      _connection;
         Expect                          _expect = Expect::RequestLine;
-        ContentLength                   _content_length = 0;
         std::optional<Request::Builder> _builder = Request::Builder();
         bool                            _is_partial_data = false;
 };
