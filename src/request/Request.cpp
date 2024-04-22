@@ -6,6 +6,7 @@
 #include <sys/fcntl.h>
 #include <utility>
 #include <string>
+#include <cassert>
 #include "Log.hpp"
 #include "Header.hpp"
 #include "RequestLine.hpp"
@@ -104,6 +105,8 @@ void Request::Builder::parse_headers()
             if (*transfer_encoding != "chunked")
                 throw HTTPError(Status::NOT_IMPLEMENTED);
             _is_chunked = true;
+            size_t erased_count = _headers.erase("transfer-encoding");
+            assert(erased_count == 1);
         }
         else if (content_length)
             _content_length = ContentLength(*content_length);
