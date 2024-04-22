@@ -191,21 +191,27 @@ void ReceiveRequestTask::receive_chunk()
 void ReceiveRequestTask::receive_last_chunk()
 {
     Reader& reader = _connection.reader().value();
-    auto    line = reader.line();
-    if (!line)
+
+    while (auto line = reader.line())
     {
-        _is_partial_data = true;
+        if (!line)
+        {
+            _is_partial_data = true;
+            return;
+        }
+        if (!line->empty())
+            continue;
+
+        realign_reader();
+        _builder->body(std::move(_chunked_body));
+        INFO("received chunked content of size " << _builder->_body.size());
+        _connection.reader().reset();
+        Request request = std::exchange(_builder, std::nullopt).value().build();
+        Runtime::enqueue(request.process(std::move(_connection)));
+        _is_complete = true;
         return;
     }
-    if (!line->empty())
-        throw HTTPError(Status::BAD_REQUEST);
-    realign_reader();
-    _builder->body(std::move(_chunked_body));
-    INFO("received chunked content of size " << _builder->_body.size());
-    _connection.reader().reset();
-    Request request = std::exchange(_builder, std::nullopt).value().build();
-    Runtime::enqueue(request.process(std::move(_connection)));
-    _is_complete = true;
+    _is_partial_data = true;
 }
 
 void ReceiveRequestTask::realign_reader()
