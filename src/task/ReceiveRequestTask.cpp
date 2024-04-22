@@ -161,12 +161,12 @@ void ReceiveRequestTask::receive_chunk_size()
     // TODO: validate chunksize
     _chunk_size = std::stoull(*line, nullptr, 16);
     INFO("expecting chunk with size " << _chunk_size);
-    // TODO: reserve space for chunk in reader
     if (_chunk_size == 0)
     {
         _expect = Expect::LastChunk;
         return;
     }
+    reader.reserve(_chunk_size);
     size_t new_size = _chunked_body.size() + _chunk_size;
     _chunked_position = _chunked_body.size();
     _chunked_body.resize(new_size);

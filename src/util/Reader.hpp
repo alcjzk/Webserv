@@ -80,6 +80,9 @@ class Reader
         /// Returns true if the reader has no unread content.
         bool is_empty() const;
 
+        /// Reserves space or `count` bytes bytes in the underlying buffer's unread portion.
+        void reserve(size_t count);
+
     private:
         Buffer           _buffer;
         Buffer::iterator _head;

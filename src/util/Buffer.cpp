@@ -84,6 +84,15 @@ Container Buffer::container() &&
     return std::move(_container);
 }
 
+void Buffer::reserve(size_t count)
+{
+    if (count > unfilled_size())
+    {
+        size_t additional_size = count - unfilled_size();
+        _container.resize(_container.size() + additional_size);
+    }
+}
+
 #ifdef TEST
 
 #include <iterator>

@@ -144,6 +144,13 @@ bool Reader::is_empty() const
     return static_cast<Buffer::const_iterator>(_head) == _buffer.end();
 }
 
+void Reader::reserve(size_t count)
+{
+    size_t position = std::distance(_buffer.begin(), _head);
+    _buffer.reserve(count);
+    _head = _buffer.begin() + position;
+}
+
 #ifdef TEST
 
 #include <cstring>
