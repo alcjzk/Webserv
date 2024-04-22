@@ -101,6 +101,8 @@ void Request::Builder::parse_headers()
         {
             if (content_length)
                 throw HTTPError(Status::BAD_REQUEST);
+            if (_request_line.http_version() == HTTPVersion(1, 0))
+                throw HTTPError(Status::BAD_REQUEST);
             to_lower_in_place(*transfer_encoding);
             if (*transfer_encoding != "chunked")
                 throw HTTPError(Status::NOT_IMPLEMENTED);
