@@ -293,6 +293,8 @@ void ReceiveRequestTask::run()
     catch (const HTTPError& error)
     {
         WARN("ReceiveRequestTask::run():" << _connection.client() << ":" << error.what());
+        if (error.status().code() == Status::BAD_REQUEST)
+            _connection._keep_alive = false;
         Runtime::enqueue(new ErrorResponseTask(std::move(_connection), error.status()));
         _is_complete = true;
     }
