@@ -58,6 +58,11 @@ optional<ContentLength> Request::Builder::content_length() const
     return _content_length;
 }
 
+bool Request::Builder::is_chunked() const
+{
+    return _is_chunked;
+}
+
 string* Request::Builder::header_by_key(const string& key)
 {
     auto entry = _headers.find(key);
@@ -88,7 +93,19 @@ void Request::Builder::parse_headers()
                 _keep_alive = false;
         }
 
-        if (const string* content_length = header_by_key("content-length"))
+        string*       transfer_encoding = header_by_key("transfer-encoding");
+        const string* content_length = header_by_key("content-length");
+
+        if (transfer_encoding)
+        {
+            if (content_length)
+                throw HTTPError(Status::BAD_REQUEST);
+            to_lower_in_place(*transfer_encoding);
+            if (*transfer_encoding != "chunked")
+                throw HTTPError(Status::NOT_IMPLEMENTED);
+            _is_chunked = true;
+        }
+        else if (content_length)
             _content_length = ContentLength(*content_length);
     }
     catch (const std::runtime_error& error)

@@ -29,7 +29,14 @@ class Request
                 const Headers& headers() const;
 
                 /// Returns ContentLength if set.
+                ///
+                /// Must not be called before `parse_headers`.
                 std::optional<ContentLength> content_length() const;
+
+                /// Returns true if the request uses chunked transfer-encoding.
+                ///
+                /// Must not be called before `parse_headers`.
+                bool is_chunked() const;
 
                 void header(Header&& header);
 
@@ -49,6 +56,7 @@ class Request
                 Headers                      _headers;
                 RequestLine                  _request_line;
                 bool                         _keep_alive = true;
+                bool                         _is_chunked = false;
                 std::optional<HttpUri>       _uri;
                 std::optional<ContentLength> _content_length;
                 Body                         _body;
