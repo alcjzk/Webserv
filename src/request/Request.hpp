@@ -24,25 +24,42 @@ class Request
         {
             public:
                 void body(Body&& body);
-                void header(Header&& header);
                 void request_line(RequestLine&& request_line);
 
                 const Headers& headers() const;
 
-                /// Returns the requests content-length based on received headers.
+                /// Returns ContentLength if set.
                 ///
-                /// @return value of the content-length header or 0 if not present.
+                /// Must not be called before `parse_headers`.
+                std::optional<ContentLength> content_length() const;
+
+                /// Returns true if the request uses chunked transfer-encoding.
                 ///
-                /// @throws HTTPError (see ContentLength).
-                ContentLength content_length() const;
+                /// Must not be called before `parse_headers`.
+                bool is_chunked() const;
+
+                void header(Header&& header);
+
+                /// Returns a header value by key. Argument given must always be lowercase, or this
+                /// function will never match.
+                std::string*       header_by_key(const std::string& key);
+                const std::string* header_by_key(const std::string& key) const;
+
+                /// Parses the message headers.
+                void parse_headers();
 
                 Request build() &&;
 
-                Headers                _headers;
-                RequestLine            _request_line;
-                bool                   _keep_alive = true;
-                std::optional<HttpUri> _uri;
-                Body                   _body;
+                /// Converts a string to lowercase in-place.
+                static void to_lower_in_place(std::string& value);
+
+                Headers                      _headers;
+                RequestLine                  _request_line;
+                bool                         _keep_alive = true;
+                bool                         _is_chunked = false;
+                std::optional<HttpUri>       _uri;
+                std::optional<ContentLength> _content_length;
+                Body                         _body;
         };
 
         Task*          process(Connection&& connection);

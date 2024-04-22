@@ -69,6 +69,9 @@ class Buffer
         /// Returns the internal container of the buffer.
         Container container() &&;
 
+        /// Reserves space for `count` bytes in the buffer's unfilled portion.
+        void reserve(size_t count);
+
     private:
         Container _container;
         size_t    _filled_size = 0;

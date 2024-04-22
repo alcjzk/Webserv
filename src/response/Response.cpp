@@ -16,8 +16,6 @@
 
 Response::Response(Status status) : _status(status), _size(0), _size_remaining(0), _is_built(false)
 {
-    if (!_keep_alive)
-        header(Header("connection", "close"));
 }
 
 bool Response::send(int fd)
@@ -84,6 +82,8 @@ void Response::build()
     std::vector<char>   body;
     std::vector<Header> headers;
 
+    if (!_keep_alive)
+        header(Header("connection", "close"));
     headers.swap(_headers);
     body.swap(_body);
 

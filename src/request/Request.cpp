@@ -6,6 +6,7 @@
 #include <sys/fcntl.h>
 #include <utility>
 #include <string>
+#include <cassert>
 #include "Log.hpp"
 #include "Header.hpp"
 #include "RequestLine.hpp"
@@ -27,6 +28,7 @@
 #include "Connection.hpp"
 #include "FileResponseTask.hpp"
 
+using std::optional;
 using std::string;
 
 void Request::Builder::body(Body&& body)
@@ -36,30 +38,8 @@ void Request::Builder::body(Body&& body)
 
 void Request::Builder::header(Header&& header)
 {
-    try
-    {
-        if (header._name == "host")
-        {
-            _uri = HttpUri(_request_line.request_target(), header._value);
-        }
-        else if (header._name == "connection")
-        {
-            (void)std::transform(
-                header._value.begin(), header._value.end(), header._value.begin(), toupper
-            );
-            if (header._value == "close")
-            {
-                _keep_alive = false;
-            }
-        }
-        if (!_headers.emplace(header._name, header._value).second)
-            throw HTTPError(Status::BAD_REQUEST);
-    }
-    catch (const std::runtime_error& error)
-    {
-        WARN("RequestBuilder::header: `" << header._value << "`: " << error.what());
+    if (!_headers.emplace(header._name, header._value).second)
         throw HTTPError(Status::BAD_REQUEST);
-    }
 }
 
 void Request::Builder::request_line(RequestLine&& request_line)
@@ -74,22 +54,81 @@ const Request::Headers& Request::Builder::headers() const
     return _headers;
 }
 
-ContentLength Request::Builder::content_length() const
+optional<ContentLength> Request::Builder::content_length() const
 {
-    if (const auto& it = _headers.find("content-length"); it != _headers.end())
+    return _content_length;
+}
+
+bool Request::Builder::is_chunked() const
+{
+    return _is_chunked;
+}
+
+string* Request::Builder::header_by_key(const string& key)
+{
+    auto entry = _headers.find(key);
+    return entry != _headers.end() ? &entry->second : nullptr;
+}
+
+const string* Request::Builder::header_by_key(const string& key) const
+{
+    const auto entry = _headers.find(key);
+    return entry != _headers.end() ? &entry->second : nullptr;
+}
+
+void Request::Builder::parse_headers()
+{
+    try
     {
-        return ContentLength(it->second);
+        string* host = header_by_key("host");
+        if (!host)
+            throw HTTPError(Status::BAD_REQUEST);
+        to_lower_in_place(*host);
+
+        _uri = HttpUri(_request_line.request_target(), *host);
+
+        if (string* connection = header_by_key("connection"))
+        {
+            to_lower_in_place(*connection);
+            if (*connection == "close")
+                _keep_alive = false;
+        }
+
+        string*       transfer_encoding = header_by_key("transfer-encoding");
+        const string* content_length = header_by_key("content-length");
+
+        if (transfer_encoding)
+        {
+            if (content_length)
+                throw HTTPError(Status::BAD_REQUEST);
+            to_lower_in_place(*transfer_encoding);
+            if (*transfer_encoding != "chunked")
+                throw HTTPError(Status::NOT_IMPLEMENTED);
+            _is_chunked = true;
+            size_t erased_count = _headers.erase("transfer-encoding");
+            assert(erased_count == 1);
+        }
+        else if (content_length)
+            _content_length = ContentLength(*content_length);
     }
-    return ContentLength(0);
+    catch (const std::runtime_error& error)
+    {
+        WARN("Request::Builder::build(): " << error.what());
+        throw HTTPError(Status::BAD_REQUEST);
+    }
 }
 
 Request Request::Builder::build() &&
 {
-    if (!_uri)
-        throw HTTPError(Status::BAD_REQUEST);
     return Request(
         std::move(*_uri), std::move(_request_line), std::move(_headers), std::move(_body)
     );
+}
+
+void Request::Builder::to_lower_in_place(string& value)
+{
+    auto to_lower = [](unsigned char c) { return std::tolower(c); };
+    (void)std::transform(value.begin(), value.end(), value.begin(), to_lower);
 }
 
 Request::Request(HttpUri&& uri, RequestLine&& request_line, Headers&& headers, Body&& body)
