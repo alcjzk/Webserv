@@ -166,10 +166,15 @@ void ReceiveRequestTask::receive_chunk_size()
         _expect = Expect::LastChunk;
         return;
     }
-    reader.reserve(_chunk_size);
     size_t new_size = _chunked_body.size() + _chunk_size;
+    if (new_size > _connection.config().body_size())
+    {
+        _connection._keep_alive = false;
+        throw HTTPError(Status::CONTENT_TOO_LARGE);
+    }
     _chunked_position = _chunked_body.size();
     _chunked_body.resize(new_size);
+    reader.reserve(_chunk_size);
     _expect = Expect::Chunk;
 }
 
