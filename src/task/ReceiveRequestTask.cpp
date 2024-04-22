@@ -107,7 +107,13 @@ void ReceiveRequestTask::receive_headers()
             INFO("End of headers");
             _builder->parse_headers();
 
-            if (auto content_length = _builder->content_length())
+            if (_builder->is_chunked())
+            {
+                realign_reader();
+                _expect = Expect::ChunkSize;
+                return;
+            }
+            else if (auto content_length = _builder->content_length())
             {
                 if (*content_length > _connection.config().body_size())
                     throw HTTPError(Status::CONTENT_TOO_LARGE);
@@ -132,16 +138,7 @@ void ReceiveRequestTask::receive_headers()
                     _builder->body(reader.read_exact(*content_length));
                 }
             }
-
-            if (reader.is_empty())
-                reader.buffer().clear();
-            else
-            {
-                assert(reader.begin() != reader.buffer().begin());
-                reader.buffer().replace(reader.begin(), reader.end());
-            }
-            reader.rewind();
-
+            realign_reader();
             Request request = std::exchange(_builder, std::nullopt).value().build();
             Runtime::enqueue(request.process(std::move(_connection)));
             _is_complete = true;
@@ -149,6 +146,80 @@ void ReceiveRequestTask::receive_headers()
         }
         _builder->header(*line);
     }
+}
+
+void ReceiveRequestTask::receive_chunk_size()
+{
+    Reader& reader = _connection.reader().value();
+    auto    line = reader.line();
+    if (!line)
+    {
+        _is_partial_data = true;
+        return;
+    }
+    // TODO: handle chunk-ext
+    // TODO: validate chunksize
+    _chunk_size = std::stoull(*line, nullptr, 16);
+    INFO("expecting chunk with size " << _chunk_size);
+    // TODO: reserve space for chunk in reader
+    if (_chunk_size == 0)
+    {
+        _expect = Expect::LastChunk;
+        return;
+    }
+    size_t new_size = _chunked_body.size() + _chunk_size;
+    _chunked_position = _chunked_body.size();
+    _chunked_body.resize(new_size);
+    _expect = Expect::Chunk;
+}
+
+void ReceiveRequestTask::receive_chunk()
+{
+    Reader& reader = _connection.reader().value();
+    // TODO: implement read_exact_into(size, buf) to avoid unnecessary extra copy.
+    auto chunk = reader.read_exact(_chunk_size);
+    if (chunk.empty())
+    {
+        _is_partial_data = true;
+        return;
+    }
+    std::copy(chunk.begin(), chunk.end(), _chunked_body.begin() + _chunked_position);
+    realign_reader();
+    _expect = Expect::ChunkSize;
+}
+
+void ReceiveRequestTask::receive_last_chunk()
+{
+    Reader& reader = _connection.reader().value();
+    auto    line = reader.line();
+    if (!line)
+    {
+        _is_partial_data = true;
+        return;
+    }
+    if (!line->empty())
+        throw HTTPError(Status::BAD_REQUEST);
+    realign_reader();
+    _builder->body(std::move(_chunked_body));
+    INFO("received chunked content of size " << _builder->_body.size());
+    _connection.reader().reset();
+    Request request = std::exchange(_builder, std::nullopt).value().build();
+    Runtime::enqueue(request.process(std::move(_connection)));
+    _is_complete = true;
+}
+
+void ReceiveRequestTask::realign_reader()
+{
+    Reader& reader = _connection.reader().value();
+    if (reader.is_empty())
+        reader.buffer().clear();
+    else
+    {
+        // TODO: safe?
+        assert(reader.begin() != reader.buffer().begin());
+        reader.buffer().replace(reader.begin(), reader.end());
+    }
+    reader.rewind();
 }
 
 void ReceiveRequestTask::receive_body()
@@ -183,6 +254,15 @@ void ReceiveRequestTask::run()
                     continue;
                 case Expect::Headers:
                     receive_headers();
+                    continue;
+                case Expect::LastChunk:
+                    receive_last_chunk();
+                    continue;
+                case Expect::ChunkSize:
+                    receive_chunk_size();
+                    continue;
+                case Expect::Chunk:
+                    receive_chunk();
                     continue;
                 case Expect::Body:
                     receive_body();
