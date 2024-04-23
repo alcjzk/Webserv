@@ -157,7 +157,7 @@ void ReceiveRequestTask::receive_chunk_size()
         _is_partial_data = true;
         return;
     }
-    // TODO: handle chunk-ext
+    trim_chunk_ext(*line);
     // TODO: validate chunksize
     _chunk_size = std::stoull(*line, nullptr, 16);
     INFO("expecting chunk with size " << _chunk_size);
@@ -326,5 +326,16 @@ void ReceiveRequestTask::disable_linger()
     if (setsockopt(_connection.client(), SOL_SOCKET, SO_LINGER, &linger, sizeof(linger)) == -1)
     {
         WARN("failed to disable linger for fd `" << _connection.client() << "`");
+    }
+}
+
+void ReceiveRequestTask::trim_chunk_ext(string& value)
+{
+    const char CHUNK_EXT_DELIM = ';';
+
+    auto delim = std::find(value.begin(), value.end(), CHUNK_EXT_DELIM);
+    if (delim != value.end())
+    {
+        (void)value.erase(delim, value.end());
     }
 }

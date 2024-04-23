@@ -45,4 +45,7 @@ class ReceiveRequestTask : public BasicTask
         size_t                          _chunked_position = 0;
         std::vector<char>               _chunked_body;
         bool                            _is_partial_data = false;
+
+        /// Trims out the chunk-ext portion from `value` in place.
+        static void trim_chunk_ext(std::string& value);
 };
