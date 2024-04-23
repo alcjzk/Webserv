@@ -1,4 +1,5 @@
 #include <cctype>
+#include <limits>
 #include <string.h>
 #include <algorithm>
 #include <unistd.h>
@@ -175,7 +176,8 @@ void ReceiveRequestTask::receive_chunk_size()
         _expect = Expect::LastChunk;
         return;
     }
-    // TODO: Handle overflow case
+    if (std::numeric_limits<size_t>::max() - _chunked_body.size() < _chunk_size)
+        throw HTTPError(Status::CONTENT_TOO_LARGE);
     size_t new_size = _chunked_body.size() + _chunk_size;
     if (new_size > _connection.config().body_size())
     {
