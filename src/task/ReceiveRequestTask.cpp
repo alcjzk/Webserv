@@ -203,14 +203,11 @@ void ReceiveRequestTask::receive_chunk_size()
 void ReceiveRequestTask::receive_chunk()
 {
     Reader& reader = _connection.reader().value();
-    // TODO: implement read_exact_into(size, buf) to avoid unnecessary extra copy.
-    auto chunk = reader.read_exact(_chunk_size);
-    if (chunk.empty())
+    if (!reader.read_exact_into(_chunk_size, _chunked_body.begin() + _chunked_position))
     {
         _is_partial_data = true;
         return;
     }
-    std::copy(chunk.begin(), chunk.end(), _chunked_body.begin() + _chunked_position);
     realign_reader();
     _expect = Expect::ChunkSize;
 }
