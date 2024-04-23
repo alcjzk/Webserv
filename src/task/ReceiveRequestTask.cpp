@@ -152,42 +152,52 @@ void ReceiveRequestTask::receive_headers()
 
 void ReceiveRequestTask::receive_chunk_size()
 {
-    Reader& reader = _connection.reader().value();
-    auto    line = reader.line();
-    if (!line)
-    {
-        _is_partial_data = true;
-        return;
-    }
-    trim_chunk_ext(*line);
-    if (!is_chunk_size(*line))
-        throw HTTPError(Status::BAD_REQUEST);
     try
     {
+        Reader& reader = _connection.reader().value();
+
+        auto line = reader.line(CHUNKED_SIZE_LINE_MAX_LENGTH);
+        if (!line)
+        {
+            _is_partial_data = true;
+            return;
+        }
+        trim_chunk_ext(*line);
+        if (!is_chunk_size(*line))
+            throw HTTPError(Status::BAD_REQUEST);
         _chunk_size = std::stoull(*line, nullptr, 16);
+        INFO("expecting chunk with size " << _chunk_size);
+        if (_chunk_size == 0)
+        {
+            _expect = Expect::LastChunk;
+            return;
+        }
+
+        if (std::numeric_limits<size_t>::max() - _chunked_body.size() < _chunk_size)
+            throw HTTPError(Status::CONTENT_TOO_LARGE);
+        size_t new_size = _chunked_body.size() + _chunk_size;
+        if (new_size > _connection.config().body_size())
+        {
+            _connection._keep_alive = false;
+            throw HTTPError(Status::CONTENT_TOO_LARGE);
+        }
+        _chunked_position = _chunked_body.size();
+        _chunked_body.resize(new_size);
+        reader.reserve(_chunk_size);
+        _expect = Expect::Chunk;
     }
-    catch (const std::exception&)
+    catch (const std::runtime_error& error)
     {
+        // Should be thrown by reader.line
+        WARN("ReceiveRequestTask::receive_chunk_size(): " << error.what());
+        throw HTTPError(Status::BAD_REQUEST);
+    }
+    catch (const std::exception& error)
+    {
+        // stoull
+        WARN("ReceiveRequestTask::receive_chunk_size(): " << error.what());
         throw HTTPError(Status::CONTENT_TOO_LARGE);
     }
-    INFO("expecting chunk with size " << _chunk_size);
-    if (_chunk_size == 0)
-    {
-        _expect = Expect::LastChunk;
-        return;
-    }
-    if (std::numeric_limits<size_t>::max() - _chunked_body.size() < _chunk_size)
-        throw HTTPError(Status::CONTENT_TOO_LARGE);
-    size_t new_size = _chunked_body.size() + _chunk_size;
-    if (new_size > _connection.config().body_size())
-    {
-        _connection._keep_alive = false;
-        throw HTTPError(Status::CONTENT_TOO_LARGE);
-    }
-    _chunked_position = _chunked_body.size();
-    _chunked_body.resize(new_size);
-    reader.reserve(_chunk_size);
-    _expect = Expect::Chunk;
 }
 
 void ReceiveRequestTask::receive_chunk()

@@ -15,6 +15,11 @@ class ReceiveRequestTask : public BasicTask
         virtual int  fd() const override;
 
     private:
+        /// Maximum length of the size line for chunked transfer.
+        ///
+        /// This limit is somewhat arbitrary, but should support most size lines.
+        static const size_t CHUNKED_SIZE_LINE_MAX_LENGTH = 1024;
+
         enum class Expect
         {
             RequestLine,
