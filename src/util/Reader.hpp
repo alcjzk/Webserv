@@ -2,6 +2,7 @@
 
 #include <limits>
 #include <stdexcept>
+#include <algorithm>
 #include <string>
 #include <limits>
 #include <optional>
