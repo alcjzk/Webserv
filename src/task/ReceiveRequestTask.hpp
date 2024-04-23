@@ -48,4 +48,7 @@ class ReceiveRequestTask : public BasicTask
 
         /// Trims out the chunk-ext portion from `value` in place.
         static void trim_chunk_ext(std::string& value);
+
+        /// Returns true if `value` is a valid chunk size.
+        static bool is_chunk_size(const std::string& value);
 };

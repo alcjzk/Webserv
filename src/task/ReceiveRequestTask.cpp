@@ -1,3 +1,4 @@
+#include <cctype>
 #include <string.h>
 #include <algorithm>
 #include <unistd.h>
@@ -158,14 +159,23 @@ void ReceiveRequestTask::receive_chunk_size()
         return;
     }
     trim_chunk_ext(*line);
-    // TODO: validate chunksize
-    _chunk_size = std::stoull(*line, nullptr, 16);
+    if (!is_chunk_size(*line))
+        throw HTTPError(Status::BAD_REQUEST);
+    try
+    {
+        _chunk_size = std::stoull(*line, nullptr, 16);
+    }
+    catch (const std::exception&)
+    {
+        throw HTTPError(Status::CONTENT_TOO_LARGE);
+    }
     INFO("expecting chunk with size " << _chunk_size);
     if (_chunk_size == 0)
     {
         _expect = Expect::LastChunk;
         return;
     }
+    // TODO: Handle overflow case
     size_t new_size = _chunked_body.size() + _chunk_size;
     if (new_size > _connection.config().body_size())
     {
@@ -338,4 +348,14 @@ void ReceiveRequestTask::trim_chunk_ext(string& value)
     {
         (void)value.erase(delim, value.end());
     }
+}
+
+bool ReceiveRequestTask::is_chunk_size(const std::string& value)
+{
+    if (value.empty())
+        return false;
+    auto not_hex = [](unsigned char c) { return !std::isxdigit(c); };
+    if (std::any_of(value.begin(), value.end(), not_hex))
+        return false;
+    return true;
 }
