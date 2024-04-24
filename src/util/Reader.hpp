@@ -2,6 +2,7 @@
 
 #include <limits>
 #include <stdexcept>
+#include <algorithm>
 #include <string>
 #include <limits>
 #include <optional>
@@ -51,6 +52,17 @@ class Reader
         /// be empty.
         std::vector<char> read_exact(size_t count);
 
+        /// Reads exactly `count` bytes from the internal buffer into destination range is not large
+        /// enough.
+        ///
+        /// @returns
+        /// true - read was successful
+        /// false - reader did not contain enough unread bytes.
+        ///
+        /// @note behavior is undefined if destination range is not large enough.
+        template <typename OutputIt>
+        bool read_exact_into(size_t count, OutputIt destination);
+
         /// Returns a reference to the internal buffer.
         Buffer&       buffer() &;
         Buffer&&      buffer() &&;
@@ -87,6 +99,16 @@ class Reader
         Buffer           _buffer;
         Buffer::iterator _head;
 };
+
+template <typename OutputIt>
+bool Reader::read_exact_into(size_t count, OutputIt destination)
+{
+    if (unread_size() < count)
+        return false;
+    (void)std::copy_n(begin(), count, destination);
+    std::advance(_head, count);
+    return true;
+}
 
 #ifdef TEST
 

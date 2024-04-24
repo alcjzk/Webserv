@@ -22,6 +22,9 @@ class HTTPVersion
         bool        is_compatible_with(const HTTPVersion& other) const;
         std::string to_string() const;
 
+        friend bool operator==(const HTTPVersion& lhs, const HTTPVersion& rhs);
+        friend bool operator!=(const HTTPVersion& lhs, const HTTPVersion& rhs);
+
     private:
         unsigned int _major;
         unsigned int _minor;

@@ -1,3 +1,5 @@
+#include <cctype>
+#include <limits>
 #include <string.h>
 #include <algorithm>
 #include <unistd.h>
@@ -150,45 +152,62 @@ void ReceiveRequestTask::receive_headers()
 
 void ReceiveRequestTask::receive_chunk_size()
 {
-    Reader& reader = _connection.reader().value();
-    auto    line = reader.line();
-    if (!line)
+    try
     {
-        _is_partial_data = true;
-        return;
+        Reader& reader = _connection.reader().value();
+
+        auto line = reader.line(CHUNKED_SIZE_LINE_MAX_LENGTH);
+        if (!line)
+        {
+            _is_partial_data = true;
+            return;
+        }
+        trim_chunk_ext(*line);
+        if (!is_chunk_size(*line))
+            throw HTTPError(Status::BAD_REQUEST);
+        _chunk_size = std::stoull(*line, nullptr, 16);
+        INFO("expecting chunk with size " << _chunk_size);
+        if (_chunk_size == 0)
+        {
+            _expect = Expect::LastChunk;
+            return;
+        }
+
+        if (std::numeric_limits<size_t>::max() - _chunked_body.size() < _chunk_size)
+            throw HTTPError(Status::CONTENT_TOO_LARGE);
+        size_t new_size = _chunked_body.size() + _chunk_size;
+        if (new_size > _connection.config().body_size())
+        {
+            _connection._keep_alive = false;
+            throw HTTPError(Status::CONTENT_TOO_LARGE);
+        }
+        _chunked_position = _chunked_body.size();
+        _chunked_body.resize(new_size);
+        reader.reserve(_chunk_size);
+        _expect = Expect::Chunk;
     }
-    // TODO: handle chunk-ext
-    // TODO: validate chunksize
-    _chunk_size = std::stoull(*line, nullptr, 16);
-    INFO("expecting chunk with size " << _chunk_size);
-    if (_chunk_size == 0)
+    catch (const std::runtime_error& error)
     {
-        _expect = Expect::LastChunk;
-        return;
+        // Should be thrown by reader.line
+        WARN("ReceiveRequestTask::receive_chunk_size(): " << error.what());
+        throw HTTPError(Status::BAD_REQUEST);
     }
-    size_t new_size = _chunked_body.size() + _chunk_size;
-    if (new_size > _connection.config().body_size())
+    catch (const std::exception& error)
     {
-        _connection._keep_alive = false;
+        // stoull
+        WARN("ReceiveRequestTask::receive_chunk_size(): " << error.what());
         throw HTTPError(Status::CONTENT_TOO_LARGE);
     }
-    _chunked_position = _chunked_body.size();
-    _chunked_body.resize(new_size);
-    reader.reserve(_chunk_size);
-    _expect = Expect::Chunk;
 }
 
 void ReceiveRequestTask::receive_chunk()
 {
     Reader& reader = _connection.reader().value();
-    // TODO: implement read_exact_into(size, buf) to avoid unnecessary extra copy.
-    auto chunk = reader.read_exact(_chunk_size);
-    if (chunk.empty())
+    if (!reader.read_exact_into(_chunk_size, _chunked_body.begin() + _chunked_position))
     {
         _is_partial_data = true;
         return;
     }
-    std::copy(chunk.begin(), chunk.end(), _chunked_body.begin() + _chunked_position);
     realign_reader();
     _expect = Expect::ChunkSize;
 }
@@ -327,4 +346,25 @@ void ReceiveRequestTask::disable_linger()
     {
         WARN("failed to disable linger for fd `" << _connection.client() << "`");
     }
+}
+
+void ReceiveRequestTask::trim_chunk_ext(string& value)
+{
+    const char CHUNK_EXT_DELIM = ';';
+
+    auto delim = std::find(value.begin(), value.end(), CHUNK_EXT_DELIM);
+    if (delim != value.end())
+    {
+        (void)value.erase(delim, value.end());
+    }
+}
+
+bool ReceiveRequestTask::is_chunk_size(const std::string& value)
+{
+    if (value.empty())
+        return false;
+    auto not_hex = [](unsigned char c) { return !std::isxdigit(c); };
+    if (std::any_of(value.begin(), value.end(), not_hex))
+        return false;
+    return true;
 }

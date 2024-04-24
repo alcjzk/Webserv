@@ -15,6 +15,11 @@ class ReceiveRequestTask : public BasicTask
         virtual int  fd() const override;
 
     private:
+        /// Maximum length of the size line for chunked transfer.
+        ///
+        /// This limit is somewhat arbitrary, but should support most size lines.
+        static const size_t CHUNKED_SIZE_LINE_MAX_LENGTH = 1024;
+
         enum class Expect
         {
             RequestLine,
@@ -45,4 +50,10 @@ class ReceiveRequestTask : public BasicTask
         size_t                          _chunked_position = 0;
         std::vector<char>               _chunked_body;
         bool                            _is_partial_data = false;
+
+        /// Trims out the chunk-ext portion from `value` in place.
+        static void trim_chunk_ext(std::string& value);
+
+        /// Returns true if `value` is a valid chunk size.
+        static bool is_chunk_size(const std::string& value);
 };

@@ -43,6 +43,16 @@ unsigned int HTTPVersion::minor() const
     return _minor;
 }
 
+bool operator==(const HTTPVersion& lhs, const HTTPVersion& rhs)
+{
+    return (lhs._major == rhs._major) && (lhs._minor == rhs._minor);
+}
+
+bool operator!=(const HTTPVersion& lhs, const HTTPVersion& rhs)
+{
+    return !(lhs == rhs);
+}
+
 ostream& operator<<(ostream& os, const HTTPVersion& version)
 {
     return os << HTTPVersion::PREFIX << version.major() << HTTPVersion::DELIMITER
