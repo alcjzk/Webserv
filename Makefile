@@ -55,6 +55,7 @@ BasicTask.cpp					\
 Buffer.cpp						\
 ContentLength.cpp				\
 Connection.cpp					\
+WriteTask.cpp					\
 main.cpp
 
 SRCS_TEST = test/testmain.cpp
