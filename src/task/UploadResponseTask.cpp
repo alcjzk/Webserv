@@ -81,21 +81,30 @@ UploadResponseTask::UploadResponseTask(
     }
     // End of headers
 
-    if (filename)
+    if (!filename || filename->empty())
     {
-        auto   path = uploads_path + *filename;
-        string location = uri + *filename;
-        size_t size = reader.position(boundary_end.begin(), boundary_end.end()).value_or(0);
-        std::vector<char> content(size);
+        Response* response = new Response(Status::OK);
+        response->body(R"(<a href="/uploads">Go to uploads.</a>)");
+        response->_keep_alive = connection._keep_alive;
 
-        bool read_ok = reader.read_exact_into(size, content.data());
-        assert(read_ok);
-
-        UploadState upload_state{
-            WriteTask(path, std::move(content), connection.config()),
-            std::move(connection),
-            location,
+        SendState send_state{
+            SendResponseTask(std::move(connection), response),
         };
-        state(std::move(upload_state));
+        state(std::move(send_state));
+        return;
     }
-};
+    auto              path = uploads_path + *filename;
+    string            location = uri + *filename;
+    size_t            size = reader.position(boundary_end.begin(), boundary_end.end()).value_or(0);
+    std::vector<char> content(size);
+
+    bool read_ok = reader.read_exact_into(size, content.data());
+    assert(read_ok);
+
+    UploadState upload_state{
+        WriteTask(path, std::move(content), connection.config()),
+        std::move(connection),
+        location,
+    };
+    state(std::move(upload_state));
+}
