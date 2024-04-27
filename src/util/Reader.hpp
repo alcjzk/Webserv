@@ -95,6 +95,23 @@ class Reader
         /// Reserves space or `count` bytes bytes in the underlying buffer's unread portion.
         void reserve(size_t count);
 
+        /// Advances the reader by `count` bytes.
+        ///
+        /// Behavior is undefined if reader does not contain at least `count` unread bytes.
+        void advance(size_t count);
+
+        /// Returns the position of the first occurrance of pattern `first`-`last`.
+        template <typename ForwardIt>
+        std::optional<size_t> position(ForwardIt first, ForwardIt last) const;
+
+        /// Advances the reader to the beginning of the first occurrance of pattern `first`-`last`.
+        ///
+        /// @returns
+        /// true - pattern found, reader was advanced.
+        /// false - pattern was not found, reader not advanced.
+        template <typename ForwardIt>
+        bool seek(ForwardIt first, ForwardIt last);
+
     private:
         Buffer           _buffer;
         Buffer::iterator _head;
@@ -108,6 +125,26 @@ bool Reader::read_exact_into(size_t count, OutputIt destination)
     (void)std::copy_n(begin(), count, destination);
     std::advance(_head, count);
     return true;
+}
+
+template <typename ForwardIt>
+std::optional<size_t> Reader::position(ForwardIt first, ForwardIt last) const
+{
+    auto it = std::search(begin(), end(), first, last);
+    if (it == end())
+        return std::nullopt;
+    return std::distance(static_cast<const_iterator>(_head), it);
+}
+
+template <typename ForwardIt>
+bool Reader::seek(ForwardIt first, ForwardIt last)
+{
+    if (auto pos = position(first, last))
+    {
+        std::advance(_head, *pos);
+        return true;
+    }
+    return false;
 }
 
 #ifdef TEST
