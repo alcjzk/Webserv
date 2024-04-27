@@ -13,6 +13,7 @@ class FieldParams
         using Container = std::unordered_map<Key, Value>;
         using Entry = std::pair<Key, Value>;
 
+        FieldParams() noexcept = default;
         FieldParams(const std::string_view& value);
 
         const Value* get(const Key& key) const;
