@@ -15,7 +15,8 @@ class Route
         typedef enum RouteType
         {
             NORMAL,
-            REDIRECTION
+            REDIRECTION,
+            UPLOAD,
         } RouteType;
 
         Route(Path uri_path);
@@ -43,7 +44,6 @@ class Route
         RouteType                  _type;
         ptrdiff_t                  _priority;
         std::optional<std::string> _default_file = std::nullopt;
-        std::optional<std::string> _upload_directory = std::nullopt;
         std::optional<std::string> _redir = std::nullopt;
         AllowedMethods             _allowed_methods;
 
