@@ -18,5 +18,5 @@ class FieldParams
         const Value* get(const Key& key) const;
 
     private:
-        Container   _inner;
+        Container _inner;
 };
