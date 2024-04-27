@@ -56,6 +56,8 @@ Buffer.cpp						\
 ContentLength.cpp				\
 Connection.cpp					\
 WriteTask.cpp					\
+UploadResponseTask.cpp			\
+FieldParams.cpp					\
 main.cpp
 
 SRCS_TEST = test/testmain.cpp
