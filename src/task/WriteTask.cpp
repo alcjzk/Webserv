@@ -27,7 +27,7 @@ WriteTask::WriteTask(const Path& path, std::vector<char>&& content, const Config
 {
     try
     {
-        _fd = path.open(O_WRONLY | O_CREAT | O_EXCL | O_NONBLOCK | O_CLOEXEC);
+        _fd = path.open(O_WRONLY | O_CREAT | O_EXCL | O_NONBLOCK | O_CLOEXEC, 0644);
     }
     catch (const std::system_error& error)
     {

@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <system_error>
 #include <optional>
+#include "Log.hpp"
 #include <stdexcept>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -98,6 +99,19 @@ std::optional<Path::Status> Path::status() const
 int Path::open(int flags) const
 {
     int fd = ::open(static_cast<string>(*this).c_str(), flags);
+    if (fd < 0)
+    {
+        throw std::system_error(errno, std::system_category());
+    }
+    return fd;
+}
+
+int Path::open(int flags, mode_t mode) const
+{
+    INFO(*this);
+    INFO(static_cast<string>(*this));
+    INFO(static_cast<string>(*this).c_str());
+    int fd = ::open(static_cast<string>(*this).c_str(), flags, mode);
     if (fd < 0)
     {
         throw std::system_error(errno, std::system_category());
