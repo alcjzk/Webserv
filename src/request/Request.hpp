@@ -66,6 +66,11 @@ class Request
         const Method&  method() const;
         const Headers& headers() const;
 
+        /// Returns a header value by key. Argument given must always be lowercase, or this
+        /// function will never match.
+        std::string*       header_by_key(const std::string& key);
+        const std::string* header_by_key(const std::string& key) const;
+
         HttpUri     _uri;
         RequestLine _request_line;
         Headers     _headers;

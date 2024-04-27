@@ -206,3 +206,15 @@ const Request::Headers& Request::headers() const
 {
     return _headers;
 }
+
+string* Request::header_by_key(const string& key)
+{
+    auto entry = _headers.find(key);
+    return entry != _headers.end() ? &entry->second : nullptr;
+}
+
+const string* Request::header_by_key(const string& key) const
+{
+    const auto entry = _headers.find(key);
+    return entry != _headers.end() ? &entry->second : nullptr;
+}
