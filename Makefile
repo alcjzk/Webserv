@@ -60,6 +60,7 @@ UploadResponseTask.cpp			\
 FieldParams.cpp					\
 FieldName.cpp					\
 FieldValue.cpp					\
+FieldMap.cpp					\
 main.cpp
 
 SRCS_TEST = test/testmain.cpp
