@@ -3,21 +3,19 @@
 #include <vector>
 #include <string>
 #include <optional>
-#include <unordered_map>
 #include "ContentLength.hpp"
 #include "RequestLine.hpp"
-#include "Header.hpp"
 #include "HttpUri.hpp"
 #include "Method.hpp"
 #include "Connection.hpp"
 #include "Task.hpp"
+#include "FieldMap.hpp"
 
 class Server;
 
 class Request
 {
     public:
-        using Headers = std::unordered_map<std::string, std::string>;
         using Body = std::vector<char>;
 
         class Builder
@@ -26,7 +24,8 @@ class Request
                 void body(Body&& body);
                 void request_line(RequestLine&& request_line);
 
-                const Headers& headers() const;
+                FieldMap&       headers();
+                const FieldMap& headers() const;
 
                 /// Returns ContentLength if set.
                 ///
@@ -38,22 +37,14 @@ class Request
                 /// Must not be called before `parse_headers`.
                 bool is_chunked() const;
 
-                void header(Header&& header);
-
-                /// Returns a header value by key. Argument given must always be lowercase, or this
-                /// function will never match.
-                std::string*       header_by_key(const std::string& key);
-                const std::string* header_by_key(const std::string& key) const;
+                void header(const std::string& header);
 
                 /// Parses the message headers.
                 void parse_headers();
 
                 Request build() &&;
 
-                /// Converts a string to lowercase in-place.
-                static void to_lower_in_place(std::string& value);
-
-                Headers                      _headers;
+                FieldMap                     _headers;
                 RequestLine                  _request_line;
                 bool                         _keep_alive = true;
                 bool                         _is_chunked = false;
@@ -62,20 +53,19 @@ class Request
                 Body                         _body;
         };
 
-        Task*          process(Connection&& connection);
-        const Method&  method() const;
-        const Headers& headers() const;
+        Request(Builder&& builder);
 
-        /// Returns a header value by key. Argument given must always be lowercase, or this
-        /// function will never match.
-        std::string*       header_by_key(const std::string& key);
-        const std::string* header_by_key(const std::string& key) const;
-
-        HttpUri     _uri;
-        RequestLine _request_line;
-        Headers     _headers;
-        Body        _body;
+        Task*              process(Connection&& connection);
+        const HttpUri&     uri() const;
+        const RequestLine& request_line() const;
+        const Method&      method() const;
+        const FieldMap&    headers() const;
+        const Body&        body() const&;
+        Body&&             body() &&;
 
     private:
-        Request(HttpUri&& uri, RequestLine&& request_line, Headers&& headers, Body&& body);
+        HttpUri     _uri;
+        RequestLine _request_line;
+        FieldMap    _headers;
+        Body        _body;
 };

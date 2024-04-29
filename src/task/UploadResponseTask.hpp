@@ -64,7 +64,7 @@ namespace upload_response_task
 
         Response* response = new Response(Status::CREATED);
         response->_keep_alive = _connection._keep_alive;
-        response->header(Header("location", _location));
+        response->header({FieldName::LOCATION, _location});
         response->body(R"(<a href="/uploads">Go to uploads.</a>)");
 
         SendState send_state{

@@ -8,11 +8,13 @@
 #include <cstring>
 #include <errno.h>
 #include <vector>
+#include "FieldName.hpp"
 #include "Status.hpp"
-#include "Header.hpp"
 #include "http.hpp"
 #include "Response.hpp"
 #include "ContentLength.hpp"
+
+using Headers = Response::Headers;
 
 Response::Response(Status status) : _status(status), _size(0), _size_remaining(0), _is_built(false)
 {
@@ -47,7 +49,7 @@ void Response::header(Header&& header)
     _headers.push_back(std::move(header));
 }
 
-const std::vector<Header>& Response::headers() const
+const Headers& Response::headers() const
 {
     return _headers;
 }
@@ -79,7 +81,7 @@ const std::vector<char>& Response::body() const
 
 void Response::content_length(ContentLength content_length)
 {
-    header(Header("content-length", std::to_string(content_length)));
+    header(Header(FieldName::CONTENT_LENGTH, std::to_string(content_length)));
 }
 
 void Response::build()
@@ -91,14 +93,14 @@ void Response::build()
     std::vector<Header> headers;
 
     if (!_keep_alive)
-        header(Header("connection", "close"));
+        header(Header(FieldName::CONNECTION, "close"));
     headers.swap(_headers);
     body.swap(_body);
 
     headers_stream << _status.as_status_line() << http::CRLF;
-    for (const auto& header : headers)
+    for (const auto& [name, value] : headers)
     {
-        headers_stream << header << http::CRLF;
+        headers_stream << name << ':' << value << http::CRLF;
     }
     headers_stream << http::CRLF;
 
