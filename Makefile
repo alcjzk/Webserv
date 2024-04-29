@@ -29,7 +29,6 @@ HTTPError.cpp					\
 Response.cpp					\
 Log.cpp							\
 Request.cpp						\
-Header.cpp						\
 http.cpp						\
 TiniNode.cpp					\
 TiniTree.cpp					\
