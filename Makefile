@@ -59,6 +59,7 @@ WriteTask.cpp					\
 UploadResponseTask.cpp			\
 FieldParams.cpp					\
 FieldName.cpp					\
+FieldValue.cpp					\
 main.cpp
 
 SRCS_TEST = test/testmain.cpp
