@@ -1,4 +1,5 @@
 #include <utility>
+#include <algorithm>
 #include "http.hpp"
 #include "HTTPError.hpp"
 #include "FieldValue.hpp"
