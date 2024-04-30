@@ -4,12 +4,17 @@
 #include <type_traits>
 #include "FieldParams.hpp"
 
+/// A _valid_ HTTP/1.1 field name (RFC 9110).
 class FieldValue
 {
     public:
         /// Constructs the value from a string and validates it.
+        ///
+        /// @throws BAD_REQUEST - argument is not a valid field value.
         FieldValue(std::string&& value);
         /// Constructs the value from a string and validates it.
+        ///
+        /// @throws BAD_REQUEST - argument is not a valid field value.
         FieldValue(const std::string& value);
 
         /// Constructs the value from a number, skipping text validation (a number is always valid).
@@ -23,6 +28,7 @@ class FieldValue
 
         friend std::ostream& operator<<(std::ostream& os, const FieldValue& value);
 
+        /// Splits out field paramets from the value.
         std::pair<FieldValue, FieldParams> split() const;
 
         static const FieldValue CLOSE;

@@ -6,11 +6,13 @@
 class FieldName
 {
     public:
-        /// String constructor.
+        /// Constructs the name from a string and validates it.
         ///
-        /// @throws
-        /// BAD_REQUEST - argument is not a valid field name.
+        /// @throws BAD_REQUEST - argument is not a valid field name.
         explicit FieldName(std::string&& name);
+        /// Constructs the name from a string and validates it.
+        ///
+        /// @throws BAD_REQUEST - argument is not a valid field name.
         explicit FieldName(const std::string& name);
 
         operator const std::string&() const noexcept;
