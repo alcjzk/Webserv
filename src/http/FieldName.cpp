@@ -51,16 +51,6 @@ bool operator!=(const FieldName& lhs, const FieldName& rhs) noexcept
     return !(lhs == rhs);
 }
 
-bool operator==(const FieldName& lhs, const string& rhs) noexcept
-{
-    return *lhs == rhs;
-}
-
-bool operator!=(const FieldName& lhs, const string& rhs) noexcept
-{
-    return !(lhs == rhs);
-}
-
 std::ostream& operator<<(std::ostream& os, const FieldName& name)
 {
     return os << *name;

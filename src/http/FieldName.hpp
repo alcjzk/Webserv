@@ -20,8 +20,6 @@ class FieldName
 
         friend bool operator==(const FieldName& lhs, const FieldName& rhs) noexcept;
         friend bool operator!=(const FieldName& lhs, const FieldName& rhs) noexcept;
-        friend bool operator==(const FieldName& lhs, const std::string& rhs) noexcept;
-        friend bool operator!=(const FieldName& lhs, const std::string& rhs) noexcept;
 
         friend std::ostream& operator<<(std::ostream& os, const FieldName& name);
 
