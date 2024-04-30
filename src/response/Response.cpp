@@ -81,7 +81,7 @@ const std::vector<char>& Response::body() const
 
 void Response::content_length(ContentLength content_length)
 {
-    header(Header(FieldName::CONTENT_LENGTH, std::to_string(content_length)));
+    header({FieldName::CONTENT_LENGTH, FieldValue(*content_length)});
 }
 
 void Response::build()
@@ -93,7 +93,7 @@ void Response::build()
     std::vector<Header> headers;
 
     if (!_keep_alive)
-        header(Header(FieldName::CONNECTION, "close"));
+        header(Header(FieldName::CONNECTION, FieldValue::CLOSE));
     headers.swap(_headers);
     body.swap(_body);
 

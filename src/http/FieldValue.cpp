@@ -7,7 +7,7 @@ using std::ostream;
 using std::pair;
 using std::string;
 
-FieldValue::FieldValue(const char* value) : FieldValue(string(value)) {}
+const FieldValue FieldValue::CLOSE = FieldValue("close");
 
 FieldValue::FieldValue(string&& value)
 {

@@ -18,7 +18,9 @@ class ContentLength
         ContentLength(const std::string& value);
 
         /// Implicitly converts to size_t.
-        operator size_t() noexcept;
+        operator size_t() const noexcept;
+
+        size_t operator*() const noexcept;
 
     private:
         size_t _value;
