@@ -55,6 +55,7 @@ class FieldNameTest : public FieldName
 {
     public:
         static void name_is_case_insensitive_test();
+        static void invalid_test();
 };
 
 #endif

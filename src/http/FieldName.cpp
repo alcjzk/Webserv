@@ -69,4 +69,26 @@ void FieldNameTest::name_is_case_insensitive_test()
     END
 }
 
+void FieldNameTest::invalid_test()
+{
+    BEGIN
+
+    std::string names[] = {" spacebefore", "spaceafter ", "\ttabbefore", "tabafter\t", ""};
+
+    for (auto name : names)
+    {
+        try
+        {
+            FieldName field_name(name);
+            EXPECT(false);
+        }
+        catch (const HTTPError& error)
+        {
+            EXPECT(error.status().code() == Status::BAD_REQUEST);
+        }
+    }
+
+    END
+}
+
 #endif
