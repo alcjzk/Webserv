@@ -26,6 +26,9 @@ namespace http
     /// Delete
     const char DEL = 127;
 
+    /// Double quote
+    const char DQUOTE = '"';
+
     /// Linear whitespace
     const std::string LWS(" \t");
 

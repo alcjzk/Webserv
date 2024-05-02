@@ -93,7 +93,6 @@ UploadResponseTask::UploadResponseTask(
         remove_dquotes(*filename);
     }
 
-    // End of headers
     if (!filename || filename->empty())
     {
         auto response = std::make_unique<Response>(Status::OK);
