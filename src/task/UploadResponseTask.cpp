@@ -29,10 +29,17 @@ UploadResponseTask::UploadResponseTask(
 {
     auto content_type = request.headers().get(FieldName::CONTENT_TYPE);
     if (!content_type)
-        throw HTTPError(Status::BAD_REQUEST); // FIXME: Unsupported media type
+    {
+        // TODO: This should probably set Accept: header
+        throw HTTPError(Status::UNSUPPORTED_MEDIA_TYPE);
+    }
 
     auto [media_type, parameters] = content_type->split();
-    (void)media_type;
+    if (*media_type != "multipart/form-data")
+    {
+        // TODO: This should probably set Accept: header
+        throw HTTPError(Status::UNSUPPORTED_MEDIA_TYPE);
+    }
     const string* boundary_param = parameters.get("boundary");
     std::string   boundary = "--" + (*boundary_param) + "\r\n";
     std::string   boundary_end = "\r\n--" + (*boundary_param) + "--\r\n";
