@@ -64,20 +64,31 @@ UploadResponseTask::UploadResponseTask(
     reader.advance(boundary.length());
     optional<string> filename;
 
+    FieldMap headers;
     while (auto line = reader.line())
     {
         if (line->empty())
             break;
+        if (!headers.insert(http::parse_field(*line)))
+            throw HTTPError(Status::BAD_REQUEST);
         auto [name, value] = http::parse_field(*line);
         if (name == FieldName::CONTENT_DISPOSITION)
         {
             auto [content_disposition, parameters] = value.split();
-            if (const string* filename_value = parameters.get("filename"))
-            {
-                filename = *filename_value;
-                remove_dquotes(*filename);
-            }
         }
+    }
+
+    const auto content_disposition = headers.get(FieldName::CONTENT_DISPOSITION);
+    if (!content_disposition)
+        throw HTTPError(Status::BAD_REQUEST);
+    auto [disposition_type, disposition_params] = content_disposition->split();
+    if (*disposition_type != "form-data")
+        throw HTTPError(Status::BAD_REQUEST);
+
+    if (const string* filename_value = parameters.get("filename"))
+    {
+        filename = *filename_value;
+        remove_dquotes(*filename);
     }
 
     // End of headers
