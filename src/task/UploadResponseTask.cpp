@@ -13,16 +13,6 @@ using namespace upload_response_task;
 using std::optional;
 using std::string;
 
-// TODO: Move somewhere (utils?)
-inline void remove_dquotes(string& value)
-{
-    if (value.size() < 2)
-        return;
-    if (value[0] != '"' || value[value.size() - 1] != '"')
-        return;
-    value = value.substr(1, value.size() - 2);
-}
-
 UploadResponseTask::UploadResponseTask(
     Connection&& connection, Request& request, const Path& uploads_path, const Path& uri
 )
@@ -90,7 +80,6 @@ UploadResponseTask::UploadResponseTask(
     if (const string* filename_value = disposition_params.get("filename"))
     {
         filename = *filename_value;
-        remove_dquotes(*filename);
     }
 
     if (!filename || filename->empty())
