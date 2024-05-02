@@ -84,8 +84,10 @@ UploadResponseTask::UploadResponseTask(
     auto [disposition_type, disposition_params] = content_disposition->split();
     if (*disposition_type != "form-data")
         throw HTTPError(Status::BAD_REQUEST);
+    if (!disposition_params.get("name"))
+        throw HTTPError(Status::BAD_REQUEST);
 
-    if (const string* filename_value = parameters.get("filename"))
+    if (const string* filename_value = disposition_params.get("filename"))
     {
         filename = *filename_value;
         remove_dquotes(*filename);
