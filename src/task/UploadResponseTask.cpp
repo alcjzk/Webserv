@@ -44,18 +44,24 @@ UploadResponseTask::UploadResponseTask(
     const string* boundary_param = parameters.get("boundary");
     if (!boundary_param)
         throw HTTPError(Status::BAD_REQUEST);
-    std::string   boundary = "--" + (*boundary_param) + "\r\n";
-    std::string   boundary_end = "\r\n--" + (*boundary_param) + "--\r\n";
+    std::string boundary = "--" + (*boundary_param) + "\r\n";
+    std::string boundary_end = "\r\n--" + (*boundary_param) + "--\r\n";
 
     Reader reader(Buffer(std::move(request).body()));
     if (!reader.seek(boundary.begin(), boundary.end()))
     {
-        // TODO: no content?
-        assert(false);
+        auto response = std::make_unique<Response>(Status::OK);
+        response->body(R"(<a href="/uploads">Go to uploads.</a>)");
+        response->_keep_alive = connection._keep_alive;
+
+        SendState send_state{
+            SendResponseTask(std::move(connection), std::move(response)),
+        };
+        state(std::move(send_state));
     }
-    reader.advance(boundary.length());
 
     // Header section
+    reader.advance(boundary.length());
     optional<string> filename;
 
     while (auto line = reader.line())
@@ -75,7 +81,6 @@ UploadResponseTask::UploadResponseTask(
     }
 
     // End of headers
-
     if (!filename || filename->empty())
     {
         auto response = std::make_unique<Response>(Status::OK);
