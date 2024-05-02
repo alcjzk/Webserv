@@ -40,7 +40,10 @@ UploadResponseTask::UploadResponseTask(
         // TODO: This should probably set Accept: header
         throw HTTPError(Status::UNSUPPORTED_MEDIA_TYPE);
     }
+
     const string* boundary_param = parameters.get("boundary");
+    if (!boundary_param)
+        throw HTTPError(Status::BAD_REQUEST);
     std::string   boundary = "--" + (*boundary_param) + "\r\n";
     std::string   boundary_end = "\r\n--" + (*boundary_param) + "--\r\n";
 
