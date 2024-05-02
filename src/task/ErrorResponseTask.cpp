@@ -57,7 +57,6 @@ ErrorResponseTask::ErrorResponseTask(Connection&& connection, unique_ptr<Respons
     }
     catch (const std::exception& error)
     {
-        // FIXME: put macros in blocks to allow oneliners
         WARN(
             "failed to use configured error page for status `" << response->status()
                                                                << "`: " << error.what()
