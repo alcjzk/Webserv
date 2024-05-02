@@ -8,7 +8,7 @@
 class SendResponseTask : public BasicTask
 {
     public:
-        SendResponseTask(Connection&& connection, Response* response);
+        SendResponseTask(Connection&& connection, std::unique_ptr<Response>&& response);
 
         virtual void run() override;
         virtual void abort() override;

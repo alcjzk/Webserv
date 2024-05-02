@@ -3,6 +3,7 @@
 #include <cassert>
 #include <chrono>
 #include <utility>
+#include <memory>
 #include <stdexcept>
 #include "SendResponseTask.hpp"
 #include "Log.hpp"
@@ -14,12 +15,14 @@
 #include "Connection.hpp"
 #include "ReceiveRequestTask.hpp"
 
-SendResponseTask::SendResponseTask(Connection&& connection, Response* response)
+using std::unique_ptr;
+
+SendResponseTask::SendResponseTask(Connection&& connection, unique_ptr<Response>&& response)
     : BasicTask(
           File(), WaitFor::Writable,
           std::chrono::system_clock::now() + connection.config().send_timeout()
       ),
-      _connection(std::move(connection)), _response(response)
+      _connection(std::move(connection)), _response(std::move(response))
 {
 }
 
