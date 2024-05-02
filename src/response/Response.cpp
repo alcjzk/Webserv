@@ -84,6 +84,11 @@ void Response::content_length(ContentLength content_length)
     header({FieldName::CONTENT_LENGTH, FieldValue(*content_length)});
 }
 
+Status Response::status() const
+{
+    return _status;
+}
+
 void Response::build()
 {
     std::stringstream   headers_stream;

@@ -41,6 +41,8 @@ class Response
 
         void content_length(ContentLength content_length);
 
+        Status status() const;
+
         bool _keep_alive = true;
 
     private:
