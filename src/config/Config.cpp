@@ -157,6 +157,11 @@ Config::Seconds Config::io_read_timeout() const
     return _io_read_timeout;
 }
 
+Config::Seconds Config::io_write_timeout() const
+{
+    return _io_write_timeout;
+}
+
 const std::vector<HostAttributes>& Config::attrs() const
 {
     return _attrs;

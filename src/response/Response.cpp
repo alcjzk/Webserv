@@ -64,6 +64,14 @@ void Response::body(const std::vector<char>& body)
     _body = body;
 }
 
+void Response::body(const std::string& value)
+{
+    content_length(value.length());
+    std::vector<char> body(value.length());
+    std::copy(value.begin(), value.end(), body.begin());
+    _body = std::move(body);
+}
+
 const std::vector<char>& Response::body() const
 {
     return _body;

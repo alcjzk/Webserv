@@ -27,6 +27,7 @@
 #include "ContentLength.hpp"
 #include "Connection.hpp"
 #include "FileResponseTask.hpp"
+#include "UploadResponseTask.hpp"
 
 using std::optional;
 using std::string;
@@ -174,6 +175,11 @@ Task* Request::process(Connection&& connection)
     if (!target_status->is_directory())
         throw HTTPError(Status::FORBIDDEN);
 
+    if (_request_line.method() == Method::POST && route->_type == Route::UPLOAD)
+    {
+        return new UploadResponseTask(std::move(connection), *this, route->_fs_path, target);
+    }
+
     if (route->_default_file)
     {
         Path default_file = target + Path(route->_default_file.value());
@@ -205,4 +211,16 @@ const Method& Request::method() const
 const Request::Headers& Request::headers() const
 {
     return _headers;
+}
+
+string* Request::header_by_key(const string& key)
+{
+    auto entry = _headers.find(key);
+    return entry != _headers.end() ? &entry->second : nullptr;
+}
+
+const string* Request::header_by_key(const string& key) const
+{
+    const auto entry = _headers.find(key);
+    return entry != _headers.end() ? &entry->second : nullptr;
 }

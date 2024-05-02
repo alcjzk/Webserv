@@ -31,6 +31,7 @@ class Response
 
         void body(std::vector<char>&& body);
         void body(const std::vector<char>& body);
+        void body(const std::string& body);
 
         const std::vector<char>& body() const;
 

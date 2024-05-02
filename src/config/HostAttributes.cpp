@@ -73,6 +73,11 @@ void HostAttributes::_assign_route(const std::string& key, const TiniNode* value
             route._redir = path->getStringValue();
             route._fs_path = std::string("./");
         }
+        else if (type->getStringValue() == "upload")
+        {
+            route._type = Route::UPLOAD;
+            route._fs_path = path->getStringValue();
+        }
         else
         {
             ERR("Unknown type for route " << key << ", skipping route definition");
@@ -108,10 +113,6 @@ void HostAttributes::_assign_route(const std::string& key, const TiniNode* value
             }
         }
     }
-
-    const TiniNode* upload = value->getMapValue()["upload"];
-    if (upload && upload->getType() == TiniNode::T_STRING)
-        route._upload_directory = upload->getStringValue();
 
     const TiniNode* default_file = value->getMapValue()["default_file"];
     if (default_file && default_file->getType() == TiniNode::T_STRING)

@@ -42,6 +42,7 @@ class Path
         void                  is_root(bool value) noexcept;
         std::optional<Status> status() const;
         int                   open(int flags) const;
+        int                   open(int flags, mode_t mode) const;
 
         operator std::string() const;
 

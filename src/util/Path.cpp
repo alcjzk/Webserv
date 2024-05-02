@@ -105,6 +105,16 @@ int Path::open(int flags) const
     return fd;
 }
 
+int Path::open(int flags, mode_t mode) const
+{
+    int fd = ::open(static_cast<string>(*this).c_str(), flags, mode);
+    if (fd < 0)
+    {
+        throw std::system_error(errno, std::system_category());
+    }
+    return fd;
+}
+
 void Path::is_root(bool value) noexcept
 {
     _is_root = value;

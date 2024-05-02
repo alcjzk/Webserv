@@ -151,6 +151,11 @@ void Reader::reserve(size_t count)
     _head = _buffer.begin() + position;
 }
 
+void Reader::advance(size_t count)
+{
+    std::advance(_head, count);
+}
+
 #ifdef TEST
 
 #include <cstring>

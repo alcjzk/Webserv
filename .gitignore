@@ -12,3 +12,4 @@
 !.clang-format
 test/testmain.cpp
 !testgen.py
+www/uploads/*
