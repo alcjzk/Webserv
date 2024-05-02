@@ -10,7 +10,6 @@
 #include "UploadResponseTask.hpp"
 
 using namespace upload_response_task;
-using std::optional;
 using std::string;
 
 UploadResponseTask::UploadResponseTask(
@@ -52,7 +51,6 @@ UploadResponseTask::UploadResponseTask(
 
     // Header section
     reader.advance(boundary.length());
-    optional<string> filename;
 
     FieldMap headers;
     while (auto line = reader.line())
@@ -61,11 +59,6 @@ UploadResponseTask::UploadResponseTask(
             break;
         if (!headers.insert(http::parse_field(*line)))
             throw HTTPError(Status::BAD_REQUEST);
-        auto [name, value] = http::parse_field(*line);
-        if (name == FieldName::CONTENT_DISPOSITION)
-        {
-            auto [content_disposition, parameters] = value.split();
-        }
     }
 
     const auto content_disposition = headers.get(FieldName::CONTENT_DISPOSITION);
@@ -77,11 +70,7 @@ UploadResponseTask::UploadResponseTask(
     if (!disposition_params.get("name"))
         throw HTTPError(Status::BAD_REQUEST);
 
-    if (const string* filename_value = disposition_params.get("filename"))
-    {
-        filename = *filename_value;
-    }
-
+    auto filename = disposition_params.get("filename");
     if (!filename || filename->empty())
     {
         auto response = std::make_unique<Response>(Status::OK);
@@ -94,8 +83,12 @@ UploadResponseTask::UploadResponseTask(
         state(std::move(send_state));
         return;
     }
-    auto              path = uploads_path + *filename;
-    string            location = uri + *filename;
+
+    if (filename->find('/') != string::npos)
+        throw HTTPError(Status::BAD_REQUEST);
+
+    auto              path = uploads_path + (*filename);
+    string            location = uri + (*filename);
     size_t            size = reader.position(boundary_end.begin(), boundary_end.end()).value_or(0);
     std::vector<char> content(size);
 
