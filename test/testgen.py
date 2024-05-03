@@ -10,7 +10,7 @@ def collect_tests(name):
     for line in file:
         line = line.strip()
         if class_name is None:
-            res = re.search("class (.+Test)", line)
+            res = re.search("(?:class|namespace) (.+Test)", line)
             if res:
                 class_name = res.group(1)
         else:
@@ -29,6 +29,9 @@ int main() {
 
 SUFFIX = """
     std::cout << \"\\nTests OK.\\n\";
+    int status = system(\"leaks -quiet test \") != 0 ? 1 : 0;
+    status == 0 ? std::cout << \"Leaks OK.\\n\" : std::cerr << \"Leaks FAIL\\n\";
+    exit(status);
     #endif
 }
 """

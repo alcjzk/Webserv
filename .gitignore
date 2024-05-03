@@ -4,6 +4,7 @@
 !Makefile
 !*.cpp
 !*.hpp
+!*.tpp
 !*.tini
 !*.html
 !.editorconfig
@@ -11,3 +12,4 @@
 !.clang-format
 test/testmain.cpp
 !testgen.py
+www/uploads/*

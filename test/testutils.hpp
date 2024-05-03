@@ -26,11 +26,13 @@
     {                                                                                              \
         std::cerr << "\nUnexpected exception: " << e.what() << " in " << __FILE__ << " line "      \
                   << __LINE__;                                                                     \
+        exit(1);                                                                                   \
     }                                                                                              \
     catch (...)                                                                                    \
     {                                                                                              \
         std::cerr << "\nUnexpected non-standard exception in " << __FILE__ << " line "             \
                   << __LINE__;                                                                     \
+        exit(1);                                                                                   \
     }
 
 #define SKIP                                                                                       \
