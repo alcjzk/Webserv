@@ -3,12 +3,16 @@
 #include <cstddef>
 #include <vector>
 #include "Status.hpp"
-#include "Header.hpp"
 #include "ContentLength.hpp"
+#include "FieldName.hpp"
+#include "FieldValue.hpp"
 
 class Response
 {
     public:
+        using Header = std::pair<FieldName, FieldValue>;
+        using Headers = std::vector<Header>;
+
         virtual ~Response() = default;
 
         Response(Status = Status::OK);
@@ -40,13 +44,13 @@ class Response
         bool _keep_alive = true;
 
     private:
-        Status              _status;
-        std::vector<char>   _buffer;
-        size_t              _size;
-        size_t              _size_remaining;
-        bool                _is_built;
-        std::vector<Header> _headers;
-        std::vector<char>   _body;
+        Status            _status;
+        std::vector<char> _buffer;
+        size_t            _size;
+        size_t            _size_remaining;
+        bool              _is_built;
+        Headers           _headers;
+        std::vector<char> _body;
 
         void build();
 };

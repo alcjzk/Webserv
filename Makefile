@@ -29,7 +29,6 @@ HTTPError.cpp					\
 Response.cpp					\
 Log.cpp							\
 Request.cpp						\
-Header.cpp						\
 http.cpp						\
 TiniNode.cpp					\
 TiniTree.cpp					\
@@ -58,9 +57,9 @@ Connection.cpp					\
 WriteTask.cpp					\
 UploadResponseTask.cpp			\
 FieldParams.cpp					\
-CGIResponse.cpp					\
-CGIWriteTask.cpp				\
-CGIReadTask.cpp					\
+FieldName.cpp					\
+FieldValue.cpp					\
+FieldMap.cpp					\
 main.cpp
 
 

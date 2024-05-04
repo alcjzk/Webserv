@@ -1,14 +1,12 @@
-#include <algorithm>
 #include <cstddef>
 #include <fcntl.h>
-#include <cctype>
 #include <stdexcept>
 #include <sys/fcntl.h>
 #include <utility>
 #include <string>
 #include <cassert>
+#include "FieldName.hpp"
 #include "Log.hpp"
-#include "Header.hpp"
 #include "RequestLine.hpp"
 #include "Method.hpp"
 #include "Response.hpp"
@@ -28,6 +26,7 @@
 #include "Connection.hpp"
 #include "FileResponseTask.hpp"
 #include "UploadResponseTask.hpp"
+#include "http.hpp"
 
 using std::optional;
 using std::string;
@@ -37,9 +36,9 @@ void Request::Builder::body(Body&& body)
     _body = std::move(body);
 }
 
-void Request::Builder::header(Header&& header)
+void Request::Builder::header(const std::string& header)
 {
-    if (!_headers.emplace(header._name, header._value).second)
+    if (!_headers.insert(http::parse_field(header)))
         throw HTTPError(Status::BAD_REQUEST);
 }
 
@@ -50,7 +49,12 @@ void Request::Builder::request_line(RequestLine&& request_line)
     _request_line = std::move(request_line);
 }
 
-const Request::Headers& Request::Builder::headers() const
+FieldMap& Request::Builder::headers()
+{
+    return _headers;
+}
+
+const FieldMap& Request::Builder::headers() const
 {
     return _headers;
 }
@@ -65,38 +69,24 @@ bool Request::Builder::is_chunked() const
     return _is_chunked;
 }
 
-string* Request::Builder::header_by_key(const string& key)
-{
-    auto entry = _headers.find(key);
-    return entry != _headers.end() ? &entry->second : nullptr;
-}
-
-const string* Request::Builder::header_by_key(const string& key) const
-{
-    const auto entry = _headers.find(key);
-    return entry != _headers.end() ? &entry->second : nullptr;
-}
-
 void Request::Builder::parse_headers()
 {
     try
     {
-        string* host = header_by_key("host");
+        const FieldValue* host = _headers.get(FieldName::HOST);
         if (!host)
             throw HTTPError(Status::BAD_REQUEST);
-        to_lower_in_place(*host);
 
         _uri = HttpUri(_request_line.request_target(), *host);
 
-        if (string* connection = header_by_key("connection"))
+        if (const FieldValue* connection = _headers.get(FieldName::CONNECTION))
         {
-            to_lower_in_place(*connection);
-            if (*connection == "close")
+            if (**connection == "close")
                 _keep_alive = false;
         }
 
-        string*       transfer_encoding = header_by_key("transfer-encoding");
-        const string* content_length = header_by_key("content-length");
+        const FieldValue* transfer_encoding = _headers.get(FieldName::TRANSFER_ENCODING);
+        const FieldValue* content_length = _headers.get(FieldName::CONTENT_LENGTH);
 
         if (transfer_encoding)
         {
@@ -104,12 +94,11 @@ void Request::Builder::parse_headers()
                 throw HTTPError(Status::BAD_REQUEST);
             if (_request_line.http_version() == HTTPVersion(1, 0))
                 throw HTTPError(Status::BAD_REQUEST);
-            to_lower_in_place(*transfer_encoding);
-            if (*transfer_encoding != "chunked")
+            if (**transfer_encoding != "chunked")
                 throw HTTPError(Status::NOT_IMPLEMENTED);
             _is_chunked = true;
-            size_t erased_count = _headers.erase("transfer-encoding");
-            assert(erased_count == 1);
+            bool was_erased = _headers.erase(FieldName::TRANSFER_ENCODING);
+            assert(was_erased);
         }
         else if (content_length)
             _content_length = ContentLength(*content_length);
@@ -123,20 +112,12 @@ void Request::Builder::parse_headers()
 
 Request Request::Builder::build() &&
 {
-    return Request(
-        std::move(*_uri), std::move(_request_line), std::move(_headers), std::move(_body)
-    );
+    return Request(std::move(*this));
 }
 
-void Request::Builder::to_lower_in_place(string& value)
-{
-    auto to_lower = [](unsigned char c) { return std::tolower(c); };
-    (void)std::transform(value.begin(), value.end(), value.begin(), to_lower);
-}
-
-Request::Request(HttpUri&& uri, RequestLine&& request_line, Headers&& headers, Body&& body)
-    : _uri(std::move(uri)), _request_line(std::move(request_line)), _headers(std::move(headers)),
-      _body(std::move(body))
+Request::Request(Request::Builder&& builder)
+    : _uri(std::move(builder._uri).value()), _request_line(std::move(builder._request_line)),
+      _headers(std::move(builder._headers)), _body(std::move(builder._body))
 {
 }
 
@@ -203,24 +184,32 @@ Task* Request::process(Connection&& connection)
     return new SendResponseTask(std::move(connection), response);
 }
 
+const HttpUri& Request::uri() const
+{
+    return _uri;
+}
+
+const RequestLine& Request::request_line() const
+{
+    return _request_line;
+}
+
 const Method& Request::method() const
 {
     return _request_line.method();
 }
 
-const Request::Headers& Request::headers() const
+const FieldMap& Request::headers() const
 {
     return _headers;
 }
 
-string* Request::header_by_key(const string& key)
+const Request::Body& Request::body() const&
 {
-    auto entry = _headers.find(key);
-    return entry != _headers.end() ? &entry->second : nullptr;
+    return _body;
 }
 
-const string* Request::header_by_key(const string& key) const
+Request::Body&& Request::body() &&
 {
-    const auto entry = _headers.find(key);
-    return entry != _headers.end() ? &entry->second : nullptr;
+    return std::move(_body);
 }

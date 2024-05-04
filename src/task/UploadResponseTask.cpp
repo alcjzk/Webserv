@@ -1,7 +1,7 @@
-#include <iterator>
 #include <string>
 #include <cassert>
 #include <utility>
+#include "http.hpp"
 #include "FieldParams.hpp"
 #include "HTTPError.hpp"
 #include "Request.hpp"
@@ -11,23 +11,7 @@
 
 using namespace upload_response_task;
 using std::optional;
-using std::pair;
 using std::string;
-
-// TODO: Move somewhere (utils?)
-static pair<string, FieldParams> split_field_value(const string& value)
-{
-    auto it = std::find(value.begin(), value.end(), ';');
-    if (it == value.end())
-        return {value, FieldParams()};
-
-    auto rev_it = std::make_reverse_iterator(it);
-    while (rev_it != value.rend() && (*rev_it == ' ' || *rev_it == '\t'))
-    {
-        rev_it--;
-    }
-    return {string(value.begin(), rev_it.base()), FieldParams(string(it, value.end()))};
-}
 
 // TODO: Move somewhere (utils?)
 inline void remove_dquotes(string& value)
@@ -43,17 +27,17 @@ UploadResponseTask::UploadResponseTask(
     Connection&& connection, Request& request, const Path& uploads_path, const Path& uri
 )
 {
-    auto content_type = request.header_by_key("content-type");
+    auto content_type = request.headers().get(FieldName::CONTENT_TYPE);
     if (!content_type)
         throw HTTPError(Status::BAD_REQUEST); // FIXME: Unsupported media type
 
-    auto [media_type, parameters] = split_field_value(*content_type);
+    auto [media_type, parameters] = content_type->split();
     (void)media_type;
     const string* boundary_param = parameters.get("boundary");
     std::string   boundary = "--" + (*boundary_param) + "\r\n";
     std::string   boundary_end = "\r\n--" + (*boundary_param) + "--\r\n";
 
-    Reader reader(Buffer(std::move(request._body)));
+    Reader reader(Buffer(std::move(request).body()));
     if (!reader.seek(boundary.begin(), boundary.end()))
     {
         // TODO: no content?
@@ -68,10 +52,10 @@ UploadResponseTask::UploadResponseTask(
     {
         if (line->empty())
             break;
-        Header header(*line);
-        if (header._name == "content-disposition")
+        auto [name, value] = http::parse_field(*line);
+        if (name == FieldName::CONTENT_DISPOSITION)
         {
-            auto [content_disposition, parameters] = split_field_value(header._value);
+            auto [content_disposition, parameters] = value.split();
             if (const string* filename_value = parameters.get("filename"))
             {
                 filename = *filename_value;
@@ -79,6 +63,7 @@ UploadResponseTask::UploadResponseTask(
             }
         }
     }
+
     // End of headers
 
     if (!filename || filename->empty())

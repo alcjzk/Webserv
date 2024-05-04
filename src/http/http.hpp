@@ -1,6 +1,9 @@
 #pragma once
 
 #include <string>
+#include <utility>
+#include "FieldName.hpp"
+#include "FieldValue.hpp"
 #include "HTTPVersion.hpp"
 
 /// HTTP related utilities and constants
@@ -8,10 +11,10 @@ namespace http
 {
     const HTTPVersion VERSION(1, 1);
 
-    /// Horizontal tab
-    const char HT = '\t';
+    /// Horizontal tab (RFC 9110)
+    const char HTAB = '\t';
 
-    /// Space
+    /// Space (RFC 9110)
     const char SP = ' ';
 
     /// Linefeed
@@ -28,15 +31,17 @@ namespace http
 
     const char* const CRLF = "\r\n";
 
-    /// Separators (RFC 2616 3.6)
-    const std::string SEPARATORS("()<>@,;:\\\"/[]?={} \t");
-
-    /// Returns true if the character is a control character
-    bool is_ctl(char c);
-
-    /// Returns true if the character is a separator
-    bool is_separator(char c);
-
     /// Returns true if the input is a valid token
     bool is_token(const std::string& text);
+
+    /// Returns true if `c` is a `tchar` (RFC 9110).
+    bool is_tchar(unsigned char c);
+
+    /// Returns true if `c` is whitespace (RFC 9110).
+    bool is_whitespace(unsigned char c);
+
+    /// Returns true if `c` is a field-vchar (RFC 9110).
+    bool is_field_vchar(unsigned char c);
+
+    std::pair<FieldName, FieldValue> parse_field(const std::string& field);
 } // namespace http
