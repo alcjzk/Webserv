@@ -58,9 +58,11 @@ Connection.cpp					\
 WriteTask.cpp					\
 UploadResponseTask.cpp			\
 FieldParams.cpp					\
+CGIResponse.cpp					\
+CGIWriteTask.cpp				\
+CGIReadTask.cpp					\
 main.cpp
 
-#CGIResponse.cpp           \
 
 SRCS_TEST = test/testmain.cpp
 
