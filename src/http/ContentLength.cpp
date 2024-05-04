@@ -30,7 +30,12 @@ ContentLength::ContentLength(const std::string& value)
     }
 }
 
-ContentLength::operator size_t() noexcept
+ContentLength::operator size_t() const noexcept
+{
+    return _value;
+}
+
+size_t ContentLength::operator*() const noexcept
 {
     return _value;
 }

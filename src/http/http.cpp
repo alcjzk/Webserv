@@ -1,33 +1,58 @@
 #include "http.hpp"
+#include <algorithm>
+#include <cctype>
+#include <string_view>
 
+using namespace http;
+
+using std::pair;
 using std::string;
+using std::string_view;
 
-namespace http
+bool http::is_token(const string& text)
 {
-    bool is_ctl(char c)
-    {
-        if (c == DEL || c <= 31)
-            return true;
+    if (text.empty())
         return false;
-    }
+    return std::all_of(text.begin(), text.end(), is_tchar);
+}
 
-    bool is_separator(char c)
-    {
-        for (char separator : SEPARATORS)
-        {
-            if (c == separator)
-                return true;
-        }
-        return false;
-    }
+bool http::is_tchar(unsigned char c)
+{
+    constexpr const string_view charset(R"(!#$%&'*+-.^_`|~)");
 
-    bool is_token(const string& text)
-    {
-        for (char c : text)
-        {
-            if (is_ctl(c) || is_separator(c))
-                return false;
-        }
+    if (std::isalnum(c) || charset.find(c) != string_view::npos)
         return true;
+    return false;
+}
+
+bool http::is_whitespace(unsigned char c)
+{
+    return (c == SP) || (c == HTAB);
+}
+
+bool http::is_field_vchar(unsigned char c)
+{
+    if (std::isgraph(c) || c >= 0x80)
+        return true;
+    return false;
+}
+
+pair<FieldName, FieldValue> http::parse_field(const string& field)
+{
+    auto   delimeter = std::find(field.begin(), field.end(), ':');
+    string name(field.begin(), delimeter);
+    string value;
+
+    if (delimeter != field.end())
+    {
+        auto begin = std::find_if_not(std::next(delimeter), field.end(), http::is_whitespace);
+        if (begin != field.end())
+        {
+            auto end = std::find_if_not(
+                field.rbegin(), std::make_reverse_iterator(begin), http::is_whitespace
+            );
+            value = string(begin, end.base());
+        }
     }
-} // namespace http
+    return {FieldName(std::move(name)), value};
+}
