@@ -64,8 +64,9 @@ ErrorResponseTask::ErrorResponseTask(Connection&& connection, unique_ptr<Respons
     }
 
     TemplateEngine engine(connection.config().error_str());
-    string         buf = engine.render();
-    vector<char>   body;
+    engine.set_value("status", response->status().text());
+    string       buf = engine.render();
+    vector<char> body;
 
     body.resize(buf.size());
     std::copy(buf.begin(), buf.end(), body.begin());
