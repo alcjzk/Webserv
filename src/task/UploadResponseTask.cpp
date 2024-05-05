@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <string>
 #include <cassert>
 #include <utility>
@@ -18,17 +19,11 @@ UploadResponseTask::UploadResponseTask(
 {
     auto content_type = request.headers().get(FieldName::CONTENT_TYPE);
     if (!content_type)
-    {
-        // TODO: This should probably set Accept: header
         throw HTTPError(Status::UNSUPPORTED_MEDIA_TYPE);
-    }
 
     auto [media_type, parameters] = content_type->split();
     if (*media_type != "multipart/form-data")
-    {
-        // TODO: This should probably set Accept: header
         throw HTTPError(Status::UNSUPPORTED_MEDIA_TYPE);
-    }
 
     const string* boundary_param = parameters.get("boundary");
     if (!boundary_param)
@@ -95,10 +90,19 @@ UploadResponseTask::UploadResponseTask(
     bool read_ok = reader.read_exact_into(size, content.data());
     assert(read_ok);
 
-    UploadState upload_state{
-        WriteTask(path, std::move(content), connection.config()),
-        std::move(connection),
-        location,
-    };
-    state(std::move(upload_state));
+    try
+    {
+        UploadState upload_state{
+            WriteTask(path, std::move(content), connection.config()),
+            std::move(connection),
+            location,
+        };
+        state(std::move(upload_state));
+    }
+    catch (const std::system_error& error)
+    {
+        if (error.code().value() == EEXIST)
+            throw HTTPError(Status::CONFLICT);
+        throw HTTPError(Status::INTERNAL_SERVER_ERROR);
+    }
 }
