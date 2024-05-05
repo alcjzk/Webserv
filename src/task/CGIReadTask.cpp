@@ -1,31 +1,52 @@
+#include "CGIWriteTask.hpp"
 #include "CGIReadTask.hpp"
-#include "CGIResponse.hpp"
-#include "Server.hpp"
+#include "Log.hpp"
+#include <string.h>
 
-CGIReadTask::CGIReadTask(pid_t pid, int client_fd)
-: Task(client_fd, WaitFor::Readable)
-, _bytes_read(0)
-, _client_fd(client_fd)
-, _pid(0)
+// this is for preparing the content to write to the CGI
+// assign _pid & _fdout
+
+CGIReadTask::CGIReadTask(File&& read_end, Config& config, pid_t pid)
+    : BasicTask(
+          std::move(read_end), WaitFor::Readable,
+          std::chrono::system_clock::now() + config.io_write_timeout()
+      ),
+      _pid(pid)
 {
-    //int status;
-    //waitpid(pid, &status, 0);
-    run();
-    //close(pipe_fd[0]); // Close the read end of the pipe
-    //this->body(std::move(body));
-    //std::vector<char> body;
-    //close(pipe_fd[1]); // Close the write end of the pipe
 }
 
-
+// Write body from request to cgi
 void CGIReadTask::run()
 {
-    //char   buffer[4096];
-    //size_t bytesRead;
-    //while ((bytesRead = read(pipe_fd[0], buffer, sizeof(buffer))) > 0)
-    //{
-    //    body.insert(body.end(), buffer, buffer + bytesRead);
-    //}
-    ServerSendResponseTask();
+    char*   data = _buffer.data() + _bytes_read_total;
+    size_t  remainder = _size - _bytes_read_total;
+    ssize_t bytes_read = read(_fd, data, remainder);
 
+    if (bytes_read < 0)
+    {
+        WARN("CGIReadTask: read failed for fd `" << _fd << "`");
+        _is_error = true;
+        _is_complete = true;
+        return;
+    }
+
+    _bytes_read_total += bytes_read;
+    if (_bytes_read_total == _size || bytes_read == 0)
+        _is_complete = true;
+}
+
+void CGIReadTask::SignalhandlerChild(int sig)
+{
+    std::cerr << "Received signal (children process): " << sig << std::endl;
+    std::exit(EXIT_FAILURE);
+}
+
+bool CGIReadTask::is_error() const
+{
+    return (_is_error);
+}
+
+std::vector<char> CGIReadTask::buffer() &&
+{
+    return (std::move(_buffer));
 }

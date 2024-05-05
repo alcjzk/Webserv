@@ -3,40 +3,42 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <exception>
+#include "File.hpp"
 #include "HTTPError.hpp"
-#include "Task.hpp"
+#include "BasicTask.hpp"
 #include "Request.hpp"
 
-class CGIWriteTask : public Task
+class CGIWriteTask : public BasicTask
 {
     public:
         virtual ~CGIWriteTask() override;
 
         // Construct env, spawn cgi
-        CGIWriteTask(Request&& request, int client_fd);
+        CGIWriteTask(
+            Request&& request, std::vector<char>& post_body, File&& write_end, pid_t pid, Config& config
+        );
 
         CGIWriteTask(const CGIWriteTask&) = delete;
         CGIWriteTask(CGIWriteTask&&) = delete;
 
-        CGIWriteTask& operator=(const CGIWriteTask &) = delete;
+        CGIWriteTask& operator=(const CGIWriteTask&) = delete;
         CGIWriteTask& operator=(CGIWriteTask&&) = delete;
 
         // Write body from request to cgi, enqueue CGIReadTask
-        virtual void            run() override;
+        virtual void run() override;
 
-        char** Environment();
+        /// Returnst true if the task completed with an error.
+        bool is_error() const;
 
         // TODO: override Task::abort (signal child to exit)
-
-    private:
-        void SetEnv(const std::string& key, const std::string& value);
-        void QueryString(const std::string& query_string);
         void SignalhandlerChild(int sig);
 
+    private:
+
         Request            _request;
+        std::vector<char>  _post_body;
         std::vector<char*> _environment;
-        size_t             _bytes_written;
+        size_t             _bytes_written_total = 0;
         pid_t              _pid;
-        int                _client_fd;
-        int                _fd_out; // stdout of child, saved for later use
+        bool               _is_error = false;
 };
