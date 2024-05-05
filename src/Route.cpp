@@ -1,10 +1,6 @@
 #include <algorithm>
-#include <exception>
 #include <stdexcept>
-#include <sstream>
-#include "Log.hpp"
 #include "Route.hpp"
-#include <iostream>
 
 Route::Route(Path uri_path) : _uri_path(uri_path)
 {

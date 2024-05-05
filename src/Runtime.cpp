@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <cassert>
-#include <utility>
 #include <memory>
 #include <system_error>
 #include <errno.h>
