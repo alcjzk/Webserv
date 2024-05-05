@@ -136,7 +136,7 @@ Task* Request::process(Connection&& connection)
     {
         unique_ptr<Response> response =
             std::make_unique<RedirectionResponse>(route->_redir.value());
-        response->_keep_alive = connection._keep_alive;
+        response->keep_alive = connection._keep_alive;
         return new SendResponseTask(std::move(connection), std::move(response));
     }
 
@@ -183,7 +183,7 @@ Task* Request::process(Connection&& connection)
         throw HTTPError(Status::FORBIDDEN);
 
     unique_ptr<Response> response = std::make_unique<DirectoryResponse>(target, _uri.path());
-    response->_keep_alive = connection._keep_alive;
+    response->keep_alive = connection._keep_alive;
     return new SendResponseTask(std::move(connection), std::move(response));
 }
 

@@ -31,7 +31,7 @@ ErrorResponseTask::ErrorResponseTask(Connection&& connection, Status status)
 
 ErrorResponseTask::ErrorResponseTask(Connection&& connection, unique_ptr<Response>&& response)
 {
-    response->_keep_alive = connection._keep_alive;
+    response->keep_alive = connection._keep_alive;
     try
     {
         std::optional<Path> error_path = connection.config().error_page(response->status());

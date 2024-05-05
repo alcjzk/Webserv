@@ -5,5 +5,5 @@
 
 RedirectionResponse::RedirectionResponse(const std::string& value, Status status) : Response(status)
 {
-    header(Header(FieldName::LOCATION, value));
+    headers().insert_or_assign(Header(FieldName::LOCATION, value));
 }

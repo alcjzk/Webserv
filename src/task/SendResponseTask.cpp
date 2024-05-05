@@ -32,7 +32,7 @@ void SendResponseTask::run()
     {
         if (!_response->send(_connection.client()))
             return;
-        if (_response->_keep_alive)
+        if (_response->keep_alive)
             Runtime::enqueue(new ReceiveRequestTask(std::move(_connection)));
     }
     catch (const std::runtime_error& error)

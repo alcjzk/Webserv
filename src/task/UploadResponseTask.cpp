@@ -36,7 +36,7 @@ UploadResponseTask::UploadResponseTask(
     {
         auto response = std::make_unique<Response>(Status::OK);
         response->body(R"(<a href="/uploads">Go to uploads.</a>)");
-        response->_keep_alive = connection._keep_alive;
+        response->keep_alive = connection._keep_alive;
 
         SendState send_state{
             SendResponseTask(std::move(connection), std::move(response)),
@@ -70,7 +70,7 @@ UploadResponseTask::UploadResponseTask(
     {
         auto response = std::make_unique<Response>(Status::OK);
         response->body(R"(<a href="/uploads">Go to uploads.</a>)");
-        response->_keep_alive = connection._keep_alive;
+        response->keep_alive = connection._keep_alive;
 
         SendState send_state{
             SendResponseTask(std::move(connection), std::move(response)),

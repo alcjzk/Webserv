@@ -72,7 +72,7 @@ namespace file_response_task
         }
 
         auto response = std::make_unique<Response>(Status::OK);
-        response->_keep_alive = _connection._keep_alive;
+        response->keep_alive = _connection._keep_alive;
         response->body(std::move(_task).buffer());
 
         SendState send_state{

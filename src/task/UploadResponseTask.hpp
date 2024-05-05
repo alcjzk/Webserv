@@ -63,8 +63,8 @@ namespace upload_response_task
         }
 
         auto response = std::make_unique<Response>(Status::CREATED);
-        response->_keep_alive = _connection._keep_alive;
-        response->header({FieldName::LOCATION, _location});
+        response->keep_alive = _connection._keep_alive;
+        response->headers().insert_or_assign({FieldName::LOCATION, _location});
         response->body(R"(<a href="/uploads">Go to uploads.</a>)");
 
         SendState send_state{
