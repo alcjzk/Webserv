@@ -14,9 +14,16 @@ class FieldMap
         using const_iterator = Container::const_iterator;
 
         const FieldValue* get(const FieldName& name) const;
-        bool              insert(Entry&& entry);
-        bool              insert(const Entry& entry);
-        bool              erase(const FieldName& name);
+
+        /// Inserts an entry into the map. Returns false on failure.
+        [[nodiscard]] bool insert(Entry&& entry);
+        /// Inserts an entry into the map. Returns false on failure.
+        [[nodiscard]] bool insert(const Entry& entry);
+
+        void insert_or_assign(Entry&& entry);
+        void insert_or_assign(const Entry& entry);
+
+        bool erase(const FieldName& name);
 
         iterator       begin() noexcept;
         const_iterator begin() const noexcept;

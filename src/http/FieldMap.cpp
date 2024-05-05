@@ -21,6 +21,16 @@ bool FieldMap::insert(const Entry& entry)
     return _container.insert(entry).second;
 }
 
+void FieldMap::insert_or_assign(Entry&& entry)
+{
+    (void)_container.insert_or_assign(entry.first, std::move(entry.second));
+}
+
+void FieldMap::insert_or_assign(const Entry& entry)
+{
+    (void)_container.insert_or_assign(entry.first, entry.second);
+}
+
 bool FieldMap::erase(const FieldName& name)
 {
     return _container.erase(name) == 1;
