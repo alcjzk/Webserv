@@ -1,3 +1,4 @@
+#include <limits>
 #include <utility>
 #include <cstddef>
 #include "Buffer.hpp"
@@ -91,6 +92,16 @@ void Buffer::reserve(size_t count)
         size_t additional_size = count - unfilled_size();
         _container.resize(_container.size() + additional_size);
     }
+}
+
+bool Buffer::grow(size_t max_capacity)
+{
+    if (_container.size() >= max_capacity)
+        return false;
+    if (std::numeric_limits<size_t>::max() - _container.size() < _container.size())
+        return false;
+    _container.resize(std::min(_container.size() * 2, max_capacity));
+    return true;
 }
 
 #ifdef TEST

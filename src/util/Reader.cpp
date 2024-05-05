@@ -156,6 +156,15 @@ void Reader::advance(size_t count)
     std::advance(_head, count);
 }
 
+bool Reader::grow(size_t max_capacity)
+{
+    size_t position = std::distance(_buffer.begin(), _head);
+    if (!_buffer.grow(max_capacity))
+        return false;
+    _head = _buffer.begin() + position;
+    return true;
+}
+
 #ifdef TEST
 
 #include <cstring>

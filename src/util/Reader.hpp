@@ -100,6 +100,15 @@ class Reader
         /// Behavior is undefined if reader does not contain at least `count` unread bytes.
         void advance(size_t count);
 
+        /// Grows the internal buffer by doubling the capacity or up to `max_capacity`.
+        ///
+        /// @returns
+        /// true - buffer was resized.
+        /// false - buffer size would exceed max_capacity or numeric limits.
+        ///
+        /// @throws see std::vector::resize.
+        bool grow(size_t max_capacity);
+
         /// Returns the position of the first occurrance of pattern `first`-`last`.
         template <typename ForwardIt>
         std::optional<size_t> position(ForwardIt first, ForwardIt last) const;
