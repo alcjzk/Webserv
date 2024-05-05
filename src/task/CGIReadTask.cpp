@@ -1,6 +1,7 @@
 #include "CGIReadTask.hpp"
 #include "Log.hpp"
 #include <string.h>
+#include <signal.h>
 
 // this is for preparing the content to write to the CGI
 // assign _pid & _fdout
@@ -51,3 +52,5 @@ std::vector<char>&& CGIReadTask::buffer()
 {
     return (std::move(_buffer));
 }
+
+CGIReadTask::~CGIReadTask() { kill(_pid, SIGKILL); }

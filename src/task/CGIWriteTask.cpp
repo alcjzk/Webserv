@@ -25,7 +25,7 @@ void CGIWriteTask::run()
     ssize_t bytes_written = write(_fd, data, remainder);
     if (bytes_written < 0)
     {
-        WARN("CGIWriteTask: write failed for fd `" << _fd_in << "`");
+        WARN("CGIWriteTask: write failed for fd `" << _fd << "`");
         _is_error = true;
         _is_complete = true;
         kill(_pid, SIGKILL);
@@ -52,3 +52,10 @@ Config& CGIWriteTask::config()   const
 {
     return _config;
 }
+
+bool CGIWriteTask::is_error() const
+{
+    return _is_error;
+}
+
+CGIWriteTask::~CGIWriteTask() {}

@@ -16,7 +16,7 @@ class CGIReadTask : public BasicTask
         );
 
         CGIReadTask(const CGIReadTask&) = delete;
-        CGIReadTask(CGIReadTask&&) = delete;
+        CGIReadTask(CGIReadTask&&) = default;
 
         CGIReadTask& operator=(const CGIReadTask&) = delete;
         CGIReadTask& operator=(CGIReadTask&&) = delete;

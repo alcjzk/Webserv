@@ -17,7 +17,7 @@ class CGIWriteTask : public BasicTask
         );
 
         CGIWriteTask(const CGIWriteTask&) = delete;
-        CGIWriteTask(CGIWriteTask&&) = delete;
+        CGIWriteTask(CGIWriteTask&&) = default;
 
         CGIWriteTask& operator=(const CGIWriteTask&) = delete;
         CGIWriteTask& operator=(CGIWriteTask&&) = delete;
