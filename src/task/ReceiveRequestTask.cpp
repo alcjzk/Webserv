@@ -57,7 +57,11 @@ void ReceiveRequestTask::fill_buffer()
             _expect == Expect::ChunkSize
         );
         if (!reader.grow(RequestLine::MAX_LENGTH))
-            throw HTTPError(Status::CONTENT_TOO_LARGE);
+        {
+            if (reader.is_aligned())
+                throw HTTPError(Status::CONTENT_TOO_LARGE);
+            realign_reader();
+        }
     }
 
     ssize_t bytes_received =
