@@ -15,6 +15,7 @@ class Status
             FORBIDDEN = 403,
             NOT_FOUND = 404,
             REQUEST_TIMEOUT = 408,
+            CONFLICT = 409,
             CONTENT_TOO_LARGE = 413,
             UNSUPPORTED_MEDIA_TYPE = 415,
             URI_TOO_LONG = 414,

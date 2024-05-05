@@ -29,6 +29,8 @@ const char* Status::text() const
             return "404 Not Found";
         case REQUEST_TIMEOUT:
             return "408 Request Timeout";
+        case CONFLICT:
+            return "409 Conflict";
         case CONTENT_TOO_LARGE:
             return "413 Content Too Large";
         case URI_TOO_LONG:
