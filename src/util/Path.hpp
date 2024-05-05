@@ -40,7 +40,7 @@ class Path
         const_iterator        cend() const noexcept;
         bool                  is_root() const noexcept;
         void                  is_root(bool value) noexcept;
-        std::optional<Status> status() const;
+        std::optional<Status> status() const noexcept;
         int                   open(int flags) const;
         int                   open(int flags, mode_t mode) const;
 

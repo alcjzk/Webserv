@@ -7,8 +7,10 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string>
+#include <string.h>
 #include <iostream>
 #include <fcntl.h>
+#include "Log.hpp"
 #include "Path.hpp"
 
 using std::ostream;
@@ -82,14 +84,13 @@ bool Path::is_root() const noexcept
     return _is_root;
 }
 
-std::optional<Path::Status> Path::status() const
+std::optional<Path::Status> Path::status() const noexcept
 {
     Status status;
 
     if (::stat(static_cast<string>(*this).c_str(), &status) != 0)
     {
-        if (errno != ENOENT && errno != ENOTDIR)
-            throw std::system_error(errno, std::system_category());
+        WARN("Path::status(): " << strerror(errno));
         return std::nullopt;
     }
     return status;
