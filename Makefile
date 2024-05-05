@@ -60,6 +60,9 @@ FieldParams.cpp					\
 FieldName.cpp					\
 FieldValue.cpp					\
 FieldMap.cpp					\
+CGICreationTask.cpp				\
+CGIReadTask.cpp					\
+CGIWriteTask.cpp				\
 main.cpp
 
 

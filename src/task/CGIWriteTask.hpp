@@ -2,9 +2,7 @@
 
 #include <sys/wait.h>
 #include <unistd.h>
-#include <exception>
 #include "File.hpp"
-#include "HTTPError.hpp"
 #include "BasicTask.hpp"
 #include "Request.hpp"
 
@@ -15,7 +13,7 @@ class CGIWriteTask : public BasicTask
 
         // Construct env, spawn cgi
         CGIWriteTask(
-            Request&& request, std::vector<char>& post_body, File&& write_end, pid_t pid, Config& config
+            Request&& request, const Request::Body& post_body, File&& write_end, pid_t pid, Config& config, int read_end
         );
 
         CGIWriteTask(const CGIWriteTask&) = delete;
@@ -33,9 +31,14 @@ class CGIWriteTask : public BasicTask
         // TODO: override Task::abort (signal child to exit)
         void SignalhandlerChild(int sig);
 
-    private:
+        // Getters
+        int     read_end() const;
+        Config& config()   const;
 
+    private:
+        Config&            _config;
         Request            _request;
+        int                _read_end;
         std::vector<char>  _post_body;
         std::vector<char*> _environment;
         size_t             _bytes_written_total = 0;

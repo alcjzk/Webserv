@@ -1,19 +1,19 @@
 #include "CGIWriteTask.hpp"
-#include "CGIReadTask.hpp"
 #include "Log.hpp"
 #include <string.h>
+#include <signal.h>
 
 // this is for preparing the content to write to the CGI
 // assign _pid & _fdout
 
 CGIWriteTask::CGIWriteTask(
-    Request&& request, std::vector<char>& post_body, File&& write_end, Config& config
+    Request&& request, const Request::Body& post_body, File&& write_end, pid_t pid, Config& config, int read_end
 )
     : BasicTask(
           std::move(write_end), WaitFor::Writable,
           std::chrono::system_clock::now() + config.io_write_timeout()
       ),
-      _request(request), _post_body(post_body)
+      _config(config), _request(request), _read_end(read_end), _post_body(post_body), _pid(std::move(pid))
 {}
 
 // Write body from request to cgi
@@ -28,6 +28,7 @@ void CGIWriteTask::run()
         WARN("CGIWriteTask: write failed for fd `" << _fd_in << "`");
         _is_error = true;
         _is_complete = true;
+        kill(_pid, SIGKILL);
         return;
     }
 
@@ -40,4 +41,14 @@ void CGIWriteTask::SignalhandlerChild(int sig)
 {
     std::cerr << "Received signal (children process): " << sig << std::endl;
     std::exit(EXIT_FAILURE);
+}
+
+int     CGIWriteTask::read_end() const
+{
+    return _read_end;
+}
+
+Config& CGIWriteTask::config()   const
+{
+    return _config;
 }

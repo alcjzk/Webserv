@@ -1,4 +1,3 @@
-#include "CGIWriteTask.hpp"
 #include "CGIReadTask.hpp"
 #include "Log.hpp"
 #include <string.h>
@@ -6,7 +5,9 @@
 // this is for preparing the content to write to the CGI
 // assign _pid & _fdout
 
-CGIReadTask::CGIReadTask(File&& read_end, Config& config, pid_t pid)
+CGIReadTask::CGIReadTask(
+    File&& read_end, Config& config, pid_t pid
+)
     : BasicTask(
           std::move(read_end), WaitFor::Readable,
           std::chrono::system_clock::now() + config.io_write_timeout()
@@ -46,7 +47,7 @@ bool CGIReadTask::is_error() const
     return (_is_error);
 }
 
-std::vector<char> CGIReadTask::buffer() &&
+std::vector<char>&& CGIReadTask::buffer()
 {
     return (std::move(_buffer));
 }
