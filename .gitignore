@@ -13,3 +13,4 @@
 test/testmain.cpp
 !testgen.py
 www/uploads/*
+!YoupiBanane/**
