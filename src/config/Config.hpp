@@ -73,8 +73,8 @@ class Config
         Seconds _client_body_timeout = Seconds(60);
         Seconds _send_timeout = Seconds(60);
         Seconds _lingering_timeout = Seconds(5);
-        Seconds _cgi_read_timeout = Seconds(60);
-        Seconds _cgi_write_timeout = Seconds(60);
+        Seconds _cgi_read_timeout = Seconds(5);
+        Seconds _cgi_write_timeout = Seconds(5);
         Seconds _io_read_timeout = Seconds(60);
         Seconds _io_write_timeout = Seconds(60);
 
