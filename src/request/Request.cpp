@@ -132,6 +132,9 @@ Task* Request::process(Connection&& connection)
     if (!route)
         throw HTTPError(Status::NOT_FOUND);
 
+    if (!route->allowed_methods().test(method()))
+        throw HTTPError(Status::METHOD_NOT_ALLOWED);
+
     if (route->_type == Route::REDIRECTION)
     {
         unique_ptr<Response> response =
@@ -141,8 +144,6 @@ Task* Request::process(Connection&& connection)
     }
 
     Path target = route->map(_uri.path());
-    if (!route->method_get())
-        throw HTTPError(Status::FORBIDDEN);
 
     auto target_status = target.status();
     if (!target_status)

@@ -6,6 +6,8 @@
 #include "Route.hpp"
 #include <iostream>
 
+using AllowedMethods = Route::AllowedMethods;
+
 Route::Route(Path uri_path) : _uri_path(uri_path)
 {
     _priority = std::distance(_uri_path.begin(), _uri_path.end());
@@ -62,6 +64,11 @@ bool Route::method_post() const
 bool Route::method_del() const
 {
     return (_allowed_methods.test(Method::DELETE));
+}
+
+const AllowedMethods& Route::allowed_methods() const
+{
+    return _allowed_methods;
 }
 
 void Route::insert_cgi(const std::pair<std::string, TiniNode*>& extension)
