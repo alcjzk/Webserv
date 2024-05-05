@@ -8,6 +8,7 @@
 #include "Connection.hpp"
 #include "CGIReadTask.hpp"
 #include "CGIWriteTask.hpp"
+#include "Log.hpp"
 #include <fcntl.h>
 
 namespace cgi_creation_task
@@ -56,11 +57,12 @@ namespace cgi_creation_task
     {
         public:
             CGICreationTask(
-                Connection&& connection, Request& request, const Path& uri, Config& config
+                Connection&& connection, Request& request, const Path& uri, const Config& config
             );
 
         private:
             std::vector<char*> _environment;
+            int _pipe_fd[2];
     };
 
     template <typename Parent>
@@ -96,6 +98,7 @@ namespace cgi_creation_task
             return parent.state(std::move(error_state));
         }
 
+        INFO("READ TASK IS COMPLETE!");
         Response* response = new Response(Status::OK);
         response->_keep_alive = _connection._keep_alive;
         response->body(std::move(_task.buffer()));

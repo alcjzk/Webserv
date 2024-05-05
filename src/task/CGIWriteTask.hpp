@@ -13,7 +13,7 @@ class CGIWriteTask : public BasicTask
 
         // Construct env, spawn cgi
         CGIWriteTask(
-            Request&& request, const Request::Body& post_body, File&& write_end, pid_t pid, Config& config, int read_end
+            Request&& request, const Request::Body& post_body, File&& write_end, pid_t pid, const Config& config, int read_end
         );
 
         CGIWriteTask(const CGIWriteTask&) = delete;
@@ -32,11 +32,11 @@ class CGIWriteTask : public BasicTask
         void SignalhandlerChild(int sig);
 
         // Getters
-        int     read_end() const;
-        Config& config()   const;
+        int             read_end() const;
+        const   Config& config()   const;
 
     private:
-        Config&            _config;
+        const Config&      _config;
         Request            _request;
         int                _read_end;
         std::vector<char>  _post_body;

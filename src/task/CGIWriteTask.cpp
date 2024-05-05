@@ -7,11 +7,11 @@
 // assign _pid & _fdout
 
 CGIWriteTask::CGIWriteTask(
-    Request&& request, const Request::Body& post_body, File&& write_end, pid_t pid, Config& config, int read_end
+    Request&& request, const Request::Body& post_body, File&& write_end, pid_t pid, const Config& config, int read_end
 )
     : BasicTask(
           std::move(write_end), WaitFor::Writable,
-          std::chrono::system_clock::now() + config.io_write_timeout()
+          std::chrono::system_clock::now() + config.cgi_write_timeout()
       ),
       _config(config), _request(request), _read_end(read_end), _post_body(post_body), _pid(std::move(pid))
 {}
@@ -23,6 +23,7 @@ void CGIWriteTask::run()
     size_t remainder = _post_body.size() - _bytes_written_total;
 
     ssize_t bytes_written = write(_fd, data, remainder);
+    INFO("Write return value: " << bytes_written);
     if (bytes_written < 0)
     {
         WARN("CGIWriteTask: write failed for fd `" << _fd << "`");
@@ -48,7 +49,7 @@ int     CGIWriteTask::read_end() const
     return _read_end;
 }
 
-Config& CGIWriteTask::config()   const
+const Config& CGIWriteTask::config()   const
 {
     return _config;
 }

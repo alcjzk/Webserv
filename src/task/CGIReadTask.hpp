@@ -12,14 +12,14 @@ class CGIReadTask : public BasicTask
 
         // Construct env, spawn cgi
         CGIReadTask(
-            File&& read_end, Config& config, pid_t pid
+            File&& read_end, const Config& config, pid_t pid
         );
 
         CGIReadTask(const CGIReadTask&) = delete;
-        CGIReadTask(CGIReadTask&&) = default;
+        CGIReadTask(CGIReadTask&&);
 
         CGIReadTask& operator=(const CGIReadTask&) = delete;
-        CGIReadTask& operator=(CGIReadTask&&) = delete;
+        CGIReadTask& operator=(CGIReadTask&&);
 
         // Read cgi output into response body, enqueue ServerSendResponseTask
         virtual void run() override;
@@ -35,8 +35,8 @@ class CGIReadTask : public BasicTask
 
     private:
         std::vector<char> _buffer;
-        size_t            _size;
-        size_t            _bytes_read_total = 0;
-        pid_t             _pid;
-        bool              _is_error = false;
+        // size_t            _size;
+        // size_t            _bytes_read_total = 0;
+        std::optional<pid_t> _pid;
+        bool                 _is_error = false;
 };

@@ -1,29 +1,29 @@
 #include "CGIReadTask.hpp"
 #include "Log.hpp"
-#include <string.h>
 #include <signal.h>
 
 // this is for preparing the content to write to the CGI
 // assign _pid & _fdout
 
 CGIReadTask::CGIReadTask(
-    File&& read_end, Config& config, pid_t pid
+    File&& read_end, const Config& config, pid_t pid
 )
     : BasicTask(
           std::move(read_end), WaitFor::Readable,
-          std::chrono::system_clock::now() + config.io_write_timeout()
+          std::chrono::system_clock::now() + config.cgi_read_timeout()
       ),
       _pid(pid)
 {
+    INFO("FD num in read task: " << _fd);
 }
 
 // Write body from request to cgi
 void CGIReadTask::run()
 {
-    char*   data = _buffer.data() + _bytes_read_total;
-    size_t  remainder = _size - _bytes_read_total;
-    ssize_t bytes_read = read(_fd, data, remainder);
+    char buf[4096];
+    ssize_t bytes_read = read(_fd, buf, 4096);
 
+    INFO("bytes read: " << bytes_read);
     if (bytes_read < 0)
     {
         WARN("CGIReadTask: read failed for fd `" << _fd << "`");
@@ -32,9 +32,12 @@ void CGIReadTask::run()
         return;
     }
 
-    _bytes_read_total += bytes_read;
-    if (_bytes_read_total == _size || bytes_read == 0)
+    _buffer.insert(_buffer.end(), buf, buf + bytes_read);
+    if (bytes_read < 4096)
+    {
         _is_complete = true;
+        return;
+    }
 }
 
 void CGIReadTask::SignalhandlerChild(int sig)
@@ -53,4 +56,28 @@ std::vector<char>&& CGIReadTask::buffer()
     return (std::move(_buffer));
 }
 
-CGIReadTask::~CGIReadTask() { kill(_pid, SIGKILL); }
+CGIReadTask::~CGIReadTask() { 
+    if (_pid)
+    {
+        INFO("KILLING CHILD");
+        kill(_pid.value(), SIGKILL);
+    }
+}
+
+
+CGIReadTask::CGIReadTask(CGIReadTask&& moved_from) : BasicTask(
+        std::move(moved_from)
+        ), _buffer(std::move(moved_from._buffer)), _pid(std::exchange(moved_from._pid, std::nullopt)), _is_error(false)
+{
+}
+
+CGIReadTask& CGIReadTask::operator=(CGIReadTask&& other)
+{
+    if (this == &other)
+        return *this;
+    BasicTask::operator=(std::move(other));
+    _buffer = std::move(other._buffer);
+    _pid = std::exchange(other._pid, std::nullopt);
+    _is_error = false;
+    return *this;
+}

@@ -5,6 +5,8 @@
 #include "Request.hpp"
 #include "Connection.hpp"
 #include "CGICreationTask.hpp"
+#include "Log.hpp"
+#include <unistd.h>
 
 using namespace cgi_creation_task;
 using std::string;
@@ -48,36 +50,37 @@ static char** Environment(std::vector<char *>& environment)
 
 
 CGICreationTask::CGICreationTask(
-    Connection&& connection, Request& request, const Path& uri, Config& config
+    Connection&& connection, Request& request, const Path& uri, const Config& config
 )
 {
-    int pipe_fd[2];
-    if (pipe(pipe_fd) == -1)
+    if (pipe(_pipe_fd) == -1)
     {
         throw HTTPError(Status::INTERNAL_SERVER_ERROR);
     }
 
+    INFO("Pfd 0: " << _pipe_fd[0]);
+    INFO("Pfd 1: " << _pipe_fd[1]);
     int pid = fork(); // Fork to create a child process
     if (pid == -1)
     {
-        close(pipe_fd[0]);
-        close(pipe_fd[1]);
+        close(_pipe_fd[0]);
+        close(_pipe_fd[1]);
         throw HTTPError(Status::INTERNAL_SERVER_ERROR);
     }
     else if (pid == 0) // Child process
     {
         // TODO: signla handler
         // signal(SIGINT, SignalhandlerChild());
-        close(pipe_fd[0]);               // close reading
-        dup2(pipe_fd[1], STDOUT_FILENO); // Redirect stdout to the write end of the pipe
-        close(pipe_fd[1]);
+        close(_pipe_fd[0]);               // close reading
+        dup2(_pipe_fd[1], STDOUT_FILENO); // Redirect stdout to the write end of the pipe
+        close(_pipe_fd[1]);
 
         // setup env
         SetEnv("AUTH_TYPE", "basic", _environment);
         SetEnv("REDIRECT_STATUS", "200", _environment);
 
-        const char* path = request.request_line().request_target().c_str();
-        char*       argv[] = {(char*)"/usr/local/bin/python3", (char*)path, nullptr};
+        std::string path = uri;
+        char*       argv[] = {(char*)"/usr/local/bin/python3", (char*)path.c_str(), nullptr};
 
         // execute
         if (execve(argv[0], argv, Environment(_environment)) == -1) // argument?
@@ -87,10 +90,21 @@ CGICreationTask::CGICreationTask(
         exit(0);
     }
 
-    WriteState write_state {
-        CGIWriteTask(std::move(request), request.body(), File(pipe_fd[0]), pid, config,  pipe_fd[1]),
-        pid, std::move(connection)
-    };
-
-    state(std::move(write_state));
+    if (request.body().size())
+    {
+        WriteState write_state {
+            CGIWriteTask(std::move(request), request.body(), File(_pipe_fd[0]), pid, config,  _pipe_fd[1]),
+            pid, std::move(connection)
+        };
+        state(std::move(write_state));
+    }
+    else
+    {
+        close(_pipe_fd[1]);
+        ReadState read_state{
+            CGIReadTask(_pipe_fd[0], config, pid),
+            std::move(connection),
+        };
+        state(std::move(read_state));
+    }
 }
