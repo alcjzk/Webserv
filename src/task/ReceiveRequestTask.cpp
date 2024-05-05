@@ -48,16 +48,20 @@ ReceiveRequestTask::ReceiveRequestTask(Connection&& connection)
 
 void ReceiveRequestTask::fill_buffer()
 {
-    Buffer& buffer = _connection.reader().value().buffer();
+    Reader& reader = _connection.reader().value();
 
-    if (buffer.unfilled_size() == 0)
+    if (reader.buffer().unfilled_size() == 0)
     {
-        // TODO: Proper error / buffer management
-        throw HTTPError(Status::BAD_REQUEST);
+        assert(
+            _expect == Expect::Headers || _expect == Expect::RequestLine ||
+            _expect == Expect::ChunkSize
+        );
+        if (!reader.grow(RequestLine::MAX_LENGTH))
+            throw HTTPError(Status::CONTENT_TOO_LARGE);
     }
 
     ssize_t bytes_received =
-        recv(_connection.client(), buffer.unfilled(), buffer.unfilled_size(), 0);
+        recv(_connection.client(), reader.buffer().unfilled(), reader.buffer().unfilled_size(), 0);
     if (bytes_received == 0)
     {
         throw Error(Error::CLOSED);
@@ -66,7 +70,7 @@ void ReceiveRequestTask::fill_buffer()
     {
         throw std::runtime_error(strerror(errno));
     }
-    buffer.advance(bytes_received);
+    reader.buffer().advance(bytes_received);
     _is_partial_data = false;
 }
 
