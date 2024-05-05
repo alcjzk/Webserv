@@ -74,6 +74,9 @@ class Reader
         /// Returns the number of unread bytes in the Reader.
         size_t unread_size() const;
 
+        /// Returns true if the reader is aligned, ae. there are no unread bytes.
+        bool is_aligned() const;
+
         /// Returns an iterator to the beginning of the unread content.
         ///
         /// @note The returned iterators will never advance the reader.

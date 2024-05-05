@@ -114,6 +114,11 @@ size_t Reader::unread_size() const
     return std::distance(static_cast<Buffer::const_iterator>(_head), _buffer.end());
 }
 
+bool Reader::is_aligned() const
+{
+    return std::distance(_buffer.begin(), static_cast<Buffer::const_iterator>(_head)) == 0;
+}
+
 Reader::iterator Reader::begin()
 {
     return _head;
