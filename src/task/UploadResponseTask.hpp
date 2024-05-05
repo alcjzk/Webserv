@@ -62,13 +62,13 @@ namespace upload_response_task
             return parent.state(std::move(error_state));
         }
 
-        Response* response = new Response(Status::CREATED);
-        response->_keep_alive = _connection._keep_alive;
-        response->header({FieldName::LOCATION, _location});
+        auto response = std::make_unique<Response>(Status::CREATED);
+        response->keep_alive = _connection._keep_alive;
+        response->headers().insert_or_assign({FieldName::LOCATION, _location});
         response->body(R"(<a href="/uploads">Go to uploads.</a>)");
 
         SendState send_state{
-            SendResponseTask(std::move(_connection), response),
+            SendResponseTask(std::move(_connection), std::move(response)),
         };
         parent.state(std::move(send_state));
     }

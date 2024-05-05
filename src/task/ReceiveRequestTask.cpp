@@ -328,7 +328,9 @@ void ReceiveRequestTask::abort()
 {
     INFO("ReceiveRequestTask for fd " << _connection.client() << " timed out");
     _is_complete = true;
-    Runtime::enqueue(new SendResponseTask(std::move(_connection), new TimeoutResponse()));
+    Runtime::enqueue(
+        new SendResponseTask(std::move(_connection), std::make_unique<TimeoutResponse>())
+    );
 }
 
 int ReceiveRequestTask::fd() const

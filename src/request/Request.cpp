@@ -5,6 +5,7 @@
 #include <utility>
 #include <string>
 #include <cassert>
+#include <memory>
 #include "FieldName.hpp"
 #include "Log.hpp"
 #include "RequestLine.hpp"
@@ -30,6 +31,7 @@
 
 using std::optional;
 using std::string;
+using std::unique_ptr;
 
 void Request::Builder::body(Body&& body)
 {
@@ -132,9 +134,10 @@ Task* Request::process(Connection&& connection)
 
     if (route->_type == Route::REDIRECTION)
     {
-        Response* response = new RedirectionResponse(route->_redir.value());
-        response->_keep_alive = connection._keep_alive;
-        return new SendResponseTask(std::move(connection), response);
+        unique_ptr<Response> response =
+            std::make_unique<RedirectionResponse>(route->_redir.value());
+        response->keep_alive = connection._keep_alive;
+        return new SendResponseTask(std::move(connection), std::move(response));
     }
 
     Path target = route->map(_uri.path());
@@ -179,9 +182,9 @@ Task* Request::process(Connection&& connection)
     if (!server.map_attributes(_uri.host()).dirlist())
         throw HTTPError(Status::FORBIDDEN);
 
-    Response* response = new DirectoryResponse(target, _uri.path());
-    response->_keep_alive = connection._keep_alive;
-    return new SendResponseTask(std::move(connection), response);
+    unique_ptr<Response> response = std::make_unique<DirectoryResponse>(target, _uri.path());
+    response->keep_alive = connection._keep_alive;
+    return new SendResponseTask(std::move(connection), std::move(response));
 }
 
 const HttpUri& Request::uri() const

@@ -26,6 +26,9 @@ namespace http
     /// Delete
     const char DEL = 127;
 
+    /// Double quote
+    const char DQUOTE = '"';
+
     /// Linear whitespace
     const std::string LWS(" \t");
 
@@ -42,6 +45,12 @@ namespace http
 
     /// Returns true if `c` is a field-vchar (RFC 9110).
     bool is_field_vchar(unsigned char c);
+
+    /// Returns true if `c` is qdtext (RFC 9110).
+    bool is_qdtext(unsigned char c);
+
+    /// Returns true if `c` is obs-text (RFC 9110).
+    bool is_obs_text(unsigned char c);
 
     std::pair<FieldName, FieldValue> parse_field(const std::string& field);
 } // namespace http

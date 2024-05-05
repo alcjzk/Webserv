@@ -21,13 +21,20 @@
 using namespace error_response_task;
 
 using std::string;
+using std::unique_ptr;
 using std::vector;
 
 ErrorResponseTask::ErrorResponseTask(Connection&& connection, Status status)
+    : ErrorResponseTask(std::move(connection), std::make_unique<Response>(status))
 {
+}
+
+ErrorResponseTask::ErrorResponseTask(Connection&& connection, unique_ptr<Response>&& response)
+{
+    response->keep_alive = connection._keep_alive;
     try
     {
-        std::optional<Path> error_path = connection.config().error_page(status);
+        std::optional<Path> error_path = connection.config().error_page(response->status());
         if (error_path)
         {
             auto error_path_status = error_path->status();
@@ -38,7 +45,7 @@ ErrorResponseTask::ErrorResponseTask(Connection&& connection, Status status)
                 ReadState read_state{
                     ReadTask(fd, error_path_status->size(), connection.config()),
                     std::move(connection),
-                    status,
+                    std::move(response),
                 };
 
                 state(std::move(read_state));
@@ -50,22 +57,23 @@ ErrorResponseTask::ErrorResponseTask(Connection&& connection, Status status)
     }
     catch (const std::exception& error)
     {
-        // FIXME: put macros in blocks to allow oneliners
-        WARN("failed to use configured error page for status `" << status << "`: " << error.what());
+        WARN(
+            "failed to use configured error page for status `" << response->status()
+                                                               << "`: " << error.what()
+        );
     }
 
-    Response* response = new Response(status);
-    response->_keep_alive = connection._keep_alive;
     TemplateEngine engine(connection.config().error_str());
-    string         buf = engine.render();
-    vector<char>   body;
+    engine.set_value("status", response->status().text());
+    string       buf = engine.render();
+    vector<char> body;
 
     body.resize(buf.size());
     std::copy(buf.begin(), buf.end(), body.begin());
     response->body(std::move(body));
 
     SendState send_state{
-        SendResponseTask(std::move(connection), response),
+        SendResponseTask(std::move(connection), std::move(response)),
     };
     state(std::move(send_state));
 }

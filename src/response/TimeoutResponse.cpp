@@ -4,5 +4,5 @@
 
 TimeoutResponse::TimeoutResponse() : Response(Status::REQUEST_TIMEOUT)
 {
-    _keep_alive = false;
+    keep_alive = false;
 }

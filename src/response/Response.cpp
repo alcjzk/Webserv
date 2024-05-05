@@ -14,8 +14,6 @@
 #include "Response.hpp"
 #include "ContentLength.hpp"
 
-using Headers = Response::Headers;
-
 Response::Response(Status status) : _status(status), _size(0), _size_remaining(0), _is_built(false)
 {
 }
@@ -39,36 +37,31 @@ bool Response::send(int fd)
     return false;
 }
 
-void Response::header(const Header& header)
+const FieldMap& Response::headers() const
 {
-    _headers.push_back(header);
+    return _headers;
 }
 
-void Response::header(Header&& header)
-{
-    _headers.push_back(std::move(header));
-}
-
-const Headers& Response::headers() const
+FieldMap& Response::headers()
 {
     return _headers;
 }
 
 void Response::body(std::vector<char>&& body)
 {
-    content_length(body.size());
+    content_length = _body.size();
     _body = std::move(body);
 }
 
 void Response::body(const std::vector<char>& body)
 {
-    content_length(body.size());
+    content_length = _body.size();
     _body = body;
 }
 
 void Response::body(const std::string& value)
 {
-    content_length(value.length());
+    content_length = _body.size();
     std::vector<char> body(value.length());
     std::copy(value.begin(), value.end(), body.begin());
     _body = std::move(body);
@@ -79,26 +72,26 @@ const std::vector<char>& Response::body() const
     return _body;
 }
 
-void Response::content_length(ContentLength content_length)
+Status Response::status() const
 {
-    header({FieldName::CONTENT_LENGTH, FieldValue(*content_length)});
+    return _status;
 }
 
 void Response::build()
 {
-    std::stringstream   headers_stream;
-    std::streambuf*     headers_rdbuf;
-    size_t              headers_size;
-    std::vector<char>   body;
-    std::vector<Header> headers;
+    std::stringstream headers_stream;
+    std::streambuf*   headers_rdbuf;
+    size_t            headers_size;
+    std::vector<char> body;
 
-    if (!_keep_alive)
-        header(Header(FieldName::CONNECTION, FieldValue::CLOSE));
-    headers.swap(_headers);
+    if (!keep_alive)
+        headers().insert_or_assign({FieldName::CONNECTION, FieldValue::CLOSE});
+
+    _headers.insert_or_assign({FieldName::CONTENT_LENGTH, FieldValue(*content_length)});
     body.swap(_body);
 
     headers_stream << _status.as_status_line() << http::CRLF;
-    for (const auto& [name, value] : headers)
+    for (const auto& [name, value] : _headers)
     {
         headers_stream << name << ':' << value << http::CRLF;
     }

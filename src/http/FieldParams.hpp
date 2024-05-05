@@ -20,4 +20,7 @@ class FieldParams
 
     private:
         Container _inner;
+
+        /// Parses and validates `value` as a quoted-string (RFC 9110).
+        static Value parse_quoted(const Value& value);
 };
