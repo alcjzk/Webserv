@@ -24,6 +24,7 @@
 #include "Path.hpp"
 #include "ContentLength.hpp"
 #include "Connection.hpp"
+#include "CGICreationTask.hpp"
 #include "FileResponseTask.hpp"
 #include "UploadResponseTask.hpp"
 #include "http.hpp"
@@ -148,8 +149,11 @@ Task* Request::process(Connection&& connection)
     if (target_status->is_regular())
     {
         // TODO: Open is assumed to succeed here
+        if (static_cast<std::string>(target).substr(static_cast<std::string>(target).size() - 3) == ".py")
+            return new CGICreationTask(std::move(connection), *this, target, server.config());
         int    fd = target.open(O_RDONLY);
         size_t size = target_status->size();
+        INFO("target_status->size() " << size);
         return new FileResponseTask(std::move(connection), fd, size);
     }
 
