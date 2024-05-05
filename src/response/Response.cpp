@@ -79,10 +79,10 @@ Status Response::status() const
 
 void Response::build()
 {
-    std::stringstream   headers_stream;
-    std::streambuf*     headers_rdbuf;
-    size_t              headers_size;
-    std::vector<char>   body;
+    std::stringstream headers_stream;
+    std::streambuf*   headers_rdbuf;
+    size_t            headers_size;
+    std::vector<char> body;
 
     if (!keep_alive)
         headers().insert_or_assign({FieldName::CONNECTION, FieldValue::CLOSE});
