@@ -262,7 +262,6 @@ void ReceiveRequestTask::realign_reader()
         reader.buffer().clear();
     else
     {
-        // TODO: safe?
         assert(reader.begin() != reader.buffer().begin());
         reader.buffer().replace(reader.begin(), reader.end());
     }
