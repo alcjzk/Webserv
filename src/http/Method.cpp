@@ -2,12 +2,12 @@
 #include "HTTPError.hpp"
 #include "Method.hpp"
 
-using std::istream;
+using std::ostream;
 using std::string;
 
-Method::Method(const std::string& str) : _type(type_from(str)) {}
+Method::Method(Type type) noexcept : _type(type) {}
 
-Method::Type Method::type_from(const std::string& str)
+Method Method::from_string(const string& str)
 {
     if (str == "GET")
         return Get;
@@ -39,7 +39,7 @@ string Method::to_string() const
     }
 }
 
-std::ostream& operator<<(std::ostream& os, const Method& method)
+ostream& operator<<(ostream& os, const Method& method)
 {
     return os << method.to_string();
 }

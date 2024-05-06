@@ -18,7 +18,7 @@ RequestLine::RequestLine(const string& line)
     auto last = std::find(first, end, http::SP);
     if (last == end)
         throw HTTPError(Status::NOT_IMPLEMENTED);
-    _method = Method(string(first, last));
+    _method = Method::from_string(string(first, last));
 
     first = std::next(last);
     end = line.end();

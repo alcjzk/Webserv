@@ -14,7 +14,7 @@ class Method
         };
 
         Method() = default;
-        Method(const std::string& str);
+        Method(Type type) noexcept;
 
         operator size_t() const;
         bool operator==(const Method& other);
@@ -24,7 +24,7 @@ class Method
         static const size_t MAX_LENGTH = 6;
         static const size_t COUNT = 3;
 
-        static Type type_from(const std::string& str);
+        static Method from_string(const std::string& str);
 
     private:
         Type _type;

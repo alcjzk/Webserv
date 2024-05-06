@@ -104,7 +104,7 @@ void HostAttributes::_assign_route(const std::string& key, const TiniNode* value
             {
                 try
                 {
-                    route._allowed_methods.set(Method::type_from(str));
+                    route._allowed_methods.set(Method::from_string(str));
                 }
                 catch (const HTTPError& e)
                 {
