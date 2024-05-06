@@ -168,13 +168,14 @@ Task* Request::process(Connection&& connection)
     if (route->_default_file)
     {
         Path default_file = target + Path(route->_default_file.value());
-        auto status = default_file.status();
-        if (status.has_value() && status->is_regular())
+        if (auto status = default_file.status())
         {
-            // TODO: Expected behavior when default file is set and exists but is not a regular
-            // file?
-            if (auto fd = default_file.open(O_RDONLY | O_NONBLOCK | O_CLOEXEC))
-                return new FileResponseTask(std::move(connection), fd.value(), status->size());
+            if (status->is_regular())
+            {
+                if (auto fd = default_file.open(O_RDONLY | O_NONBLOCK | O_CLOEXEC))
+                    return new FileResponseTask(std::move(connection), fd.value(), status->size());
+            }
+            WARN("default file `" << default_file << "` exists but could not be opened");
         }
     }
 
