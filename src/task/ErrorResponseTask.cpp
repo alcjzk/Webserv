@@ -2,10 +2,12 @@
 #include <stdexcept>
 #include <algorithm>
 #include <exception>
+#include <system_error>
 #include <utility>
 #include <sys/fcntl.h>
 #include <string>
 #include <optional>
+#include <errno.h>
 
 #include "Path.hpp"
 #include "Log.hpp"
@@ -40,10 +42,12 @@ ErrorResponseTask::ErrorResponseTask(Connection&& connection, unique_ptr<Respons
             auto error_path_status = error_path->status();
             if (error_path_status && error_path_status->is_regular())
             {
-                int fd = error_path->open(O_RDONLY);
+                auto fd = error_path->open(O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+                if (!fd)
+                    throw std::system_error(errno, std::system_category());
 
                 ReadState read_state{
-                    ReadTask(fd, error_path_status->size(), connection.config()),
+                    ReadTask(fd.value(), error_path_status->size(), connection.config()),
                     std::move(connection),
                     std::move(response),
                 };

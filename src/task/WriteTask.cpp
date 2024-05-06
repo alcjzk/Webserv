@@ -4,6 +4,8 @@
 #include <vector>
 #include <utility>
 #include <chrono>
+#include <errno.h>
+#include <cstring>
 #include "Config.hpp"
 #include "BasicTask.hpp"
 #include "Log.hpp"
@@ -25,15 +27,13 @@ WriteTask::WriteTask(const Path& path, std::vector<char>&& content, const Config
       ),
       _buffer(std::move(content))
 {
-    try
+    auto fd = path.open(O_WRONLY | O_CREAT | O_EXCL | O_NONBLOCK | O_CLOEXEC, 0644);
+    if (!fd)
     {
-        _fd = path.open(O_WRONLY | O_CREAT | O_EXCL | O_NONBLOCK | O_CLOEXEC, 0644);
+        WARN("WriteTask: could not open `" << path << "`: " << strerror(errno));
+        throw std::system_error(errno, std::system_category());
     }
-    catch (const std::system_error& error)
-    {
-        WARN("WriteTask: could not open `" << path << "`: " << error.what());
-        throw std::system_error(error);
-    }
+    _fd = fd.value();
 }
 
 void WriteTask::run()

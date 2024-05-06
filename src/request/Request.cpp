@@ -151,10 +151,10 @@ Task* Request::process(Connection&& connection)
 
     if (target_status->is_regular())
     {
-        // TODO: Open is assumed to succeed here
-        int    fd = target.open(O_RDONLY);
-        size_t size = target_status->size();
-        return new FileResponseTask(std::move(connection), fd, size);
+        auto fd = target.open(O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+        if (!fd)
+            throw HTTPError(Status::NOT_FOUND);
+        return new FileResponseTask(std::move(connection), fd.value(), target_status->size());
     }
 
     if (!target_status->is_directory())
@@ -173,10 +173,8 @@ Task* Request::process(Connection&& connection)
         {
             // TODO: Expected behavior when default file is set and exists but is not a regular
             // file?
-            // TODO: Open is assumed to succeed here
-            return new FileResponseTask(
-                std::move(connection), default_file.open(O_RDONLY), status->size()
-            );
+            if (auto fd = default_file.open(O_RDONLY | O_NONBLOCK | O_CLOEXEC))
+                return new FileResponseTask(std::move(connection), fd.value(), status->size());
         }
     }
 
