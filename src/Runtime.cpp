@@ -40,7 +40,7 @@ void Runtime::run_impl()
 
     while (!_is_interrupt_signaled)
     {
-        vector<struct pollfd> pollfds;
+        vector<struct pollfd> pollfds(_tasks.size());
 
         for (const auto& task : _tasks)
         {
