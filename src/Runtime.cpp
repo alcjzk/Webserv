@@ -40,7 +40,8 @@ void Runtime::run_impl()
 
     while (!_is_interrupt_signaled)
     {
-        vector<struct pollfd> pollfds(_tasks.size());
+        vector<struct pollfd> pollfds;
+        pollfds.reserve(_tasks.size());
 
         for (const auto& task : _tasks)
         {
@@ -60,20 +61,15 @@ void Runtime::run_impl()
         }
 
         auto now = std::chrono::system_clock::now();
-
-        for (const auto& pollfd : pollfds)
+        for (size_t idx = 0; idx < pollfds.size(); idx++)
         {
-            // NOTE: There's unnecessary iterations here if pollfds / task are in the same order
-            auto task = std::find_if(
-                _tasks.begin(), _tasks.end(),
-                [&pollfd](const auto& task) { return task->fd() == pollfd.fd; }
-            );
-            assert(task != _tasks.end());
+            const auto& pollfd = pollfds[idx];
+            auto&       task = _tasks[idx];
 
             if (pollfd.revents)
-                (*task)->run();
-            else if ((*task)->is_expired_at(now))
-                (*task)->abort();
+                task->run();
+            else if (task->is_expired_at(now))
+                task->abort();
         }
 
         _tasks.erase(
