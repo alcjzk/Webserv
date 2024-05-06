@@ -10,11 +10,11 @@ Method::Method(const std::string& str) : _type(type_from(str)) {}
 Method::Type Method::type_from(const std::string& str)
 {
     if (str == "GET")
-        return GET;
+        return Get;
     else if (str == "POST")
-        return POST;
+        return Post;
     else if (str == "DELETE")
-        return DELETE;
+        return Delete;
     else
         throw HTTPError(Status::BAD_REQUEST);
 }
@@ -28,11 +28,11 @@ string Method::to_string() const
 {
     switch (_type)
     {
-        case GET:
+        case Get:
             return "GET";
-        case POST:
+        case Post:
             return "POST";
-        case DELETE:
+        case Delete:
             return "DELETE";
         default:
             assert(false);

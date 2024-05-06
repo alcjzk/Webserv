@@ -160,7 +160,7 @@ Task* Request::process(Connection&& connection)
     if (!target_status->is_directory())
         throw HTTPError(Status::FORBIDDEN);
 
-    if (_request_line.method() == Method::POST && route->_type == Route::UPLOAD)
+    if (_request_line.method() == Method::Post && route->_type == Route::UPLOAD)
     {
         return new UploadResponseTask(std::move(connection), *this, route->_fs_path, target);
     }

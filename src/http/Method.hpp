@@ -6,22 +6,24 @@
 class Method
 {
     public:
-        static const size_t MAX_LENGTH = 6;
+        enum Type
+        {
+            Get,
+            Post,
+            Delete
+        };
 
         Method() = default;
         Method(const std::string& str);
-        static const size_t COUNT = 3;
+
         operator size_t() const;
+        bool operator==(const Method& other);
 
         std::string to_string() const;
 
-        bool operator==(const Method& other);
-        typedef enum Type
-        {
-            GET,
-            POST,
-            DELETE
-        } Type;
+        static const size_t MAX_LENGTH = 6;
+        static const size_t COUNT = 3;
+
         static Type type_from(const std::string& str);
 
     private:
