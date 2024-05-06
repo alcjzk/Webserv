@@ -33,7 +33,7 @@ class RequestLineTest : public RequestLine
     public:
         // A server that receives a method longer than any that it implements SHOULD respond with a
         // 501 (Not Implemented) status code.
-        static void method_too_throws_not_implemented_test();
+        static void method_too_long_throws_not_implemented_test();
 
         //  A server that receives a request-target longer than any URI it wishes to parse MUST
         // respond with a 414 (URI Too Long) status code

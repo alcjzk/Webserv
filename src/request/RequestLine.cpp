@@ -13,35 +13,23 @@ constexpr size_t RequestLine::uri_max_length()
 
 RequestLine::RequestLine(const string& line)
 {
-    size_t head;
-    size_t end;
-
-    auto it_end = line.begin() + std::min(line.length(), Method::MAX_LENGTH + 1);
-    auto it = std::find_first_of(line.begin(), line.end(), http::LWS.begin(), http::LWS.end());
-    if (it == it_end)
+    auto first = line.begin();
+    auto end = first + std::min(line.length(), Method::MAX_LENGTH + 1);
+    auto last = std::find(first, end, http::SP);
+    if (last == end)
         throw HTTPError(Status::NOT_IMPLEMENTED);
-    _method = Method(string(line.begin(), it));
+    _method = Method(string(first, last));
 
-    end = std::distance(line.begin(), it);
-    head = line.find_first_not_of(http::LWS, end);
-    if (head == string::npos)
+    first = std::next(last);
+    end = line.end();
+    last = std::find(first, end, http::SP);
+    if (last == end)
         throw HTTPError(Status::BAD_REQUEST);
-    end = line.find_first_of(http::LWS, head);
-    if (end == string::npos)
-        throw HTTPError(Status::BAD_REQUEST);
-    size_t length = end - head;
-    if (length > uri_max_length())
+    if (std::distance(first, last) > (ssize_t)uri_max_length())
         throw HTTPError(Status::URI_TOO_LONG);
-    _request_target = line.substr(head, length);
+    _request_target = string(first, last);
 
-    head = line.find_first_not_of(http::LWS, end);
-    if (head == string::npos)
-        throw HTTPError(Status::BAD_REQUEST);
-    end = line.find_first_of(http::LWS, head);
-    _http_version = HTTPVersion(line.substr(head, end - head));
-
-    if (end != string::npos && line.find_first_not_of(http::LWS, end) != string::npos)
-        throw HTTPError(Status::BAD_REQUEST);
+    _http_version = HTTPVersion(string(std::next(last), end));
 }
 
 const Method& RequestLine::method() const
@@ -70,7 +58,7 @@ ostream& operator<<(ostream& os, const RequestLine& line)
 #include <string>
 #include "testutils.hpp"
 
-void RequestLineTest::method_too_throws_not_implemented_test()
+void RequestLineTest::method_too_long_throws_not_implemented_test()
 {
     BEGIN
 
