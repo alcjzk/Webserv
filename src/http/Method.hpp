@@ -6,7 +6,7 @@
 class Method
 {
     public:
-        enum Type
+        enum Type : size_t
         {
             Get,
             Post,
@@ -16,8 +16,8 @@ class Method
         Method() = default;
         Method(Type type) noexcept;
 
-        operator size_t() const;
-        bool operator==(const Method& other);
+        operator size_t() const noexcept;
+        bool operator==(const Method& other) noexcept;
 
         std::string to_string() const;
 

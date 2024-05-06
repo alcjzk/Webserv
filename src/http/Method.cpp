@@ -19,7 +19,7 @@ Method Method::from_string(const string& str)
         throw HTTPError(Status::BAD_REQUEST);
 }
 
-bool Method::operator==(const Method& other)
+bool Method::operator==(const Method& other) noexcept
 {
     return _type == other._type;
 }
@@ -44,7 +44,7 @@ ostream& operator<<(ostream& os, const Method& method)
     return os << method.to_string();
 }
 
-Method::operator size_t() const
+Method::operator size_t() const noexcept
 {
     return _type;
 }
