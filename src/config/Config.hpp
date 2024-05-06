@@ -41,7 +41,6 @@ class Config
         Seconds client_header_timeout() const;
 
         /// Returns a timeout in seconds between successive reads when receiving a request body.
-        // TODO: Not used until receive client body is implemented.
         Seconds client_body_timeout() const;
 
         /// Returns a timeout in seconds between successive writes when sending a response back to

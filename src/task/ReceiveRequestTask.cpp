@@ -120,6 +120,8 @@ void ReceiveRequestTask::receive_headers()
             if (_builder->is_chunked())
             {
                 realign_reader();
+                _expire_time =
+                    std::chrono::system_clock::now() + _connection.config().client_body_timeout();
                 _expect = Expect::ChunkSize;
                 return;
             }
@@ -141,6 +143,8 @@ void ReceiveRequestTask::receive_headers()
                         std::copy(reader.begin(), reader.end(), body_buffer.unfilled());
                         body_buffer.advance(reader.unread_size());
                         reader.buffer(std::move(body_buffer));
+                        _expire_time = std::chrono::system_clock::now() +
+                                       _connection.config().client_body_timeout();
                         _expect = Expect::Body;
                         return;
                     }
@@ -160,6 +164,7 @@ void ReceiveRequestTask::receive_headers()
 
 void ReceiveRequestTask::receive_chunk_size()
 {
+    _expire_time = std::chrono::system_clock::now() + _connection.config().client_body_timeout();
     try
     {
         Reader& reader = _connection.reader().value();
@@ -210,6 +215,7 @@ void ReceiveRequestTask::receive_chunk_size()
 
 void ReceiveRequestTask::receive_chunk()
 {
+    _expire_time = std::chrono::system_clock::now() + _connection.config().client_body_timeout();
     Reader& reader = _connection.reader().value();
     if (!reader.read_exact_into(_chunk_size, _chunked_body.begin() + _chunked_position))
     {
@@ -222,12 +228,15 @@ void ReceiveRequestTask::receive_chunk()
 
 void ReceiveRequestTask::receive_last_chunk()
 {
+    _expire_time = std::chrono::system_clock::now() + _connection.config().client_body_timeout();
     Reader& reader = _connection.reader().value();
 
     while (auto line = reader.line())
     {
         if (!line)
         {
+            _expire_time =
+                std::chrono::system_clock::now() + _connection.config().client_body_timeout();
             _is_partial_data = true;
             return;
         }
@@ -265,6 +274,8 @@ void ReceiveRequestTask::receive_body()
     Reader& reader = _connection.reader().value();
     if (!reader.buffer().is_full())
     {
+        _expire_time =
+            std::chrono::system_clock::now() + _connection.config().client_body_timeout();
         _is_partial_data = true;
         return;
     }
