@@ -88,6 +88,7 @@ CGICreationTask::CGICreationTask(
             SetEnv("CONTENT_LENGTH", std::to_string(request.body().size()), _environment);
         SetEnv("SERVER_NAME", request.uri().host(), _environment);
         SetEnv("SERVER_PORT", request.uri().port(), _environment);
+        SetEnv("SERVER_PROTOCOL", "HTTP/1.1", _environment);
         SetEnv("SERVER_SOFTWARE", "webserv", _environment);
         SetEnv("SCRIPT_NAME", request.uri().path(), _environment);
         SetEnv("REQUEST_METHOD", request.method().to_string(), _environment);
