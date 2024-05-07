@@ -90,6 +90,7 @@ CGICreationTask::CGICreationTask(
         SetEnv("SERVER_PORT", request.uri().port(), _environment);
         SetEnv("SERVER_SOFTWARE", "webserv", _environment);
         SetEnv("SCRIPT_NAME", request.uri().path(), _environment);
+        SetEnv("REQUEST_METHOD", request.method().to_string(), _environment);
 
         std::string path = uri;
         char*       argv[] = {(char*)"/usr/local/bin/python3", (char*)path.c_str(), nullptr};
