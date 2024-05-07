@@ -1,8 +1,10 @@
+#include <stdexcept>
 #include "HTTPError.hpp"
 
 HTTPError::HTTPError(Status status) : _status(status)
 {
-    // TODO: Disallow constructing from non-error status
+    if (!status.is_error())
+        throw std::logic_error("HTTPError: attempt to construct from non-error status");
 }
 
 const char* HTTPError::what() const throw()

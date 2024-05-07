@@ -48,16 +48,24 @@ ReceiveRequestTask::ReceiveRequestTask(Connection&& connection)
 
 void ReceiveRequestTask::fill_buffer()
 {
-    Buffer& buffer = _connection.reader().value().buffer();
+    Reader& reader = _connection.reader().value();
 
-    if (buffer.unfilled_size() == 0)
+    if (reader.buffer().unfilled_size() == 0)
     {
-        // TODO: Proper error / buffer management
-        throw HTTPError(Status::BAD_REQUEST);
+        assert(
+            _expect == Expect::Headers || _expect == Expect::RequestLine ||
+            _expect == Expect::ChunkSize
+        );
+        if (!reader.grow(RequestLine::MAX_LENGTH))
+        {
+            if (reader.is_aligned())
+                throw HTTPError(Status::CONTENT_TOO_LARGE);
+            realign_reader();
+        }
     }
 
     ssize_t bytes_received =
-        recv(_connection.client(), buffer.unfilled(), buffer.unfilled_size(), 0);
+        recv(_connection.client(), reader.buffer().unfilled(), reader.buffer().unfilled_size(), 0);
     if (bytes_received == 0)
     {
         throw Error(Error::CLOSED);
@@ -66,7 +74,7 @@ void ReceiveRequestTask::fill_buffer()
     {
         throw std::runtime_error(strerror(errno));
     }
-    buffer.advance(bytes_received);
+    reader.buffer().advance(bytes_received);
     _is_partial_data = false;
 }
 
@@ -112,6 +120,8 @@ void ReceiveRequestTask::receive_headers()
             if (_builder->is_chunked())
             {
                 realign_reader();
+                _expire_time =
+                    std::chrono::system_clock::now() + _connection.config().client_body_timeout();
                 _expect = Expect::ChunkSize;
                 return;
             }
@@ -133,6 +143,8 @@ void ReceiveRequestTask::receive_headers()
                         std::copy(reader.begin(), reader.end(), body_buffer.unfilled());
                         body_buffer.advance(reader.unread_size());
                         reader.buffer(std::move(body_buffer));
+                        _expire_time = std::chrono::system_clock::now() +
+                                       _connection.config().client_body_timeout();
                         _expect = Expect::Body;
                         return;
                     }
@@ -152,6 +164,7 @@ void ReceiveRequestTask::receive_headers()
 
 void ReceiveRequestTask::receive_chunk_size()
 {
+    _expire_time = std::chrono::system_clock::now() + _connection.config().client_body_timeout();
     try
     {
         Reader& reader = _connection.reader().value();
@@ -202,6 +215,7 @@ void ReceiveRequestTask::receive_chunk_size()
 
 void ReceiveRequestTask::receive_chunk()
 {
+    _expire_time = std::chrono::system_clock::now() + _connection.config().client_body_timeout();
     Reader& reader = _connection.reader().value();
     if (!reader.read_exact_into(_chunk_size, _chunked_body.begin() + _chunked_position))
     {
@@ -214,12 +228,15 @@ void ReceiveRequestTask::receive_chunk()
 
 void ReceiveRequestTask::receive_last_chunk()
 {
+    _expire_time = std::chrono::system_clock::now() + _connection.config().client_body_timeout();
     Reader& reader = _connection.reader().value();
 
     while (auto line = reader.line())
     {
         if (!line)
         {
+            _expire_time =
+                std::chrono::system_clock::now() + _connection.config().client_body_timeout();
             _is_partial_data = true;
             return;
         }
@@ -245,7 +262,6 @@ void ReceiveRequestTask::realign_reader()
         reader.buffer().clear();
     else
     {
-        // TODO: safe?
         assert(reader.begin() != reader.buffer().begin());
         reader.buffer().replace(reader.begin(), reader.end());
     }
@@ -257,6 +273,8 @@ void ReceiveRequestTask::receive_body()
     Reader& reader = _connection.reader().value();
     if (!reader.buffer().is_full())
     {
+        _expire_time =
+            std::chrono::system_clock::now() + _connection.config().client_body_timeout();
         _is_partial_data = true;
         return;
     }
@@ -312,7 +330,9 @@ void ReceiveRequestTask::run()
     catch (const HTTPError& error)
     {
         WARN("ReceiveRequestTask::run():" << _connection.client() << ":" << error.what());
-        if (error.status().code() == Status::BAD_REQUEST)
+        auto status_code = error.status().code();
+        if (status_code >= 400 && status_code != Status::NOT_FOUND &&
+            status_code != Status::CONFLICT)
             _connection._keep_alive = false;
         Runtime::enqueue(new ErrorResponseTask(std::move(_connection), error.status()));
         _is_complete = true;
@@ -328,7 +348,9 @@ void ReceiveRequestTask::abort()
 {
     INFO("ReceiveRequestTask for fd " << _connection.client() << " timed out");
     _is_complete = true;
-    Runtime::enqueue(new SendResponseTask(std::move(_connection), new TimeoutResponse()));
+    Runtime::enqueue(
+        new SendResponseTask(std::move(_connection), std::make_unique<TimeoutResponse>())
+    );
 }
 
 int ReceiveRequestTask::fd() const

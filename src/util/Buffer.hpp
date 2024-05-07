@@ -72,6 +72,15 @@ class Buffer
         /// Reserves space for `count` bytes in the buffer's unfilled portion.
         void reserve(size_t count);
 
+        /// Grows the buffer by doubling the capacity or up to `max_capacity`.
+        ///
+        /// @returns
+        /// true - buffer was resized.
+        /// false - buffer size would exceed max_capacity or numeric limits.
+        ///
+        /// @throws see std::vector::resize.
+        bool grow(size_t max_capacity);
+
     private:
         Container _container;
         size_t    _filled_size = 0;

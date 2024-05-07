@@ -74,6 +74,9 @@ class Reader
         /// Returns the number of unread bytes in the Reader.
         size_t unread_size() const;
 
+        /// Returns true if the reader is aligned, ae. there are no unread bytes.
+        bool is_aligned() const;
+
         /// Returns an iterator to the beginning of the unread content.
         ///
         /// @note The returned iterators will never advance the reader.
@@ -99,6 +102,15 @@ class Reader
         ///
         /// Behavior is undefined if reader does not contain at least `count` unread bytes.
         void advance(size_t count);
+
+        /// Grows the internal buffer by doubling the capacity or up to `max_capacity`.
+        ///
+        /// @returns
+        /// true - buffer was resized.
+        /// false - buffer size would exceed max_capacity or numeric limits.
+        ///
+        /// @throws see std::vector::resize.
+        bool grow(size_t max_capacity);
 
         /// Returns the position of the first occurrance of pattern `first`-`last`.
         template <typename ForwardIt>

@@ -18,7 +18,7 @@ HttpUri::HttpUri(const std::string& request_target, const std::string& host)
 
     if (request_target[0] == '/')
     {
-        _path = request_target.substr(0, query_offset);
+        _path = Path::canonical(request_target.substr(0, query_offset));
         authority(host);
     }
     else
@@ -31,7 +31,7 @@ HttpUri::HttpUri(const std::string& request_target, const std::string& host)
 
         path_offset = std::min(request_target.find_first_of("/", PREFIX.length()), query_offset);
         if (path_offset < query_offset)
-            _path = request_target.substr(path_offset, query_offset - path_offset);
+            _path = Path::canonical(request_target.substr(path_offset, query_offset - path_offset));
         else
             _path = "/";
 
@@ -41,7 +41,7 @@ HttpUri::HttpUri(const std::string& request_target, const std::string& host)
     }
 }
 
-const std::string& HttpUri::path() const
+const Path& HttpUri::path() const
 {
     return _path;
 }

@@ -6,12 +6,12 @@
 #include "ContentLength.hpp"
 #include "FieldName.hpp"
 #include "FieldValue.hpp"
+#include "FieldMap.hpp"
 
 class Response
 {
     public:
         using Header = std::pair<FieldName, FieldValue>;
-        using Headers = std::vector<Header>;
 
         virtual ~Response() = default;
 
@@ -28,10 +28,8 @@ class Response
         /// @return true if the message was fully sent, false otherwise.
         bool send(int fd);
 
-        void header(const Header& header);
-        void header(Header&& header);
-
-        const std::vector<Header>& headers() const;
+        const FieldMap& headers() const;
+        FieldMap&       headers();
 
         void body(std::vector<char>&& body);
         void body(const std::vector<char>& body);
@@ -39,9 +37,10 @@ class Response
 
         const std::vector<char>& body() const;
 
-        void content_length(ContentLength content_length);
+        Status status() const;
 
-        bool _keep_alive = true;
+        bool          keep_alive = true;
+        ContentLength content_length = 0;
 
     private:
         Status            _status;
@@ -49,7 +48,7 @@ class Response
         size_t            _size;
         size_t            _size_remaining;
         bool              _is_built;
-        Headers           _headers;
+        FieldMap          _headers;
         std::vector<char> _body;
 
         void build();

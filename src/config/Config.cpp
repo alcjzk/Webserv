@@ -137,11 +137,6 @@ Config::Seconds Config::send_timeout() const
     return _send_timeout;
 }
 
-Config::Seconds Config::lingering_timeout() const
-{
-    return _lingering_timeout;
-}
-
 Config::Seconds Config::cgi_read_timeout() const
 {
     return _cgi_read_timeout;

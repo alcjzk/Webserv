@@ -35,8 +35,7 @@ void AcceptTask::run()
         }
         if (fcntl(fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
         {
-            // TODO: This should probably be handled as a warning
-            throw std::runtime_error(strerror(errno));
+            WARN("AcceptTask::run(): fcntl: " << strerror(errno));
         }
         INFO("Client connected on fd " << fd);
         Connection connection(fd, _server);

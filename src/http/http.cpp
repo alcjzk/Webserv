@@ -32,9 +32,27 @@ bool http::is_whitespace(unsigned char c)
 
 bool http::is_field_vchar(unsigned char c)
 {
-    if (std::isgraph(c) || c >= 0x80)
+    if (std::isgraph(c) || http::is_obs_text(c))
         return true;
     return false;
+}
+
+bool http::is_qdtext(unsigned char c)
+{
+    if (http::is_whitespace(c) || http::is_obs_text(c))
+        return true;
+    if (c == 0x21)
+        return true;
+    if (c >= 0x23 && c <= 0x5B)
+        return true;
+    if (c >= 0x5D && c <= 0x7E)
+        return true;
+    return false;
+}
+
+bool http::is_obs_text(unsigned char c)
+{
+    return c >= 0x80;
 }
 
 pair<FieldName, FieldValue> http::parse_field(const string& field)

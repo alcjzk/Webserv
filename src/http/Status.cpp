@@ -27,12 +27,18 @@ const char* Status::text() const
             return "403 Forbidden";
         case NOT_FOUND:
             return "404 Not Found";
+        case METHOD_NOT_ALLOWED:
+            return "405 Method Not Allowed";
         case REQUEST_TIMEOUT:
             return "408 Request Timeout";
+        case CONFLICT:
+            return "409 Conflict";
         case CONTENT_TOO_LARGE:
             return "413 Content Too Large";
         case URI_TOO_LONG:
             return "414 URI Too Long";
+        case UNSUPPORTED_MEDIA_TYPE:
+            return "415 Unsupported Media Type";
         case INTERNAL_SERVER_ERROR:
             return "500 Internal Server Error";
         case NOT_IMPLEMENTED:

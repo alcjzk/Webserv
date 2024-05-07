@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <system_error>
 #include <optional>
 #include <stdexcept>
 #include <sys/types.h>
@@ -7,10 +6,13 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string>
+#include <string.h>
 #include <iostream>
 #include <fcntl.h>
+#include "Log.hpp"
 #include "Path.hpp"
 
+using std::optional;
 using std::ostream;
 using std::string;
 
@@ -82,35 +84,36 @@ bool Path::is_root() const noexcept
     return _is_root;
 }
 
-std::optional<Path::Status> Path::status() const
+optional<Path::Status> Path::status() const noexcept
 {
     Status status;
 
     if (::stat(static_cast<string>(*this).c_str(), &status) != 0)
     {
-        if (errno != ENOENT && errno != ENOTDIR)
-            throw std::system_error(errno, std::system_category());
+        WARN("Path::status(): " << strerror(errno));
         return std::nullopt;
     }
     return status;
 }
 
-int Path::open(int flags) const
+optional<int> Path::open(int flags) const
 {
     int fd = ::open(static_cast<string>(*this).c_str(), flags);
     if (fd < 0)
     {
-        throw std::system_error(errno, std::system_category());
+        WARN("Path::open(): " << strerror(errno));
+        return std::nullopt;
     }
     return fd;
 }
 
-int Path::open(int flags, mode_t mode) const
+optional<int> Path::open(int flags, mode_t mode) const
 {
     int fd = ::open(static_cast<string>(*this).c_str(), flags, mode);
     if (fd < 0)
     {
-        throw std::system_error(errno, std::system_category());
+        WARN("Path::open(): " << strerror(errno));
+        return std::nullopt;
     }
     return fd;
 }
