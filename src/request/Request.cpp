@@ -81,10 +81,15 @@ void Request::Builder::parse_headers()
 
         _uri = HttpUri(_request_line.request_target(), *host);
 
-        if (const FieldValue* connection = _headers.get(FieldName::CONNECTION))
+        const FieldValue* connection = _headers.get(FieldName::CONNECTION);
+        if (_request_line.http_version() == HTTPVersion(1, 0))
         {
-            if (**connection == "close")
+            if (!connection || **connection != "keep-alive")
                 _keep_alive = false;
+        }
+        else if (connection && **connection == "close")
+        {
+            _keep_alive = false;
         }
 
         const FieldValue* transfer_encoding = _headers.get(FieldName::TRANSFER_ENCODING);
