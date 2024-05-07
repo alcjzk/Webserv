@@ -62,6 +62,10 @@ CGICreationTask::CGICreationTask(
     INFO("Pfd 0: " << _pipe_fd[0]);
     INFO("Pfd 1: " << _pipe_fd[1]);
     int pid = fork(); // Fork to create a child process
+    for ( auto field : request.headers())
+    {
+        INFO("FIELD_NAME " << field.first << " FIELD_VALUE " << field.second);
+    }
     if (pid == -1)
     {
         close(_pipe_fd[0]);
@@ -82,6 +86,7 @@ CGICreationTask::CGICreationTask(
         SetEnv("GATEWAY_INTERFACE", "CGI/1.1", _environment);
         if (request.body().size())
             SetEnv("CONTENT_LENGTH", std::to_string(request.body().size()), _environment);
+        SetEnv("SERVER_NAME", request.uri().host(), _environment);
 
         std::string path = uri;
         char*       argv[] = {(char*)"/usr/local/bin/python3", (char*)path.c_str(), nullptr};
