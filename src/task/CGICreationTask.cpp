@@ -78,6 +78,7 @@ CGICreationTask::CGICreationTask(
         // setup env
         SetEnv("AUTH_TYPE", "basic", _environment);
         SetEnv("REDIRECT_STATUS", "200", _environment);
+        SetEnv("GATEWAY_INTERFACE", "CGI/1.1", _environment);
 
         std::string path = uri;
         char*       argv[] = {(char*)"/usr/local/bin/python3", (char*)path.c_str(), nullptr};
