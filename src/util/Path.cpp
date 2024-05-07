@@ -196,7 +196,6 @@ Path Path::canonical(const Path& path)
             if (*next != "..")
             {
                 result._segments.push_back(*it);
-                it = std::next(next);
             }
         }
     }
