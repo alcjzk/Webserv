@@ -132,6 +132,9 @@ Task* Request::process(Connection&& connection)
     if (!route)
         throw HTTPError(Status::NOT_FOUND);
 
+    if (!route->allowed_methods().test(method()))
+        throw HTTPError(Status::METHOD_NOT_ALLOWED);
+
     if (route->_type == Route::REDIRECTION)
     {
         unique_ptr<Response> response =
@@ -141,8 +144,6 @@ Task* Request::process(Connection&& connection)
     }
 
     Path target = route->map(_uri.path());
-    if (!route->method_get())
-        throw HTTPError(Status::FORBIDDEN);
 
     auto target_status = target.status();
     if (!target_status)
@@ -150,16 +151,16 @@ Task* Request::process(Connection&& connection)
 
     if (target_status->is_regular())
     {
-        // TODO: Open is assumed to succeed here
-        int    fd = target.open(O_RDONLY);
-        size_t size = target_status->size();
-        return new FileResponseTask(std::move(connection), fd, size);
+        auto fd = target.open(O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+        if (!fd)
+            throw HTTPError(Status::NOT_FOUND);
+        return new FileResponseTask(std::move(connection), fd.value(), target_status->size());
     }
 
     if (!target_status->is_directory())
         throw HTTPError(Status::FORBIDDEN);
 
-    if (_request_line.method() == Method::POST && route->_type == Route::UPLOAD)
+    if (_request_line.method() == Method::Post && route->_type == Route::UPLOAD)
     {
         return new UploadResponseTask(std::move(connection), *this, route->_fs_path, target);
     }
@@ -167,15 +168,14 @@ Task* Request::process(Connection&& connection)
     if (route->_default_file)
     {
         Path default_file = target + Path(route->_default_file.value());
-        auto status = default_file.status();
-        if (status.has_value() && status->is_regular())
+        if (auto status = default_file.status())
         {
-            // TODO: Expected behavior when default file is set and exists but is not a regular
-            // file?
-            // TODO: Open is assumed to succeed here
-            return new FileResponseTask(
-                std::move(connection), default_file.open(O_RDONLY), status->size()
-            );
+            if (status->is_regular())
+            {
+                if (auto fd = default_file.open(O_RDONLY | O_NONBLOCK | O_CLOEXEC))
+                    return new FileResponseTask(std::move(connection), fd.value(), status->size());
+            }
+            WARN("default file `" << default_file << "` exists but could not be opened");
         }
     }
 

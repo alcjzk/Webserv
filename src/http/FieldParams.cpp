@@ -19,7 +19,9 @@ static inline void to_lowercase_in_place(std::string& value)
 FieldParams::FieldParams(const string_view& value)
 {
     using Iterator = std::regex_iterator<string_view::const_iterator>;
-    static const std::regex regex(R"((?:[ \t]*);(?:[ \t]*)([^ \t;=]+)=([^ \t;=]+))");
+    static const std::regex regex(
+        R"((?:[ \t]*);(?:[ \t]*)([^ \t;=]+)=([^ \t;="]+|(?:"(?:[^"\\]|\\.)*")))"
+    );
 
     Iterator match(value.begin(), value.end(), regex);
     Iterator end;
@@ -73,3 +75,37 @@ Value FieldParams::parse_quoted(const Value& value)
     }
     return result;
 }
+
+#ifdef TEST
+
+#include "testutils.hpp"
+#include <tuple>
+
+using Input = std::string;
+using ExpectedKey = std::string;
+using ExpectedValue = std::string;
+
+void FieldParamsTest::regex_test()
+{
+    BEGIN
+
+    const std::tuple<Input, ExpectedKey, ExpectedValue> values[] = {
+        {" \t;whitespace=before", "whitespace", "before"},
+        {";no=whitespace", "no", "whitespace"},
+        {R"(;quoted=" spaceinside ")", "quoted", " spaceinside "},
+        {R"(;quoted=" \" \\ escapes")", "quoted", R"( " \ escapes)"},
+    };
+
+    for (auto test : values)
+    {
+        FieldParams   params(std::get<0>(test));
+        const string& key = std::get<1>(test);
+        const string& value = std::get<2>(test);
+
+        EXPECT(*params.get(key) == value);
+    }
+
+    END
+}
+
+#endif

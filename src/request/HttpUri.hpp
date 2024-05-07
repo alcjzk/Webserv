@@ -3,6 +3,7 @@
 #include <string>
 #include <string_view>
 #include <ostream>
+#include "Path.hpp"
 
 /// https://datatracker.ietf.org/doc/html/rfc9110#name-http-uri-scheme
 class HttpUri
@@ -15,13 +16,13 @@ class HttpUri
 
         const std::string& host() const;
         const std::string& port() const;
-        const std::string& path() const;
+        const Path&        path() const;
         const std::string& query() const;
 
     private:
         std::string _host;
         std::string _port;
-        std::string _path;
+        Path        _path;
         std::string _query;
 
         template <typename String>

@@ -1,0 +1,19 @@
+body_size = 100
+[servers.alpha]
+    host = 127.0.0.1
+    port = 8080
+    [servers.alpha.localhost]
+        directory_listing = true
+        [servers.alpha.localhost.routes./post\_body]
+            type = normal
+            path = www/
+            methods = POST
+        [servers.alpha.localhost.routes./]
+            type = normal
+            path = www/
+            methods = GET
+        [servers.alpha.localhost.routes./directory]
+            type = normal
+            path = YoupiBanane/
+            methods = GET
+            default_file = youpi.bad_extension

@@ -24,3 +24,13 @@ class FieldParams
         /// Parses and validates `value` as a quoted-string (RFC 9110).
         static Value parse_quoted(const Value& value);
 };
+
+#ifdef TEST
+
+class FieldParamsTest : public FieldParams
+{
+    public:
+        static void regex_test();
+};
+
+#endif

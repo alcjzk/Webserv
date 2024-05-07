@@ -2,24 +2,24 @@
 #include "HTTPError.hpp"
 #include "Method.hpp"
 
-using std::istream;
+using std::ostream;
 using std::string;
 
-Method::Method(const std::string& str) : _type(type_from(str)) {}
+Method::Method(Type type) noexcept : _type(type) {}
 
-Method::Type Method::type_from(const std::string& str)
+Method Method::from_string(const string& str)
 {
     if (str == "GET")
-        return GET;
+        return Get;
     else if (str == "POST")
-        return POST;
+        return Post;
     else if (str == "DELETE")
-        return DELETE;
+        return Delete;
     else
         throw HTTPError(Status::BAD_REQUEST);
 }
 
-bool Method::operator==(const Method& other)
+bool Method::operator==(const Method& other) noexcept
 {
     return _type == other._type;
 }
@@ -28,23 +28,23 @@ string Method::to_string() const
 {
     switch (_type)
     {
-        case GET:
+        case Get:
             return "GET";
-        case POST:
+        case Post:
             return "POST";
-        case DELETE:
+        case Delete:
             return "DELETE";
         default:
             assert(false);
     }
 }
 
-std::ostream& operator<<(std::ostream& os, const Method& method)
+ostream& operator<<(ostream& os, const Method& method)
 {
     return os << method.to_string();
 }
 
-Method::operator size_t() const
+Method::operator size_t() const noexcept
 {
     return _type;
 }

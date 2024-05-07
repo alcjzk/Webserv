@@ -41,16 +41,11 @@ class Config
         Seconds client_header_timeout() const;
 
         /// Returns a timeout in seconds between successive reads when receiving a request body.
-        // TODO: Not used until receive client body is implemented.
         Seconds client_body_timeout() const;
 
         /// Returns a timeout in seconds between successive writes when sending a response back to
         /// the client.
         Seconds send_timeout() const;
-
-        /// Returns the maximum time to linger a connection.
-        // TODO: Not used until lingering close is implemented.
-        Seconds lingering_timeout() const;
 
         /// Returns a timeout in seconds between successive CGI reads.
         // TODO: Not used until CGI is implemented.
@@ -72,7 +67,6 @@ class Config
         Seconds _client_header_timeout = Seconds(60);
         Seconds _client_body_timeout = Seconds(60);
         Seconds _send_timeout = Seconds(60);
-        Seconds _lingering_timeout = Seconds(5);
         Seconds _cgi_read_timeout = Seconds(60);
         Seconds _cgi_write_timeout = Seconds(60);
         Seconds _io_read_timeout = Seconds(60);

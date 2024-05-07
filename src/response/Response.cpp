@@ -49,20 +49,20 @@ FieldMap& Response::headers()
 
 void Response::body(std::vector<char>&& body)
 {
-    content_length = _body.size();
+    content_length = body.size();
     _body = std::move(body);
 }
 
 void Response::body(const std::vector<char>& body)
 {
-    content_length = _body.size();
+    content_length = body.size();
     _body = body;
 }
 
 void Response::body(const std::string& value)
 {
-    content_length = _body.size();
     std::vector<char> body(value.length());
+    content_length = body.size();
     std::copy(value.begin(), value.end(), body.begin());
     _body = std::move(body);
 }
