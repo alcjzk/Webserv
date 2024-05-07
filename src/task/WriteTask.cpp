@@ -3,7 +3,6 @@
 #include <system_error>
 #include <vector>
 #include <utility>
-#include <chrono>
 #include <errno.h>
 #include <cstring>
 #include "Config.hpp"
@@ -12,20 +11,18 @@
 #include "Path.hpp"
 #include "WriteTask.hpp"
 
+using std::optional;
+using Seconds = Task::Seconds;
+
 WriteTask::WriteTask(File&& file, std::vector<char>&& content, const Config& config)
-    : BasicTask(
-          std::move(file), WaitFor::Writable,
-          std::chrono::system_clock::now() + config.io_write_timeout()
-      ),
-      _buffer(std::move(content))
+    : BasicTask(std::move(file), WaitFor::Writable), _buffer(std::move(content)),
+      _expire_time(config.io_write_timeout())
 {
 }
 
 WriteTask::WriteTask(const Path& path, std::vector<char>&& content, const Config& config)
-    : BasicTask(
-          File(), WaitFor::Writable, std::chrono::system_clock::now() + config.io_write_timeout()
-      ),
-      _buffer(std::move(content))
+    : BasicTask(File(), WaitFor::Writable), _buffer(std::move(content)),
+      _expire_time(config.io_write_timeout())
 {
     auto fd = path.open(O_WRONLY | O_CREAT | O_EXCL | O_NONBLOCK | O_CLOEXEC, 0644);
     if (!fd)
@@ -53,6 +50,11 @@ void WriteTask::run()
     _bytes_written_total += size_t(bytes_written);
     if (bytes_written == 0)
         _is_complete = true;
+}
+
+optional<Seconds> WriteTask::expire_time() const
+{
+    return _expire_time;
 }
 
 bool WriteTask::is_error() const

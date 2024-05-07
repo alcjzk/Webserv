@@ -17,6 +17,9 @@ class WriteTask : public BasicTask
         /// Performs work on the task.
         virtual void run() override;
 
+        /// Returns the number of seconds until the task expires.
+        virtual std::optional<Seconds> expire_time() const override;
+
         /// Returnst true if the task completed with an error.
         bool is_error() const;
 
@@ -24,4 +27,5 @@ class WriteTask : public BasicTask
         std::vector<char> _buffer;
         size_t            _bytes_written_total = 0;
         bool              _is_error = false;
+        Seconds           _expire_time;
 };

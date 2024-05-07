@@ -11,7 +11,8 @@ class ReadTask : public BasicTask
     public:
         ReadTask(File&& file, size_t size, const Config& config);
 
-        virtual void run() override;
+        virtual void                   run() override;
+        virtual std::optional<Seconds> expire_time() const override;
 
         std::vector<char> buffer() &&;
         bool              is_error() const;
@@ -21,4 +22,5 @@ class ReadTask : public BasicTask
         std::vector<char> _buffer;
         size_t            _bytes_read_total = 0;
         bool              _is_error = false;
+        Seconds           _expire_time;
 };

@@ -64,12 +64,17 @@ void Runtime::run_impl()
         for (size_t idx = 0; idx < pollfds.size(); idx++)
         {
             const auto& pollfd = pollfds[idx];
-            auto&       task = _tasks[idx];
 
             if (pollfd.revents)
-                task->run();
-            else if (task->is_expired_at(now))
-                task->abort();
+            {
+                _tasks[idx]->run();
+                _tasks[idx]->last_run(now);
+            }
+            else if (auto expire_time = _tasks[idx]->expire_time())
+            {
+                if (now - _tasks[idx]->last_run() >= *expire_time)
+                    _tasks[idx]->abort();
+            }
         }
 
         _tasks.erase(

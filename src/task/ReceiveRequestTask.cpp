@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <unistd.h>
 #include <cassert>
-#include <chrono>
 #include <stdexcept>
 #include <string>
 #include <optional>
@@ -30,14 +29,13 @@
 #include "Connection.hpp"
 #include "Task.hpp"
 
+using std::optional;
 using std::string;
+using Seconds = Task::Seconds;
 
 ReceiveRequestTask::ReceiveRequestTask(Connection&& connection)
-    : BasicTask(
-          File(), WaitFor::Readable,
-          std::chrono::system_clock::now() + connection.config().keepalive_timeout()
-      ),
-      _connection(std::move(connection))
+    : BasicTask(File(), WaitFor::Readable), _connection(std::move(connection)),
+      _expire_time(_connection.config().keepalive_timeout())
 {
     if (!_connection.reader())
     {
@@ -88,8 +86,7 @@ void ReceiveRequestTask::receive_start_line()
         builder.request_line(reader.line(RequestLine::MAX_LENGTH).value());
         INFO(builder._request_line);
         _expect = Expect::Headers;
-        _expire_time =
-            std::chrono::system_clock::now() + _connection.config().client_header_timeout();
+        _expire_time = _connection.config().client_header_timeout();
     }
     catch (const std::bad_optional_access&)
     {
@@ -120,9 +117,8 @@ void ReceiveRequestTask::receive_headers()
             if (_builder->is_chunked())
             {
                 realign_reader();
-                _expire_time =
-                    std::chrono::system_clock::now() + _connection.config().client_body_timeout();
                 _expect = Expect::ChunkSize;
+                _expire_time = _connection.config().client_body_timeout();
                 return;
             }
             else if (auto content_length = _builder->content_length())
@@ -143,8 +139,7 @@ void ReceiveRequestTask::receive_headers()
                         std::copy(reader.begin(), reader.end(), body_buffer.unfilled());
                         body_buffer.advance(reader.unread_size());
                         reader.buffer(std::move(body_buffer));
-                        _expire_time = std::chrono::system_clock::now() +
-                                       _connection.config().client_body_timeout();
+                        _expire_time = _connection.config().client_body_timeout();
                         _expect = Expect::Body;
                         return;
                     }
@@ -164,7 +159,6 @@ void ReceiveRequestTask::receive_headers()
 
 void ReceiveRequestTask::receive_chunk_size()
 {
-    _expire_time = std::chrono::system_clock::now() + _connection.config().client_body_timeout();
     try
     {
         Reader& reader = _connection.reader().value();
@@ -215,7 +209,6 @@ void ReceiveRequestTask::receive_chunk_size()
 
 void ReceiveRequestTask::receive_chunk()
 {
-    _expire_time = std::chrono::system_clock::now() + _connection.config().client_body_timeout();
     Reader& reader = _connection.reader().value();
     if (!reader.read_exact_into(_chunk_size, _chunked_body.begin() + _chunked_position))
     {
@@ -228,15 +221,12 @@ void ReceiveRequestTask::receive_chunk()
 
 void ReceiveRequestTask::receive_last_chunk()
 {
-    _expire_time = std::chrono::system_clock::now() + _connection.config().client_body_timeout();
     Reader& reader = _connection.reader().value();
 
     while (auto line = reader.line())
     {
         if (!line)
         {
-            _expire_time =
-                std::chrono::system_clock::now() + _connection.config().client_body_timeout();
             _is_partial_data = true;
             return;
         }
@@ -273,8 +263,6 @@ void ReceiveRequestTask::receive_body()
     Reader& reader = _connection.reader().value();
     if (!reader.buffer().is_full())
     {
-        _expire_time =
-            std::chrono::system_clock::now() + _connection.config().client_body_timeout();
         _is_partial_data = true;
         return;
     }
@@ -356,6 +344,11 @@ void ReceiveRequestTask::abort()
 int ReceiveRequestTask::fd() const
 {
     return _connection.client();
+}
+
+optional<Seconds> ReceiveRequestTask::expire_time() const
+{
+    return _expire_time;
 }
 
 void ReceiveRequestTask::disable_linger()
