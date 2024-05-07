@@ -1,5 +1,6 @@
 #pragma once
 
+#include <utility>
 #include <variant>
 #include <optional>
 #include "Task.hpp"
@@ -20,12 +21,14 @@ class CompositeTask : public Task
         template <typename T>
         void state(T&& state);
 
-        virtual void                     run() override;
-        virtual void                     abort() override;
-        virtual int                      fd() const override;
-        virtual WaitFor                  wait_for() const override;
-        virtual bool                     is_complete() const override;
-        virtual std::optional<TimePoint> expire_time() const override;
+        virtual void                   run() override;
+        virtual void                   abort() override;
+        virtual int                    fd() const override;
+        virtual WaitFor                wait_for() const override;
+        virtual bool                   is_complete() const override;
+        virtual std::optional<Seconds> expire_time() const override;
+        virtual TimePoint              last_run() const override;
+        virtual void                   last_run(TimePoint time_point) override;
 
     private:
         State _state;
@@ -139,10 +142,10 @@ bool CompositeTask<States...>::is_complete() const
 }
 
 template <typename... States>
-std::optional<Task::TimePoint> CompositeTask<States...>::expire_time() const
+std::optional<Task::Seconds> CompositeTask<States...>::expire_time() const
 {
     return *std::visit(
-        [](auto&& state) -> std::template optional<std::template optional<TimePoint>>
+        [](auto&& state) -> std::template optional<std::template optional<Seconds>>
         {
             using T = std::decay_t<decltype(state)>;
 
@@ -154,6 +157,49 @@ std::optional<Task::TimePoint> CompositeTask<States...>::expire_time() const
             else
             {
                 return state._task.expire_time();
+            }
+        },
+        _state
+    );
+}
+
+template <typename... States>
+Task::TimePoint CompositeTask<States...>::last_run() const
+{
+    return *std::visit(
+        [](auto&& state) -> std::template optional<TimePoint>
+        {
+            using T = std::decay_t<decltype(state)>;
+
+            if constexpr (std::is_same_v<T, std::monostate>)
+            {
+                throw std::logic_error("cannot call last_run() on invariant");
+                return std::nullopt;
+            }
+            else
+            {
+                return state._task.last_run();
+            }
+        },
+        _state
+    );
+}
+
+template <typename... States>
+void CompositeTask<States...>::last_run(Task::TimePoint time_point)
+{
+    std::visit(
+        [=](auto&& state) -> void
+        {
+            using T = std::decay_t<decltype(state)>;
+
+            if constexpr (std::is_same_v<T, std::monostate>)
+            {
+                throw std::logic_error("cannot call last_run(v) on invariant");
+            }
+            else
+            {
+                state._task.last_run(time_point);
             }
         },
         _state

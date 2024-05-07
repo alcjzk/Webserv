@@ -10,9 +10,10 @@ class ReceiveRequestTask : public BasicTask
     public:
         ReceiveRequestTask(Connection&& connection);
 
-        virtual void run() override;
-        virtual void abort() override;
-        virtual int  fd() const override;
+        virtual void                   run() override;
+        virtual void                   abort() override;
+        virtual int                    fd() const override;
+        virtual std::optional<Seconds> expire_time() const override;
 
     private:
         /// Maximum length of the size line for chunked transfer.
@@ -50,6 +51,7 @@ class ReceiveRequestTask : public BasicTask
         size_t                          _chunked_position = 0;
         std::vector<char>               _chunked_body;
         bool                            _is_partial_data = false;
+        Seconds                         _expire_time;
 
         /// Trims out the chunk-ext portion from `value` in place.
         static void trim_chunk_ext(std::string& value);
