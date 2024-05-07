@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <stdexcept>
 #include "HttpUri.hpp"
+#include "HTTPError.hpp"
+#include "http.hpp"
 
 using std::string;
 
@@ -14,11 +16,19 @@ HttpUri::HttpUri(const std::string& request_target, const std::string& host)
 
     query_offset = std::min(request_target.find_first_of('?'), request_target.length());
     if (query_offset != request_target.length())
-        _query = request_target.substr(query_offset + 1);
+    {
+        string query = request_target.substr(query_offset + 1);
+        if (!http::is_query(query))
+            throw HTTPError(Status::BAD_REQUEST);
+        _query = std::move(query);
+    }
 
     if (request_target[0] == '/')
     {
-        _path = Path::canonical(request_target.substr(0, query_offset));
+        string path = request_target.substr(0, query_offset);
+        if (!http::is_absolute_path(path))
+            throw HTTPError(Status::BAD_REQUEST);
+        _path = Path::canonical(path);
         authority(host);
     }
     else
@@ -31,7 +41,12 @@ HttpUri::HttpUri(const std::string& request_target, const std::string& host)
 
         path_offset = std::min(request_target.find_first_of("/", PREFIX.length()), query_offset);
         if (path_offset < query_offset)
-            _path = Path::canonical(request_target.substr(path_offset, query_offset - path_offset));
+        {
+            string path = request_target.substr(path_offset, query_offset - path_offset);
+            if (!http::is_absolute_path(path))
+                throw HTTPError(Status::BAD_REQUEST);
+            _path = Path::canonical(path);
+        }
         else
             _path = "/";
 

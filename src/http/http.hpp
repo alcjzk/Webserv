@@ -2,6 +2,7 @@
 
 #include <string>
 #include <utility>
+#include <string_view>
 #include "FieldName.hpp"
 #include "FieldValue.hpp"
 #include "HTTPVersion.hpp"
@@ -51,6 +52,12 @@ namespace http
 
     /// Returns true if `c` is obs-text (RFC 9110).
     bool is_obs_text(unsigned char c);
+
+    /// Returns true if `value` is an absolute path (RFC 9110).
+    bool is_absolute_path(const std::string& value);
+
+    /// Returns true if `value` is a valid query (RFC 3986).
+    bool is_query(const std::string& value);
 
     std::pair<FieldName, FieldValue> parse_field(const std::string& field);
 } // namespace http
