@@ -16,7 +16,7 @@ Method Method::from_string(const string& str)
     else if (str == "DELETE")
         return Delete;
     else
-        throw HTTPError(Status::BAD_REQUEST);
+        throw HTTPError(Status::NOT_IMPLEMENTED);
 }
 
 bool Method::operator==(const Method& other) noexcept
