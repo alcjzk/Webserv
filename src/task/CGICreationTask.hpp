@@ -99,12 +99,12 @@ namespace cgi_creation_task
         }
 
         INFO("READ TASK IS COMPLETE!");
-        Response* response = new Response(Status::OK);
-        response->_keep_alive = _connection._keep_alive;
+        auto response = std::make_unique<Response>(Status::OK);
+        response->keep_alive = _connection._keep_alive;
         response->body(std::move(_task.buffer()));
 
         SendState send_state{
-            SendResponseTask(std::move(_connection), response),
+            SendResponseTask(std::move(_connection), std::move(response)),
         };
         parent.state(std::move(send_state));
     }
