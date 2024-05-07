@@ -20,6 +20,7 @@ HttpUri::HttpUri(const std::string& request_target, const std::string& host)
         string query = request_target.substr(query_offset + 1);
         if (!http::is_query(query))
             throw HTTPError(Status::BAD_REQUEST);
+        query = http::pct_decode(query.begin(), query.end());
         _query = std::move(query);
     }
 
@@ -28,6 +29,7 @@ HttpUri::HttpUri(const std::string& request_target, const std::string& host)
         string path = request_target.substr(0, query_offset);
         if (!http::is_absolute_path(path))
             throw HTTPError(Status::BAD_REQUEST);
+        path = http::pct_decode(path.begin(), path.end());
         _path = Path::canonical(path);
         authority(host);
     }
@@ -45,6 +47,7 @@ HttpUri::HttpUri(const std::string& request_target, const std::string& host)
             string path = request_target.substr(path_offset, query_offset - path_offset);
             if (!http::is_absolute_path(path))
                 throw HTTPError(Status::BAD_REQUEST);
+            path = http::pct_decode(path.begin(), path.end());
             _path = Path::canonical(path);
         }
         else
@@ -172,6 +175,24 @@ void HttpUriTest::absolute_form_ignores_host_header_test()
 
     HttpUri uri("http://example.com/", "notreal.com");
     EXPECT(uri.host() == "example.com");
+
+    END
+}
+
+void HttpUriTest::pct_decoded_test()
+{
+    BEGIN
+
+    {
+        HttpUri uri("/%25some%20path?%25some%20query", "example.com");
+        EXPECT(uri.path() == "/%some path");
+        EXPECT(uri.query() == "%some query");
+    }
+    {
+        HttpUri uri("http://example.com/%25some%20path?%25some%20query", "example.com");
+        EXPECT(uri.path() == "/%some path");
+        EXPECT(uri.query() == "%some query");
+    }
 
     END
 }

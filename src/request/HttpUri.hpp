@@ -50,6 +50,7 @@ class HttpUriTest : private HttpUri
         static void absolute_form_test();
         static void origin_form_test();
         static void absolute_form_ignores_host_header_test();
+        static void pct_decoded_test();
 };
 
 #endif
