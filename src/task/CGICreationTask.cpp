@@ -7,6 +7,7 @@
 #include "CGICreationTask.hpp"
 #include "Log.hpp"
 #include <unistd.h>
+#include <string>
 
 using namespace cgi_creation_task;
 using std::string;
@@ -79,6 +80,8 @@ CGICreationTask::CGICreationTask(
         SetEnv("AUTH_TYPE", "basic", _environment);
         SetEnv("REDIRECT_STATUS", "200", _environment);
         SetEnv("GATEWAY_INTERFACE", "CGI/1.1", _environment);
+        if (request.body().size())
+            SetEnv("CONTENT_LENGTH", std::to_string(request.body().size()), _environment);
 
         std::string path = uri;
         char*       argv[] = {(char*)"/usr/local/bin/python3", (char*)path.c_str(), nullptr};
