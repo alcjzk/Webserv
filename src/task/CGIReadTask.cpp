@@ -60,7 +60,7 @@ std::vector<char>&& CGIReadTask::buffer()
 CGIReadTask::~CGIReadTask() { 
     if (_pid)
     {
-        INFO("KILLING CHILD");
+        INFO("KILLING CHILD IN DESTRUCTOR");
         kill(_pid.value(), SIGKILL);
         auto code = waitpid(_pid.value(), &_exit_status, 0);
     }
