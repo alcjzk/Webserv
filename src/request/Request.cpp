@@ -119,13 +119,15 @@ Request Request::Builder::build() &&
 
 Request::Request(Request::Builder&& builder)
     : _uri(std::move(builder._uri).value()), _request_line(std::move(builder._request_line)),
-      _headers(std::move(builder._headers)), _body(std::move(builder._body))
+      _headers(std::move(builder._headers)), _body(std::move(builder._body)),
+      _keep_alive(builder._keep_alive)
 {
 }
 
 Task* Request::process(Connection&& connection)
 {
     const Server& server = connection.server();
+    connection._keep_alive = _keep_alive;
 
     const Route* route = server.route(_uri.path(), _uri.host());
 

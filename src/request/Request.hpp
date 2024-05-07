@@ -68,4 +68,5 @@ class Request
         RequestLine _request_line;
         FieldMap    _headers;
         Body        _body;
+        bool        _keep_alive;
 };
