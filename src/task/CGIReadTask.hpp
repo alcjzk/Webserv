@@ -33,10 +33,14 @@ class CGIReadTask : public BasicTask
         // Get the buffer
         std::vector<char>&& buffer();
 
+        // Abort override
+        void abort() override;
+
     private:
         std::vector<char> _buffer;
         // size_t            _size;
         // size_t            _bytes_read_total = 0;
         std::optional<pid_t> _pid;
         bool                 _is_error = false;
+        int                  _exit_status = 0;
 };

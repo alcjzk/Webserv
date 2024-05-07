@@ -1,6 +1,7 @@
 #include "CGIReadTask.hpp"
 #include "Log.hpp"
 #include <signal.h>
+#include <sys/wait.h>
 
 // this is for preparing the content to write to the CGI
 // assign _pid & _fdout
@@ -61,6 +62,7 @@ CGIReadTask::~CGIReadTask() {
     {
         INFO("KILLING CHILD");
         kill(_pid.value(), SIGKILL);
+        auto code = waitpid(_pid.value(), &_exit_status, 0);
     }
 }
 
@@ -80,4 +82,17 @@ CGIReadTask& CGIReadTask::operator=(CGIReadTask&& other)
     _pid = std::exchange(other._pid, std::nullopt);
     _is_error = false;
     return *this;
+}
+
+void CGIReadTask::abort()
+{
+    INFO("CGIReadTask for fd " << _fd << " timed out.");
+    _is_complete = true;
+    _is_error = true;
+    if (_pid)
+    {
+        INFO("KILLING CHILD");
+        kill(_pid.value(), SIGKILL);
+        std::exchange(_pid, std::nullopt);
+    }
 }
