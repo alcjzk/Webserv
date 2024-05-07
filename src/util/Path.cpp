@@ -196,7 +196,6 @@ Path Path::canonical(const Path& path)
             if (*next != "..")
             {
                 result._segments.push_back(*it);
-                it = std::next(next);
             }
         }
     }
@@ -220,6 +219,7 @@ void PathTest::canonical_test()
     EXPECT((Path::canonical(Path("/.././.././../foo")) == Path("/foo")));
     EXPECT((Path::canonical(Path("foo/bar/././../baz/")) == Path("foo/baz")));
     EXPECT((Path::canonical(Path("foo/bar/././../baz/../.")) == Path("foo/")));
+    EXPECT((Path::canonical(Path("/foo/bar")) == Path("/foo/bar")));
 
     END
 }
