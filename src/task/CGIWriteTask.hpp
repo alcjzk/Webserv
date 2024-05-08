@@ -37,8 +37,9 @@ class CGIWriteTask : public BasicTask
         void SignalhandlerChild(int sig);
 
         // Getters
-        int           write_end() const;
-        const Config& config() const;
+        int                    write_end() const;
+        const Config&          config() const;
+        std::optional<Seconds> expire_time() const override;
 
     private:
         Config               _config;
@@ -50,4 +51,5 @@ class CGIWriteTask : public BasicTask
         std::optional<pid_t> _pid;
         bool                 _is_error = false;
         int                  _exit_status = 0;
+        Seconds              _expire_time;
 };

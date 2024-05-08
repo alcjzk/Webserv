@@ -10,10 +10,9 @@ CGIReadTask::CGIReadTask(
     int read_end, const Config& config, pid_t pid
 )
     : BasicTask(
-          std::move(read_end), WaitFor::Readable,
-          std::chrono::system_clock::now() + config.cgi_read_timeout()
+          std::move(read_end), WaitFor::Readable
       ),
-      _pid(pid)
+      _pid(pid), _expire_time(config.cgi_read_timeout())
 {
     INFO("FD num in read task: " << _fd);
 }
@@ -95,4 +94,9 @@ void CGIReadTask::abort()
         kill(_pid.value(), SIGKILL);
         std::exchange(_pid, std::nullopt);
     }
+}
+
+std::optional<Task::Seconds> CGIReadTask::expire_time() const
+{
+    return _expire_time;
 }

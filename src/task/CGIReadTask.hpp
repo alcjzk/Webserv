@@ -34,9 +34,12 @@ class CGIReadTask : public BasicTask
         // Abort override
         void abort() override;
 
+        std::optional<Seconds> expire_time() const override;
+
     private:
         std::vector<char>    _buffer;
         std::optional<pid_t> _pid;
         bool                 _is_error = false;
         int                  _exit_status = 0;
+        Seconds              _expire_time;
 };

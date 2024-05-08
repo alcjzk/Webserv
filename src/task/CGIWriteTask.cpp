@@ -10,10 +10,10 @@ CGIWriteTask::CGIWriteTask(
     Request&& request, const Request::Body& post_body, int write_end, pid_t pid, Config& config
 )
     : BasicTask(
-          File(), WaitFor::Writable, std::chrono::system_clock::now() + config.cgi_write_timeout()
+          File(), WaitFor::Writable
       ),
       _config(config), _request(request), _write_end(write_end), _post_body(post_body),
-      _pid(std::move(pid))
+      _pid(std::move(pid)), _expire_time(config.cgi_write_timeout())
 {
     INFO("Writing post body: \n" << std::string(_post_body.begin(), _post_body.end()));
 }
@@ -119,4 +119,10 @@ CGIWriteTask& CGIWriteTask::operator=(CGIWriteTask&& other)
     _write_end= other._write_end;
     _exit_status = other._exit_status;
     return *this;
+}
+
+
+std::optional<Task::Seconds> CGIWriteTask::expire_time() const
+{
+    return _expire_time;
 }
