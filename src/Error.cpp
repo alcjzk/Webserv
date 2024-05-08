@@ -3,7 +3,7 @@
 
 Error::Error(Kind kind) : std::runtime_error(kind_str(kind)), _kind(kind) {}
 
-const char* Error::what() const throw()
+const char* Error::what() const noexcept
 {
     return kind_str(_kind);
 }
