@@ -1,6 +1,5 @@
 #include <optional>
 #include <unistd.h>
-#include <cassert>
 #include <utility>
 #include <memory>
 #include <stdexcept>
@@ -36,10 +35,6 @@ void SendResponseTask::run()
     catch (const std::runtime_error& error)
     {
         ERR(error.what());
-    }
-    catch (...)
-    {
-        assert(false);
     }
     _is_complete = true;
 }
