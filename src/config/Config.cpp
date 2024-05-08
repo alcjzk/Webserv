@@ -184,3 +184,9 @@ std::optional<Path> Config::error_page(Status status) const
         return (it->second);
     return std::nullopt;
 }
+
+
+const std::string& Config::client_ip() const
+{
+    return _client_ip;
+}

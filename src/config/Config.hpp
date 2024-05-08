@@ -22,6 +22,7 @@ class Config
             std::pair<std::string, TiniNode*> first_pair
         );
 
+        const std::string&                 client_ip() const;
         const std::string&                 port() const;
         const std::string&                 host() const;
         int                                backlog() const;
@@ -74,6 +75,7 @@ class Config
 
         std::string                 _port = "8000";
         std::string                 _host = "127.0.0.1";
+        std::string                 _client_ip = "127.0.0.1";
         std::vector<HostAttributes> _attrs;
         HostAttributes              _first_attr;
         int                         _backlog = 25;
