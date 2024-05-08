@@ -6,7 +6,6 @@
 #include <sstream>
 #include <utility>
 #include <cstring>
-#include <errno.h>
 #include <vector>
 #include "FieldName.hpp"
 #include "Status.hpp"
@@ -29,7 +28,7 @@ bool Response::send(int fd)
     offset = _size - _size_remaining;
     bytes_sent = ::send(fd, &_buffer[offset], _size_remaining, 0);
     if (bytes_sent == -1)
-        throw std::runtime_error(strerror(errno));
+        throw std::runtime_error("send failed");
     assert(bytes_sent >= 0);
     _size_remaining -= bytes_sent;
     if (_size_remaining == 0)

@@ -44,19 +44,9 @@ int main(int argc, char* argv[])
         }
         Runtime::run();
     }
-    catch (const char* e)
-    {
-        ERR(e);
-        return EXIT_FAILURE;
-    }
     catch (const std::exception& e)
     {
         ERR(e.what());
-        return EXIT_FAILURE;
-    }
-    catch (...)
-    {
-        ERR("STATIC TEXT");
         return EXIT_FAILURE;
     }
 
