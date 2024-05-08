@@ -8,6 +8,7 @@
 #include "Log.hpp"
 #include <unistd.h>
 #include <string>
+#include <sys/socket.h>
 
 using namespace cgi_creation_task;
 using std::string;
@@ -49,12 +50,30 @@ static char** Environment(std::vector<char *>& environment)
     return arr;
 }
 
+static void  SetupEnvironment(std::vector<char *>& environment, Request& request)
+{
+    SetEnv("AUTH_TYPE", "basic", environment);
+    SetEnv("REDIRECT_STATUS", "200", environment);
+    SetEnv("GATEWAY_INTERFACE", "CGI/1.1", environment);
+    if (request.body().size())
+        SetEnv("CONTENT_LENGTH", std::to_string(request.body().size()), environment);
+    SetEnv("SERVER_NAME", request.uri().host(), environment);
+    SetEnv("SERVER_PORT", request.uri().port(), environment);
+    SetEnv("SERVER_PROTOCOL", "HTTP/1.1", environment);
+    SetEnv("SERVER_SOFTWARE", "webserv", environment);
+    SetEnv("SCRIPT_NAME", request.uri().path(), environment);
+    SetEnv("REQUEST_METHOD", request.method().to_string(), environment);
+    SetEnv("QUERY_STRING", request.uri().query(), environment);
+
+    // QueryString(request.uri().query(), environment);
+}
+
 
 CGICreationTask::CGICreationTask(
-    Connection&& connection, Request& request, const Path& uri, const Config& config
+    Connection&& connection, Request& request, const Path& uri, Config& config
 )
 {
-    if (pipe(_pipe_fd) == -1)
+    if (socketpair(AF_UNIX, SOCK_STREAM, 0, _pipe_fd) == -1)
     {
         throw HTTPError(Status::INTERNAL_SERVER_ERROR);
     }
@@ -62,10 +81,10 @@ CGICreationTask::CGICreationTask(
     INFO("Pfd 0: " << _pipe_fd[0]);
     INFO("Pfd 1: " << _pipe_fd[1]);
     int pid = fork(); // Fork to create a child process
-    for ( auto field : request.headers())
-    {
-        INFO("FIELD_NAME " << field.first << " FIELD_VALUE " << field.second);
-    }
+    // for ( auto field : request.headers())
+    // {
+    //     INFO("FIELD_NAME " << field.first << " FIELD_VALUE " << field.second);
+    // }
     if (pid == -1)
     {
         close(_pipe_fd[0]);
@@ -74,24 +93,14 @@ CGICreationTask::CGICreationTask(
     }
     else if (pid == 0) // Child process
     {
+        close(_pipe_fd[1]);
         // TODO: signla handler
         // signal(SIGINT, SignalhandlerChild());
-        close(_pipe_fd[0]);               // close reading
-        dup2(_pipe_fd[1], STDOUT_FILENO); // Redirect stdout to the write end of the pipe
-        close(_pipe_fd[1]);
+        dup2(_pipe_fd[0], STDIN_FILENO); // Redirect stdout to the write end of the pipe
+        dup2(_pipe_fd[0], STDOUT_FILENO); // Redirect stdout to the write end of the pipe
 
         // setup env
-        SetEnv("AUTH_TYPE", "basic", _environment);
-        SetEnv("REDIRECT_STATUS", "200", _environment);
-        SetEnv("GATEWAY_INTERFACE", "CGI/1.1", _environment);
-        if (request.body().size())
-            SetEnv("CONTENT_LENGTH", std::to_string(request.body().size()), _environment);
-        SetEnv("SERVER_NAME", request.uri().host(), _environment);
-        SetEnv("SERVER_PORT", request.uri().port(), _environment);
-        SetEnv("SERVER_PROTOCOL", "HTTP/1.1", _environment);
-        SetEnv("SERVER_SOFTWARE", "webserv", _environment);
-        SetEnv("SCRIPT_NAME", request.uri().path(), _environment);
-        SetEnv("REQUEST_METHOD", request.method().to_string(), _environment);
+        SetupEnvironment(_environment, request);
 
         std::string path = uri;
         char*       argv[] = {(char*)"/usr/local/bin/python3", (char*)path.c_str(), nullptr};
@@ -101,22 +110,26 @@ CGICreationTask::CGICreationTask(
         {
             throw HTTPError(Status::INTERNAL_SERVER_ERROR);
         }
+        close(_pipe_fd[0]);
         exit(0);
     }
-
+    close(_pipe_fd[0]);
     if (request.body().size())
     {
+        // const std::vector<char>& vec = request.body();
+        // string str(vec.begin(), vec.end());
+        // INFO("request body: " << str);
         WriteState write_state {
-            CGIWriteTask(std::move(request), request.body(), File(_pipe_fd[0]), pid, config,  _pipe_fd[1]),
+            CGIWriteTask(std::move(request), request.body(), _pipe_fd[1], pid, config),
             pid, std::move(connection)
         };
         state(std::move(write_state));
     }
     else
     {
-        close(_pipe_fd[1]);
+        // close(_pipe_fd[1]);
         ReadState read_state{
-            CGIReadTask(_pipe_fd[0], config, pid),
+            CGIReadTask(_pipe_fd[1], config, pid),
             std::move(connection),
         };
         state(std::move(read_state));

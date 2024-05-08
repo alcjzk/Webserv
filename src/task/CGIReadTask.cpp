@@ -7,7 +7,7 @@
 // assign _pid & _fdout
 
 CGIReadTask::CGIReadTask(
-    File&& read_end, const Config& config, pid_t pid
+    int read_end, const Config& config, pid_t pid
 )
     : BasicTask(
           std::move(read_end), WaitFor::Readable,
@@ -34,7 +34,7 @@ void CGIReadTask::run()
     }
 
     _buffer.insert(_buffer.end(), buf, buf + bytes_read);
-    if (bytes_read < 4096)
+    if (bytes_read == 0)
     {
         _is_complete = true;
         return;
@@ -69,7 +69,7 @@ CGIReadTask::~CGIReadTask() {
 
 CGIReadTask::CGIReadTask(CGIReadTask&& moved_from) : BasicTask(
         std::move(moved_from)
-        ), _buffer(std::move(moved_from._buffer)), _pid(std::exchange(moved_from._pid, std::nullopt)), _is_error(false)
+        ), _buffer(std::move(moved_from._buffer)), _pid(std::exchange(moved_from._pid, std::nullopt)), _is_error(false), _exit_status(0)
 {
 }
 

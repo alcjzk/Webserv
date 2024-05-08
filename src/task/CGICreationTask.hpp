@@ -57,12 +57,13 @@ namespace cgi_creation_task
     {
         public:
             CGICreationTask(
-                Connection&& connection, Request& request, const Path& uri, const Config& config
+                Connection&& connection, Request& request, const Path& uri, Config& config
             );
 
         private:
             std::vector<char*> _environment;
             int _pipe_fd[2];
+            void setup_environment();
     };
 
     template <typename Parent>
@@ -79,7 +80,7 @@ namespace cgi_creation_task
         }
 
         ReadState read_state{
-            CGIReadTask(File(_task.read_end()), _task.config(), _pid),
+            CGIReadTask(_task.write_end(), _task.config(), _pid),
             std::move(_connection),
         };
         parent.state(std::move(read_state));

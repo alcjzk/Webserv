@@ -1,4 +1,3 @@
-#include <cstddef>
 #include <fcntl.h>
 #include <stdexcept>
 #include <sys/fcntl.h>
@@ -154,7 +153,7 @@ Task* Request::process(Connection&& connection)
     {
         // TODO: Open is assumed to succeed here
         if (static_cast<std::string>(target).substr(static_cast<std::string>(target).size() - 3) == ".py")
-            return new CGICreationTask(std::move(connection), *this, target, server.config());
+            return new CGICreationTask(std::move(connection), *this, target, (Config&)server.config());
         auto fd = target.open(O_RDONLY | O_NONBLOCK | O_CLOEXEC);
         if (!fd)
             throw HTTPError(Status::NOT_FOUND);

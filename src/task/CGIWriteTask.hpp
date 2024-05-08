@@ -2,7 +2,6 @@
 
 #include <sys/wait.h>
 #include <unistd.h>
-#include "File.hpp"
 #include "BasicTask.hpp"
 #include "Request.hpp"
 
@@ -13,17 +12,23 @@ class CGIWriteTask : public BasicTask
 
         // Construct env, spawn cgi
         CGIWriteTask(
-            Request&& request, const Request::Body& post_body, File&& write_end, pid_t pid, const Config& config, int read_end
+            Request&& request, const Request::Body& post_body, int write_end, pid_t pid,
+            Config& config
         );
 
         CGIWriteTask(const CGIWriteTask&) = delete;
-        CGIWriteTask(CGIWriteTask&&) = default;
+        CGIWriteTask(CGIWriteTask&&);
 
         CGIWriteTask& operator=(const CGIWriteTask&) = delete;
-        CGIWriteTask& operator=(CGIWriteTask&&) = delete;
+        CGIWriteTask& operator=(CGIWriteTask&&);
+
+        void abort() override;
 
         // Write body from request to cgi, enqueue CGIReadTask
         virtual void run() override;
+
+        // Making sure, that the fd returned to the poll function is _write_end
+        virtual int fd() const override;
 
         /// Returnst true if the task completed with an error.
         bool is_error() const;
@@ -32,16 +37,17 @@ class CGIWriteTask : public BasicTask
         void SignalhandlerChild(int sig);
 
         // Getters
-        int             read_end() const;
-        const   Config& config()   const;
+        int           write_end() const;
+        const Config& config() const;
 
     private:
-        const Config&      _config;
-        Request            _request;
-        int                _read_end;
-        std::vector<char>  _post_body;
-        std::vector<char*> _environment;
-        size_t             _bytes_written_total = 0;
-        pid_t              _pid;
-        bool               _is_error = false;
+        Config               _config;
+        Request              _request;
+        int                  _write_end;
+        std::vector<char>    _post_body;
+        std::vector<char*>   _environment;
+        size_t               _bytes_written_total = 0;
+        std::optional<pid_t> _pid;
+        bool                 _is_error = false;
+        int                  _exit_status = 0;
 };

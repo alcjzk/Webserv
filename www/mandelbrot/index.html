@@ -1,0 +1,21 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+    </head>
+    <body>
+        <form action="/mandelbrot/mandelbrot.py" method="POST">
+
+            <label for="x_left">x_left:</label><br>
+            <input type="number" id="x_left" name="x_left" value="-1.5"><br>
+            <label for="x_right">x_right:</label><br>
+            <input type="number" id="x_right" name="x_right" value="0.5"><br><br>
+
+            <label for="y_top">y_top:</label><br>
+            <input type="number" id="y_top" name="y_top" value="1.0"><br><br>
+            <label for="y_bottom">y_bottom:</label><br>
+            <input type="number" id="y_bottom" name="y_bottom" value="-1.0"><br><br>
+
+            <input type="submit" value="Submit">
+        </form>
+    </body>
+</html>

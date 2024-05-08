@@ -11,9 +11,7 @@ class CGIReadTask : public BasicTask
         virtual ~CGIReadTask() override;
 
         // Construct env, spawn cgi
-        CGIReadTask(
-            File&& read_end, const Config& config, pid_t pid
-        );
+        CGIReadTask(int read_end, const Config& config, pid_t pid);
 
         CGIReadTask(const CGIReadTask&) = delete;
         CGIReadTask(CGIReadTask&&);
@@ -28,7 +26,7 @@ class CGIReadTask : public BasicTask
         void SignalhandlerChild(int sig);
 
         // For error state checking
-        bool              is_error() const;
+        bool is_error() const;
 
         // Get the buffer
         std::vector<char>&& buffer();
@@ -37,9 +35,7 @@ class CGIReadTask : public BasicTask
         void abort() override;
 
     private:
-        std::vector<char> _buffer;
-        // size_t            _size;
-        // size_t            _bytes_read_total = 0;
+        std::vector<char>    _buffer;
         std::optional<pid_t> _pid;
         bool                 _is_error = false;
         int                  _exit_status = 0;
