@@ -197,4 +197,20 @@ void HttpUriTest::pct_decoded_test()
     END
 }
 
+void HttpUriTest::host_case_insensitive_test()
+{
+    BEGIN
+
+    {
+        HttpUri uri("/", "EXAMPLE.COM");
+        EXPECT(uri.host() == "example.com");
+    }
+    {
+        HttpUri uri("http://EXAMPLE.COM", "EXAMPLE.COM");
+        EXPECT(uri.host() == "example.com");
+    }
+
+    END
+}
+
 #endif
