@@ -27,6 +27,14 @@ FieldValue::FieldValue(string&& value)
     _value = std::move(value);
 }
 
+bool FieldValue::eq_case_insensitive(const std::string& other) const
+{
+    auto is_iequal = [](unsigned char lhs, unsigned char rhs) { return std::tolower(lhs) == std::tolower(rhs); };
+    if (_value.length() != other.length())
+        return false;
+    return std::equal(_value.begin(), _value.end(), other.begin(), is_iequal);
+}
+
 FieldValue::operator const string&() const noexcept
 {
     return _value;

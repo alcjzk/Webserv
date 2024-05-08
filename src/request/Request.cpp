@@ -84,10 +84,10 @@ void Request::Builder::parse_headers()
         const FieldValue* connection = _headers.get(FieldName::CONNECTION);
         if (_request_line.http_version() == HTTPVersion(1, 0))
         {
-            if (!connection || **connection != "keep-alive")
+            if (!connection || connection->eq_case_insensitive("keep-alive"))
                 _keep_alive = false;
         }
-        else if (connection && **connection == "close")
+        else if (connection && connection->eq_case_insensitive("close"))
         {
             _keep_alive = false;
         }
@@ -101,7 +101,7 @@ void Request::Builder::parse_headers()
                 throw HTTPError(Status::BAD_REQUEST);
             if (_request_line.http_version() == HTTPVersion(1, 0))
                 throw HTTPError(Status::BAD_REQUEST);
-            if (**transfer_encoding != "chunked")
+            if (!transfer_encoding->eq_case_insensitive("chunked"))
                 throw HTTPError(Status::NOT_IMPLEMENTED);
             _is_chunked = true;
             bool was_erased = _headers.erase(FieldName::TRANSFER_ENCODING);
