@@ -81,10 +81,15 @@ void Request::Builder::parse_headers()
 
         _uri = HttpUri(_request_line.request_target(), *host);
 
-        if (const FieldValue* connection = _headers.get(FieldName::CONNECTION))
+        const FieldValue* connection = _headers.get(FieldName::CONNECTION);
+        if (_request_line.http_version() == HTTPVersion(1, 0))
         {
-            if (**connection == "close")
+            if (!connection || connection->eq_case_insensitive("keep-alive"))
                 _keep_alive = false;
+        }
+        else if (connection && connection->eq_case_insensitive("close"))
+        {
+            _keep_alive = false;
         }
 
         const FieldValue* transfer_encoding = _headers.get(FieldName::TRANSFER_ENCODING);
@@ -96,7 +101,7 @@ void Request::Builder::parse_headers()
                 throw HTTPError(Status::BAD_REQUEST);
             if (_request_line.http_version() == HTTPVersion(1, 0))
                 throw HTTPError(Status::BAD_REQUEST);
-            if (**transfer_encoding != "chunked")
+            if (!transfer_encoding->eq_case_insensitive("chunked"))
                 throw HTTPError(Status::NOT_IMPLEMENTED);
             _is_chunked = true;
             bool was_erased = _headers.erase(FieldName::TRANSFER_ENCODING);
@@ -119,13 +124,15 @@ Request Request::Builder::build() &&
 
 Request::Request(Request::Builder&& builder)
     : _uri(std::move(builder._uri).value()), _request_line(std::move(builder._request_line)),
-      _headers(std::move(builder._headers)), _body(std::move(builder._body))
+      _headers(std::move(builder._headers)), _body(std::move(builder._body)),
+      _keep_alive(builder._keep_alive)
 {
 }
 
 Task* Request::process(Connection&& connection)
 {
     const Server& server = connection.server();
+    connection._keep_alive = _keep_alive;
 
     const Route* route = server.route(_uri.path(), _uri.host());
 

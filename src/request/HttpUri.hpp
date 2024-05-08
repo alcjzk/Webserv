@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+#include <iterator>
 #include <string>
 #include <string_view>
 #include <ostream>
@@ -31,7 +33,12 @@ class HttpUri
             size_t host_length;
 
             host_length = std::min(authority.find_first_of(':'), authority.length());
-            _host = std::string(authority.cbegin(), authority.cbegin() + host_length);
+            _host.reserve(host_length);
+            auto to_lowercase = [](unsigned char c) { return std::tolower(c); };
+            (void)std::transform(
+                authority.begin(), authority.begin() + host_length, std::back_inserter(_host),
+                to_lowercase
+            );
 
             if (host_length == authority.length())
                 _port = PORT_DEFAULT;
@@ -50,6 +57,9 @@ class HttpUriTest : private HttpUri
         static void absolute_form_test();
         static void origin_form_test();
         static void absolute_form_ignores_host_header_test();
+        static void pct_decoded_test();
+        static void host_case_insensitive_test();
+        static void scheme_case_insensitive_test();
 };
 
 #endif

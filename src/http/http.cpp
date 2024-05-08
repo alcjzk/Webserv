@@ -1,6 +1,7 @@
 #include "http.hpp"
 #include <algorithm>
 #include <cctype>
+#include <regex>
 #include <string_view>
 
 using namespace http;
@@ -53,6 +54,24 @@ bool http::is_qdtext(unsigned char c)
 bool http::is_obs_text(unsigned char c)
 {
     return c >= 0x80;
+}
+
+bool http::is_absolute_path(const std::string& value)
+{
+    static const std::regex regex(
+        R"((?:\/(?:[a-z0-9:@!$&'\(\)*+,;=\-\._~]|(?:%[0-9a-f]{2}))*)+)",
+        std::regex_constants::ECMAScript | std::regex_constants::icase
+    );
+    return std::regex_match(value, regex);
+}
+
+bool http::is_query(const std::string& value)
+{
+    static const std::regex regex(
+        R"((?:(?:[a-z0-9:@!$&'\(\)*+,;=\-\._~\/?]|(?:%[0-9a-f]{2}))*)+)",
+        std::regex_constants::ECMAScript | std::regex_constants::icase
+    );
+    return std::regex_match(value, regex);
 }
 
 pair<FieldName, FieldValue> http::parse_field(const string& field)

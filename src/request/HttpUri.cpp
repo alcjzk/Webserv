@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <stdexcept>
 #include "HttpUri.hpp"
+#include "HTTPError.hpp"
+#include "http.hpp"
 
 using std::string;
 
@@ -14,16 +16,29 @@ HttpUri::HttpUri(const std::string& request_target, const std::string& host)
 
     query_offset = std::min(request_target.find_first_of('?'), request_target.length());
     if (query_offset != request_target.length())
-        _query = request_target.substr(query_offset + 1);
+    {
+        string query = request_target.substr(query_offset + 1);
+        if (!http::is_query(query))
+            throw HTTPError(Status::BAD_REQUEST);
+        query = http::pct_decode(query.begin(), query.end());
+        _query = std::move(query);
+    }
 
     if (request_target[0] == '/')
     {
-        _path = Path::canonical(request_target.substr(0, query_offset));
+        string path = request_target.substr(0, query_offset);
+        if (!http::is_absolute_path(path))
+            throw HTTPError(Status::BAD_REQUEST);
+        path = http::pct_decode(path.begin(), path.end());
+        _path = Path::canonical(path);
         authority(host);
     }
     else
     {
-        if (request_target.rfind(PREFIX, 0) != 0)
+        string prefix = request_target.substr(0, PREFIX.length());
+        auto   to_lowercase = [](unsigned char c) { return std::tolower(c); };
+        (void)std::transform(prefix.begin(), prefix.end(), prefix.begin(), to_lowercase);
+        if (prefix != PREFIX)
             throw std::runtime_error("invalid scheme prefix");
 
         if (PREFIX.length() == request_target.length())
@@ -31,7 +46,13 @@ HttpUri::HttpUri(const std::string& request_target, const std::string& host)
 
         path_offset = std::min(request_target.find_first_of("/", PREFIX.length()), query_offset);
         if (path_offset < query_offset)
-            _path = Path::canonical(request_target.substr(path_offset, query_offset - path_offset));
+        {
+            string path = request_target.substr(path_offset, query_offset - path_offset);
+            if (!http::is_absolute_path(path))
+                throw HTTPError(Status::BAD_REQUEST);
+            path = http::pct_decode(path.begin(), path.end());
+            _path = Path::canonical(path);
+        }
         else
             _path = "/";
 
@@ -158,6 +179,49 @@ void HttpUriTest::absolute_form_ignores_host_header_test()
     HttpUri uri("http://example.com/", "notreal.com");
     EXPECT(uri.host() == "example.com");
 
+    END
+}
+
+void HttpUriTest::pct_decoded_test()
+{
+    BEGIN
+
+    {
+        HttpUri uri("/%25some%20path?%25some%20query", "example.com");
+        EXPECT(uri.path() == "/%some path");
+        EXPECT(uri.query() == "%some query");
+    }
+    {
+        HttpUri uri("http://example.com/%25some%20path?%25some%20query", "example.com");
+        EXPECT(uri.path() == "/%some path");
+        EXPECT(uri.query() == "%some query");
+    }
+
+    END
+}
+
+void HttpUriTest::host_case_insensitive_test()
+{
+    BEGIN
+
+    {
+        HttpUri uri("/", "EXAMPLE.COM");
+        EXPECT(uri.host() == "example.com");
+    }
+    {
+        HttpUri uri("http://EXAMPLE.COM", "EXAMPLE.COM");
+        EXPECT(uri.host() == "example.com");
+    }
+
+    END
+}
+
+void HttpUriTest::scheme_case_insensitive_test()
+{
+    BEGIN
+    {
+        HttpUri uri("HTTP://example.com", "example.com");
+    }
     END
 }
 
