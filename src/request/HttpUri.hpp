@@ -59,6 +59,7 @@ class HttpUriTest : private HttpUri
         static void absolute_form_ignores_host_header_test();
         static void pct_decoded_test();
         static void host_case_insensitive_test();
+        static void scheme_case_insensitive_test();
 };
 
 #endif

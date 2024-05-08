@@ -35,7 +35,10 @@ HttpUri::HttpUri(const std::string& request_target, const std::string& host)
     }
     else
     {
-        if (request_target.rfind(PREFIX, 0) != 0)
+        string prefix = request_target.substr(0, PREFIX.length());
+        auto   to_lowercase = [](unsigned char c) { return std::tolower(c); };
+        (void)std::transform(prefix.begin(), prefix.end(), prefix.begin(), to_lowercase);
+        if (prefix != PREFIX)
             throw std::runtime_error("invalid scheme prefix");
 
         if (PREFIX.length() == request_target.length())
@@ -210,6 +213,15 @@ void HttpUriTest::host_case_insensitive_test()
         EXPECT(uri.host() == "example.com");
     }
 
+    END
+}
+
+void HttpUriTest::scheme_case_insensitive_test()
+{
+    BEGIN
+    {
+        HttpUri uri("HTTP://example.com", "example.com");
+    }
     END
 }
 
