@@ -2,11 +2,13 @@ import cmath
 import os
 import cgi
 import time
+import string
+import random
 
 form = cgi.FieldStorage()
 
 def brot(c):
-    itmax = 42
+    itmax = 255
     z = complex(0, 0)
     while (z.real < 5.0 and z.imag < 5.0 and itmax > 0):
         z = z**2 + c
@@ -21,6 +23,9 @@ if __name__ == "__main__":
           <!DOCTYPE HTML>
             <html>
               <head>
+            p {
+                font-family: numberFont, regularFont
+            }
             </head>
             <body>
             <pre>
@@ -60,11 +65,11 @@ if __name__ == "__main__":
     if form.getvalue('x_res') is not None:
         x_res = float(form.getvalue('x_res'))
     else:
-        x_res = 1.0
+        x_res = 50.0
     if form.getvalue('y_res') is not None:
         y_res = float(form.getvalue('y_res'))
     else:
-        y_res = 1.0
+        y_res = 50.0
 
     start = complex(x_left, y_top)
     end = complex(x_right, y_bottom)
@@ -76,19 +81,19 @@ if __name__ == "__main__":
     print(f'x_step: {x_step}     y_step: {y_step}')
     print(f'x_res: {x_res}       y_res: {y_res}')
 
+    print("</pre>")
     y_inc = y_top
     while y_inc > y_bottom:
         x_inc = x_left
         while x_inc < x_right:
-            if brot(complex(x_inc, y_inc)):
-                print("#", end="")
+            color = brot(complex(x_inc, y_inc))
+            if color:
+                print(f"<p style=\"display:inline;color:rgb({color % 255}, {color * 2 % 255}, {color * 4 % 255})\">{random.choice(string.ascii_letters)}</p>", end="")
             else:
-                print(" ", end="")
+                print(f"<p style=\"display:inline;color:rgb({color % 255}, {color * 2 % 255}, {color * 4 % 255})\">{random.choice(string.ascii_letters)}</p>", end="")
             x_inc += x_step
-            # print(f'x_inc: {x_inc}     y_inc: {y_inc}')
-        print()
+        print("<br>")
         y_inc -= y_step
-    print("</pre>")
     print(f"""
         <form action="/mandelbrot/mandelbrot.py" method="POST">
 
