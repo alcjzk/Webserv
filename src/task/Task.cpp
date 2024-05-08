@@ -1,8 +1,10 @@
 #include "Task.hpp"
 
-bool Task::is_expired_at(TimePoint time_point) const
-{
-    if (this->expire_time() && *(this->expire_time()) <= time_point)
-        return true;
-    return false;
-}
+using std::optional;
+using Seconds = Task::Seconds;
+using TimePoint = Task::TimePoint;
+
+// optional<Seconds> Task::expire_time() const
+//{
+//     return std::nullopt;
+// }

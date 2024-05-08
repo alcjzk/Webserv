@@ -21,6 +21,9 @@ class FieldValue
         template <typename Number, std::enable_if_t<std::is_integral_v<Number>, bool> = true>
         FieldValue(Number value);
 
+        /// Case-insensitive string equality.
+        bool eq_case_insensitive(const std::string& other) const;
+
         operator const std::string&() const noexcept;
 
         const std::string& operator*() const noexcept;

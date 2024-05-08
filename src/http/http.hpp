@@ -1,5 +1,9 @@
 #pragma once
 
+#include <cctype>
+#include <algorithm>
+#include <stdexcept>
+#include <iterator>
 #include <string>
 #include <utility>
 #include "FieldName.hpp"
@@ -52,5 +56,47 @@ namespace http
     /// Returns true if `c` is obs-text (RFC 9110).
     bool is_obs_text(unsigned char c);
 
+    /// Returns true if `value` is an absolute path (RFC 9110).
+    bool is_absolute_path(const std::string& value);
+
+    /// Returns true if `value` is a valid query (RFC 3986).
+    bool is_query(const std::string& value);
+
+    template <typename ForwardIt>
+    std::string pct_decode(ForwardIt first, ForwardIt last);
+
     std::pair<FieldName, FieldValue> parse_field(const std::string& field);
 } // namespace http
+
+template <typename ForwardIt>
+std::string http::pct_decode(ForwardIt head, ForwardIt last)
+{
+    std::string result;
+    result.reserve(std::distance(head, last));
+
+    auto is_hex = [](unsigned char c) { return std::isxdigit(c); };
+
+    while (head != last)
+    {
+        if (*head == '%')
+        {
+            head = std::next(head);
+            if (std::distance(head, last) < 2)
+                throw std::runtime_error("invalid pct encoding");
+
+            auto end = std::next(head);
+            if (!std::all_of(head, end, is_hex))
+                throw std::runtime_error("invalid pct encoding");
+
+            unsigned char value = std::stoul(std::string(head, std::next(end)), nullptr, 16);
+            result.push_back(value);
+            head = std::next(end);
+        }
+        else
+        {
+            result.push_back(*head);
+            head = std::next(head);
+        }
+    }
+    return result;
+}

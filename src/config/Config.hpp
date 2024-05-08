@@ -76,7 +76,7 @@ class Config
         std::string                 _host = "127.0.0.1";
         std::vector<HostAttributes> _attrs;
         HostAttributes              _first_attr;
-        int                         _backlog = 128;
+        int                         _backlog = 25;
         size_t                      _body_size = 4096;
         size_t                      _header_buffer_size = 1024;
         std::map<int, Path>         _error_pages;

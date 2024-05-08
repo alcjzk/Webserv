@@ -5,6 +5,9 @@
 #include "Task.hpp"
 #include "BasicTask.hpp"
 
+using Seconds = Task::Seconds;
+using TimePoint = Task::TimePoint;
+
 void BasicTask::abort()
 {
     WARN(
@@ -29,12 +32,19 @@ bool BasicTask::is_complete() const
     return _is_complete;
 }
 
-std::optional<Task::TimePoint> BasicTask::expire_time() const
+std::optional<Seconds> BasicTask::expire_time() const
 {
-    return _expire_time;
+    return std::nullopt;
 }
 
-BasicTask::BasicTask(File&& fd, WaitFor wait_for, std::optional<TimePoint> expire_time)
-    : _fd(std::move(fd)), _wait_for(wait_for), _expire_time(expire_time)
+TimePoint BasicTask::last_run() const
 {
+    return _last_run;
 }
+
+void BasicTask::last_run(TimePoint last_run)
+{
+    _last_run = last_run;
+}
+
+BasicTask::BasicTask(File&& fd, WaitFor wait_for) : _fd(std::move(fd)), _wait_for(wait_for) {}

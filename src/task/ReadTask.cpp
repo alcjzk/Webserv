@@ -2,7 +2,6 @@
 #include <utility>
 #include <unistd.h>
 #include <cstddef>
-#include <chrono>
 #include "Log.hpp"
 #include "File.hpp"
 #include "Task.hpp"
@@ -10,14 +9,13 @@
 #include "BasicTask.hpp"
 #include "ReadTask.hpp"
 
+using std::optional;
 using std::vector;
+using Seconds = Task::Seconds;
 
 ReadTask::ReadTask(File&& file, size_t size, const Config& config)
-    : BasicTask(
-          std::move(file), WaitFor::Readable,
-          std::chrono::system_clock::now() + config.io_read_timeout()
-      ),
-      _size(size), _buffer(size, 0)
+    : BasicTask(std::move(file), WaitFor::Readable), _size(size), _buffer(size, 0),
+      _expire_time(config.io_read_timeout())
 {
 }
 
@@ -43,6 +41,11 @@ void ReadTask::run()
     _bytes_read_total += bytes_read;
     if (_bytes_read_total == _size || bytes_read == 0)
         _is_complete = true;
+}
+
+optional<Seconds> ReadTask::expire_time() const
+{
+    return _expire_time;
 }
 
 bool ReadTask::is_error() const

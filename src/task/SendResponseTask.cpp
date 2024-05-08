@@ -1,7 +1,6 @@
 #include <optional>
 #include <unistd.h>
 #include <cassert>
-#include <chrono>
 #include <utility>
 #include <memory>
 #include <stdexcept>
@@ -15,14 +14,13 @@
 #include "Connection.hpp"
 #include "ReceiveRequestTask.hpp"
 
+using std::optional;
 using std::unique_ptr;
+using Seconds = Task::Seconds;
 
 SendResponseTask::SendResponseTask(Connection&& connection, unique_ptr<Response>&& response)
-    : BasicTask(
-          File(), WaitFor::Writable,
-          std::chrono::system_clock::now() + connection.config().send_timeout()
-      ),
-      _connection(std::move(connection)), _response(std::move(response))
+    : BasicTask(File(), WaitFor::Writable), _connection(std::move(connection)),
+      _response(std::move(response)), _expire_time(_connection.config().send_timeout())
 {
 }
 
@@ -55,4 +53,9 @@ void SendResponseTask::abort()
 int SendResponseTask::fd() const
 {
     return _connection.client();
+}
+
+optional<Seconds> SendResponseTask::expire_time() const
+{
+    return _expire_time;
 }
