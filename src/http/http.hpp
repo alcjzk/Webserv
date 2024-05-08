@@ -1,13 +1,13 @@
 #pragma once
 
 #include <cctype>
+#include <algorithm>
 #include <stdexcept>
+#include <iterator>
 #include <string>
 #include <utility>
-#include <string_view>
 #include "FieldName.hpp"
 #include "FieldValue.hpp"
-#include "HTTPError.hpp"
 #include "HTTPVersion.hpp"
 
 /// HTTP related utilities and constants
