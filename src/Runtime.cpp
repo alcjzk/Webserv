@@ -5,6 +5,7 @@
 #include <signal.h>
 #include <poll.h>
 #include <chrono>
+#include "Log.hpp"
 #include "Runtime.hpp"
 #include "Task.hpp"
 #include "Log.hpp"
@@ -44,64 +45,72 @@ void Runtime::run_impl()
 
     while (!_is_interrupt_signaled)
     {
-        vector<struct pollfd> pollfds;
-        pollfds.reserve(_tasks.size());
-
-        if (_is_child_exited)
+        try
         {
-            _is_child_exited = false;
-            INFO("Child exited is true");
-            for (const auto& [wait_for, task] : _pids_alive)
+            vector<struct pollfd> pollfds;
+            pollfds.reserve(_tasks.size());
+
+            if (_is_child_exited)
             {
-                int   status;
-                pid_t pid = waitpid(wait_for, &status, WNOHANG);
-                if (pid > 0)
+                _is_child_exited = false;
+                INFO("Child exited is true");
+                for (const auto& [wait_for, task] : _pids_alive)
                 {
-                    child_remove(wait_for);
-                    task.terminate(WIFEXITED(status) && WEXITSTATUS(status) > 0);
+                    int   status;
+                    pid_t pid = waitpid(wait_for, &status, WNOHANG);
+                    if (pid > 0)
+                    {
+                        child_remove(wait_for);
+                        task.terminate(WIFEXITED(status) && WEXITSTATUS(status) > 0);
+                    }
                 }
             }
-        }
-        for (const auto& task : _tasks)
-        {
-            short events = 0;
-            if (task->wait_for() == WaitFor::Readable)
-                events = POLLIN;
-            else if (task->wait_for() == WaitFor::Writable)
-                events = POLLOUT;
-            pollfds.push_back({task->fd(), events, 0});
-        }
-
-        if (poll(pollfds.data(), pollfds.size(), POLL_TIMEOUT_MILLIS) == -1)
-        {
-            // Don't throw when poll errors due to signal
-            if (errno != EINTR)
-                throw std::system_error(errno, std::system_category());
-        }
-
-        auto now = std::chrono::system_clock::now();
-        for (size_t idx = 0; idx < pollfds.size(); idx++)
-        {
-            const auto& pollfd = pollfds[idx];
-
-            if (pollfd.revents)
+            for (const auto& task : _tasks)
             {
-                _tasks[idx]->run();
-                _tasks[idx]->last_run(now);
+                short events = 0;
+                if (task->wait_for() == WaitFor::Readable)
+                    events = POLLIN;
+                else if (task->wait_for() == WaitFor::Writable)
+                    events = POLLOUT;
+                pollfds.push_back({task->fd(), events, 0});
             }
-            else if (auto expire_time = _tasks[idx]->expire_time())
-            {
-                if (now - _tasks[idx]->last_run() >= *expire_time)
-                    _tasks[idx]->abort();
-            }
-        }
 
-        _tasks.erase(
-            std::remove_if(
-                _tasks.begin(), _tasks.end(), [](const auto& task) { return task->is_complete(); }
-            ),
-            _tasks.end()
-        );
+            if (poll(pollfds.data(), pollfds.size(), POLL_TIMEOUT_MILLIS) == -1)
+            {
+                // Don't throw when poll errors due to signal
+                if (errno != EINTR)
+                    throw std::system_error(errno, std::system_category());
+            }
+
+            auto now = std::chrono::system_clock::now();
+            for (size_t idx = 0; idx < pollfds.size(); idx++)
+            {
+                const auto& pollfd = pollfds[idx];
+
+                if (pollfd.revents)
+                {
+                    _tasks[idx]->run();
+                    _tasks[idx]->last_run(now);
+                }
+                else if (auto expire_time = _tasks[idx]->expire_time())
+                {
+                    if (now - _tasks[idx]->last_run() >= *expire_time)
+                        _tasks[idx]->abort();
+                }
+            }
+
+            _tasks.erase(
+                std::remove_if(
+                    _tasks.begin(), _tasks.end(),
+                    [](const auto& task) { return task->is_complete(); }
+                ),
+                _tasks.end()
+            );
+        }
+        catch (const std::exception& error)
+        {
+            ERR("Runtime: " << error.what());
+        }
     }
 }
 
