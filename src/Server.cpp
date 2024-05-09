@@ -24,20 +24,35 @@ Server::Server(Config&& config) : _config(std::move(config)), _port(_config.port
 
     status = getaddrinfo(_config.host().c_str(), _port, &hints, &_address_info);
     if (status != 0)
+    {
+        freeaddrinfo(_address_info);
         throw std::runtime_error(gai_strerror(status));
+    }
     _fd = socket(_address_info->ai_family, _address_info->ai_socktype, _address_info->ai_protocol);
     if (_fd == -1)
+    {
+        freeaddrinfo(_address_info);
         throw std::runtime_error(strerror(errno));
+    }
     if (fcntl(_fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
+    {
+        freeaddrinfo(_address_info);
         throw std::runtime_error(strerror(errno));
+    }
     if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &sockopt_value, sizeof(sockopt_value)) == -1)
     {
         ERR("Server: setsockopt: failure");
     }
     if (bind(_fd, _address_info->ai_addr, _address_info->ai_addrlen) == -1)
+    {
+        freeaddrinfo(_address_info);
         throw std::runtime_error(strerror(errno));
+    }
     if (listen(_fd, _config.backlog()) == -1)
+    {
+        freeaddrinfo(_address_info);
         throw std::runtime_error(strerror(errno));
+    }
     INFO("Listening on " << _fd);
     Runtime::enqueue(new AcceptTask(*this));
 }
