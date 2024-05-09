@@ -18,11 +18,6 @@ bool Error::operator==(Kind kind) const
     return _kind == kind;
 }
 
-Error::Kind Error::kind() const
-{
-    return _kind;
-}
-
 const char* Error::kind_str(Kind kind)
 {
     switch (kind)

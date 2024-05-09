@@ -75,17 +75,15 @@ namespace tiniutils
         for (auto s : split_input)
         {
             std::string tmp;
-            for (auto c : s)
-            {
-                if (!(isspace(c)))
-                    tmp.push_back(c);
-            }
+            tmp.reserve(s.length());
+            auto not_space = [](unsigned char c) { return !std::isspace(c); };
+            std::copy_if(s.begin(), s.end(), std::back_inserter(tmp), not_space);
             no_spaces.push_back(tmp);
         }
         return no_spaces;
     }
 
-    void printErr(int err_type, int col, int row, std::string line)
+    void printErr(int err_type, int col, int row, const std::string& line)
     {
         for (int i = 0; i < col; ++i)
             std::cerr << " ";

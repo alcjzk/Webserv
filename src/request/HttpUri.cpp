@@ -8,13 +8,10 @@ using std::string;
 
 HttpUri::HttpUri(const std::string& request_target, const std::string& host)
 {
-    size_t query_offset;
-    size_t path_offset;
-
     if (request_target.empty())
         throw std::runtime_error("request target cannot be empty");
 
-    query_offset = std::min(request_target.find_first_of('?'), request_target.length());
+    size_t query_offset = std::min(request_target.find_first_of('?'), request_target.length());
     if (query_offset != request_target.length())
     {
         string query = request_target.substr(query_offset + 1);
@@ -44,7 +41,8 @@ HttpUri::HttpUri(const std::string& request_target, const std::string& host)
         if (PREFIX.length() == request_target.length())
             throw std::runtime_error("expected host");
 
-        path_offset = std::min(request_target.find_first_of("/", PREFIX.length()), query_offset);
+        size_t path_offset =
+            std::min(request_target.find_first_of("/", PREFIX.length()), query_offset);
         if (path_offset < query_offset)
         {
             string path = request_target.substr(path_offset, query_offset - path_offset);
