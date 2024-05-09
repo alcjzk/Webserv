@@ -57,7 +57,11 @@ void ReceiveRequestTask::fill_buffer()
         if (!reader.grow(RequestLine::MAX_LENGTH))
         {
             if (reader.is_aligned())
+            {
+                if (_expect == Expect::RequestLine)
+                    throw HTTPError(Status::URI_TOO_LONG);
                 throw HTTPError(Status::CONTENT_TOO_LARGE);
+            }
             realign_reader();
         }
     }
