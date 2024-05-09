@@ -27,13 +27,14 @@ class Route
         Route& operator=(Route&& other) = default;
         using AllowedMethods = std::bitset<Method::COUNT>;
 
-        bool                  match(const Path& uri_path) const;
-        Path                  map(const Path& uri_path) const;
-        bool                  method_get() const;
-        bool                  method_post() const;
-        bool                  method_del() const;
-        const AllowedMethods& allowed_methods() const;
-        void                  insert_cgi(const std::pair<std::string, TiniNode*>& extension);
+        bool                       match(const Path& uri_path) const;
+        Path                       map(const Path& uri_path) const;
+        bool                       method_get() const;
+        bool                       method_post() const;
+        bool                       method_del() const;
+        const AllowedMethods&      allowed_methods() const;
+        void                       insert_cgi(const std::pair<std::string, TiniNode*>& extension);
+        std::optional<std::string> get_cgi_option(std::string to_find) const;
 
         bool operator<(const Route& rhs) const;
         bool operator>(const Route& rhs) const;

@@ -126,3 +126,11 @@ std::optional<Task::Seconds> CGIWriteTask::expire_time() const
 {
     return _expire_time;
 }
+
+void CGIWriteTask::terminate(bool err)
+{
+    INFO("TERMINATED CHILD");
+    _is_complete = true;
+    if (err)
+        _is_error = true;
+}

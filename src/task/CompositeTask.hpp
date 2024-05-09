@@ -23,6 +23,7 @@ class CompositeTask : public Task
 
         virtual void                   run() override;
         virtual void                   abort() override;
+        virtual void                   terminate(bool is_error) override;
         virtual int                    fd() const override;
         virtual WaitFor                wait_for() const override;
         virtual bool                   is_complete() const override;
@@ -82,6 +83,27 @@ void CompositeTask<States...>::abort()
             if constexpr (!std::is_same_v<T, std::monostate>)
             {
                 state._task.abort();
+            }
+            else
+            {
+                throw std::logic_error("cannot call abort() on invariant");
+            }
+        },
+        _state
+    );
+}
+
+template <typename... States>
+void CompositeTask<States...>::terminate(bool is_error)
+{
+    std::visit(
+        [is_error](auto&& state)
+        {
+            using T = std::decay_t<decltype(state)>;
+
+            if constexpr (!std::is_same_v<T, std::monostate>)
+            {
+                state._task.terminate(is_error);
             }
             else
             {

@@ -1,6 +1,7 @@
 #include "CGIReadTask.hpp"
 #include "Log.hpp"
 #include <signal.h>
+#include "Runtime.hpp"
 #include <sys/wait.h>
 
 // this is for preparing the content to write to the CGI
@@ -23,7 +24,6 @@ void CGIReadTask::run()
     char buf[4096];
     ssize_t bytes_read = read(_fd, buf, 4096);
 
-    // INFO("bytes read: " << bytes_read);
     if (bytes_read < 0)
     {
         WARN("CGIReadTask: read failed for fd `" << _fd << "`");
@@ -38,7 +38,7 @@ void CGIReadTask::run()
         _is_complete = true;
         return;
     }
-    if (_buffer.size() > 1048576)
+    if (_buffer.size() > _upload_limit)
     {
         INFO("Buffer size limit exceeded");
         _is_complete = true;
@@ -75,7 +75,7 @@ CGIReadTask::~CGIReadTask() {
 
 CGIReadTask::CGIReadTask(CGIReadTask&& moved_from) : BasicTask(
         std::move(moved_from)
-        ), _buffer(std::move(moved_from._buffer)), _pid(std::exchange(moved_from._pid, std::nullopt)), _is_error(false), _exit_status(0)
+        ), _buffer(std::move(moved_from._buffer)), _pid(std::exchange(moved_from._pid, std::nullopt)), _is_error(false), _exit_status(0), _upload_limit(1000000)
 {
 }
 
@@ -87,6 +87,7 @@ CGIReadTask& CGIReadTask::operator=(CGIReadTask&& other)
     _buffer = std::move(other._buffer);
     _pid = std::exchange(other._pid, std::nullopt);
     _is_error = false;
+    _exit_status = 0;
     return *this;
 }
 
@@ -101,6 +102,15 @@ void CGIReadTask::abort()
         kill(_pid.value(), SIGKILL);
         std::exchange(_pid, std::nullopt);
     }
+}
+
+void CGIReadTask::terminate(bool err)
+{
+    INFO("TERMINATED CHILD");
+    std::exchange(_pid, std::nullopt);
+    _is_complete = true;
+    if (err)
+        _is_error = true;
 }
 
 std::optional<Task::Seconds> CGIReadTask::expire_time() const

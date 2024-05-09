@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include "Route.hpp"
+#include "Log.hpp"
 
 using AllowedMethods = Route::AllowedMethods;
 
@@ -73,4 +74,22 @@ void Route::insert_cgi(const std::pair<std::string, TiniNode*>& extension)
         throw std::runtime_error("Null key in TiniNode");
     if (extension.second->getType() == TiniNode::T_STRING)
         _cgi_opts[extension.first] = extension.second->getStringValue();
+}
+
+std::optional<std::string> Route::get_cgi_option(std::string to_find) const
+{
+    INFO("Searching for cgi option")
+    for (const auto& cgi_pair : _cgi_opts)
+    {
+        if (static_cast<std::string>(to_find).substr(static_cast<std::string>(to_find).size() - cgi_pair.first.size()) == cgi_pair.first)
+        {
+            INFO("Found cgi option, which is " << cgi_pair.second);
+            return cgi_pair.second;
+        }
+    }
+    return std::nullopt;
+    // const auto& cgi_pair = _cgi_opts.find(to_find);
+    // if (cgi_pair == _cgi_opts.end())
+    //     return std::nullopt;
+    // return cgi_pair->second;
 }

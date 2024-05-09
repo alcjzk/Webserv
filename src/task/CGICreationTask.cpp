@@ -14,7 +14,8 @@ using namespace cgi_creation_task;
 using std::string;
 
 // setup the environment for CGI
-static void SetEnv(const std::string& key, const std::string& value, std::vector<char *>& environment)
+static void
+SetEnv(const std::string& key, const std::string& value, std::vector<char*>& environment)
 {
     std::string envVar = key + "=" + value;
     char*       envPtr = strdup(envVar.c_str()); // memory leak?
@@ -35,13 +36,12 @@ static void SetEnv(const std::string& key, const std::string& value, std::vector
 // }
 
 // convert std::vector<char*> to char**
-static char** Environment(std::vector<char *>& environment)
+static char** Environment(std::vector<char*>& environment)
 {
     char** arr = new char*[environment.size() + 1];
     size_t i = 0;
 
-    for (std::vector<char*>::const_iterator it = environment.begin(); it != environment.end();
-         ++it)
+    for (std::vector<char*>::const_iterator it = environment.begin(); it != environment.end(); ++it)
     {
         arr[i++] = *it;
     }
@@ -50,7 +50,7 @@ static char** Environment(std::vector<char *>& environment)
     return arr;
 }
 
-static void  SetupEnvironment(std::vector<char *>& environment, Request& request)
+static void SetupEnvironment(std::vector<char*>& environment, Request& request)
 {
     SetEnv("AUTH_TYPE", "basic", environment);
     SetEnv("REDIRECT_STATUS", "200", environment);
@@ -64,13 +64,12 @@ static void  SetupEnvironment(std::vector<char *>& environment, Request& request
     SetEnv("SCRIPT_NAME", request.uri().path(), environment);
     SetEnv("REQUEST_METHOD", request.method().to_string(), environment);
     SetEnv("QUERY_STRING", request.uri().query(), environment);
-
     // QueryString(request.uri().query(), environment);
 }
 
-
 CGICreationTask::CGICreationTask(
-    Connection&& connection, Request& request, const Path& uri, Config& config
+    Connection&& connection, Request& request, const Path& uri, Config& config,
+    std::string cgi_executable
 )
 {
     if (socketpair(AF_UNIX, SOCK_STREAM, 0, _pipe_fd) == -1)
@@ -85,8 +84,6 @@ CGICreationTask::CGICreationTask(
     // {
     //     INFO("FIELD_NAME " << field.first << " FIELD_VALUE " << field.second);
     // }
-    // TODO: signla handler
-    // signal(SIGINT, SignalhandlerChild());
     if (pid == -1)
     {
         close(_pipe_fd[0]);
@@ -101,7 +98,9 @@ CGICreationTask::CGICreationTask(
         SetupEnvironment(_environment, request);
 
         std::string path = uri;
-        char*       argv[] = {const_cast<char*>("/usr/local/bin/python3"), const_cast<char*>(path.c_str()), nullptr};
+        char*       argv[] = {
+            const_cast<char*>(cgi_executable.c_str()), const_cast<char*>(path.c_str()), nullptr
+        };
 
         // execute
         if (execve(argv[0], argv, Environment(_environment)) == -1) // argument?
@@ -114,12 +113,9 @@ CGICreationTask::CGICreationTask(
     close(_pipe_fd[0]);
     if (request.body().size())
     {
-        // const std::vector<char>& vec = request.body();
-        // string str(vec.begin(), vec.end());
-        // INFO("request body: " << str);
-        WriteState write_state {
-            CGIWriteTask(std::move(request), request.body(), _pipe_fd[1], pid, config),
-            pid, std::move(connection)
+        WriteState write_state{
+            CGIWriteTask(std::move(request), request.body(), _pipe_fd[1], pid, config), pid,
+            std::move(connection)
         };
         state(std::move(write_state));
     }

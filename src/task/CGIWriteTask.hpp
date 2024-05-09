@@ -36,6 +36,9 @@ class CGIWriteTask : public BasicTask
         // TODO: override Task::abort (signal child to exit)
         void SignalhandlerChild(int sig);
 
+        // Handle sudden termination of child
+        void terminate(bool err) override;
+
         // Getters
         int                    write_end() const;
         const Config&          config() const;

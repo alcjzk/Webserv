@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <sys/wait.h>
 
 #include "BasicTask.hpp"
@@ -34,6 +35,9 @@ class CGIReadTask : public BasicTask
         // Abort override
         void abort() override;
 
+        // Handle sudden termination of child
+        void terminate(bool err) override;
+
         std::optional<Seconds> expire_time() const override;
 
     private:
@@ -41,5 +45,6 @@ class CGIReadTask : public BasicTask
         std::optional<pid_t> _pid;
         bool                 _is_error = false;
         int                  _exit_status = 0;
+        const size_t         _upload_limit = 1000000;
         Seconds              _expire_time;
 };

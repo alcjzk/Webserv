@@ -57,7 +57,7 @@ namespace cgi_creation_task
     {
         public:
             CGICreationTask(
-                Connection&& connection, Request& request, const Path& uri, Config& config
+                Connection&& connection, Request& request, const Path& uri, Config& config, std::string executable
             );
 
         private:
