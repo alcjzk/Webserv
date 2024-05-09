@@ -47,13 +47,4 @@ void BasicTask::last_run(TimePoint last_run)
     _last_run = last_run;
 }
 
-void BasicTask::terminate(bool is_error)
-{
-    INFO(
-        "BasicTask for fd `" << _fd << "`"
-                             << "was terminated"
-    );
-    _is_complete = true;
-}
-
 BasicTask::BasicTask(File&& fd, WaitFor wait_for) : _fd(std::move(fd)), _wait_for(wait_for) {}

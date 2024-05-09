@@ -28,7 +28,6 @@ namespace cgi_creation_task
     {
         public:
             CGIWriteTask _task;
-            pid_t        _pid;
             Connection  _connection;
 
             template <typename Parent>
@@ -72,6 +71,7 @@ namespace cgi_creation_task
         if (_task.is_error())
         {
             Status status = Status::INTERNAL_SERVER_ERROR;
+            int exit_status;
 
             ErrorState error_state{
                 ErrorResponseTask(std::move(_connection), status),
@@ -80,7 +80,7 @@ namespace cgi_creation_task
         }
 
         ReadState read_state{
-            CGIReadTask(_task.write_end(), _task.config(), _pid),
+            CGIReadTask(_task.write_end(), _task.config(), std::move(_task).take_pid()),
             std::move(_connection),
         };
         parent.state(std::move(read_state));
@@ -89,6 +89,7 @@ namespace cgi_creation_task
     template <typename Parent>
     void ReadState::on_complete(Parent& parent)
     {
+        INFO("Printti")
         if (_task.is_error())
         {
             Status status = Status::INTERNAL_SERVER_ERROR;

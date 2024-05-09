@@ -114,7 +114,7 @@ CGICreationTask::CGICreationTask(
     if (request.body().size())
     {
         WriteState write_state{
-            CGIWriteTask(std::move(request), request.body(), _pipe_fd[1], pid, config), pid,
+            CGIWriteTask(std::move(request), request.body(), _pipe_fd[1], pid, config),
             std::move(connection)
         };
         state(std::move(write_state));

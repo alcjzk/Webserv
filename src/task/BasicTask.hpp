@@ -9,7 +9,6 @@ class BasicTask : public Task
 {
     public:
         virtual void                   abort() override;
-        virtual void                   terminate(bool is_error) override;
         virtual int                    fd() const override;
         virtual WaitFor                wait_for() const override;
         virtual bool                   is_complete() const override;

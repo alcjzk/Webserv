@@ -4,6 +4,7 @@
 #include <sys/wait.h>
 
 #include "BasicTask.hpp"
+#include "Child.hpp"
 #include "Config.hpp"
 
 class CGIReadTask : public BasicTask
@@ -12,13 +13,13 @@ class CGIReadTask : public BasicTask
         virtual ~CGIReadTask() override;
 
         // Construct env, spawn cgi
-        CGIReadTask(int read_end, const Config& config, pid_t pid);
+        CGIReadTask(int read_end, const Config& config, Child&& pid);
 
         CGIReadTask(const CGIReadTask&) = delete;
-        CGIReadTask(CGIReadTask&&);
+        CGIReadTask(CGIReadTask&&) = default;
 
         CGIReadTask& operator=(const CGIReadTask&) = delete;
-        CGIReadTask& operator=(CGIReadTask&&);
+        CGIReadTask& operator=(CGIReadTask&&) = default;
 
         // Read cgi output into response body, enqueue ServerSendResponseTask
         virtual void run() override;
@@ -35,16 +36,12 @@ class CGIReadTask : public BasicTask
         // Abort override
         void abort() override;
 
-        // Handle sudden termination of child
-        void terminate(bool err) override;
-
         std::optional<Seconds> expire_time() const override;
 
     private:
         std::vector<char>    _buffer;
-        std::optional<pid_t> _pid;
+        Child                _pid;
         bool                 _is_error = false;
-        int                  _exit_status = 0;
-        const size_t         _upload_limit = 1000000;
+        const static size_t  _upload_limit = 1000000;
         Seconds              _expire_time;
 };

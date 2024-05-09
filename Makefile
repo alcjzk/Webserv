@@ -63,6 +63,7 @@ FieldMap.cpp					\
 CGICreationTask.cpp				\
 CGIReadTask.cpp					\
 CGIWriteTask.cpp				\
+Child.cpp						\
 main.cpp
 
 

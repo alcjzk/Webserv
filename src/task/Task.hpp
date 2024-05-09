@@ -22,7 +22,6 @@ class Task
 
         virtual void                   run() = 0;
         virtual void                   abort() = 0;
-        virtual void                   terminate(bool error) = 0;
         virtual int                    fd() const = 0;
         virtual WaitFor                wait_for() const = 0;
         virtual std::optional<Seconds> expire_time() const = 0;

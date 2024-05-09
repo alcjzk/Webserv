@@ -1,6 +1,5 @@
 #include "CGIReadTask.hpp"
 #include "Log.hpp"
-#include <signal.h>
 #include "Runtime.hpp"
 #include <sys/wait.h>
 #include <utility>
@@ -9,12 +8,12 @@
 // assign _pid & _fdout
 
 CGIReadTask::CGIReadTask(
-    int read_end, const Config& config, pid_t pid
+    int read_end, const Config& config, Child&& pid
 )
     : BasicTask(
           std::move(read_end), WaitFor::Readable
       ),
-      _pid(pid), _expire_time(config.cgi_read_timeout())
+      _pid(std::move(pid)), _expire_time(config.cgi_read_timeout())
 {
     INFO("FD num in read task: " << _fd);
 }
@@ -25,6 +24,7 @@ void CGIReadTask::run()
     char buf[4096];
     ssize_t bytes_read = read(_fd, buf, 4096);
 
+    INFO("READING")
     if (bytes_read < 0)
     {
         WARN("CGIReadTask: read failed for fd `" << _fd << "`");
@@ -36,6 +36,7 @@ void CGIReadTask::run()
     _buffer.insert(_buffer.end(), buf, buf + bytes_read);
     if (bytes_read == 0)
     {
+        _pid.wait();
         _is_complete = true;
         return;
     }
@@ -65,53 +66,15 @@ std::vector<char>&& CGIReadTask::buffer()
 }
 
 CGIReadTask::~CGIReadTask() {
-    if (_pid)
-    {
-        INFO("KILLING CHILD IN DESTRUCTOR");
-        kill(_pid.value(), SIGKILL);
-        auto _code = waitpid(_pid.value(), &_exit_status, 0);
-    }
-}
-
-
-CGIReadTask::CGIReadTask(CGIReadTask&& moved_from) : BasicTask(
-        std::move(moved_from)
-        ), _buffer(std::move(moved_from._buffer)), _pid(std::exchange(moved_from._pid, std::nullopt)), _is_error(false), _exit_status(0), _upload_limit(1000000)
-{
-}
-
-CGIReadTask& CGIReadTask::operator=(CGIReadTask&& other)
-{
-    if (this == &other)
-        return *this;
-    BasicTask::operator=(std::move(other));
-    _buffer = std::move(other._buffer);
-    _pid = std::exchange(other._pid, std::nullopt);
-    _is_error = false;
-    _exit_status = 0;
-    return *this;
+    INFO("Destructing read task")
 }
 
 void CGIReadTask::abort()
 {
-    INFO("CGIReadTask for fd " << _fd << " timed out.");
+    // BREAK
+    INFO("Aborting read task");
     _is_complete = true;
     _is_error = true;
-    if (_pid)
-    {
-        INFO("KILLING CHILD");
-        kill(_pid.value(), SIGKILL);
-        std::exchange(_pid, std::nullopt);
-    }
-}
-
-void CGIReadTask::terminate(bool err)
-{
-    INFO("TERMINATED CHILD");
-    std::exchange(_pid, std::nullopt);
-    _is_complete = true;
-    if (err)
-        _is_error = true;
 }
 
 std::optional<Task::Seconds> CGIReadTask::expire_time() const

@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include "BasicTask.hpp"
 #include "Request.hpp"
+#include "Child.hpp"
 
 class CGIWriteTask : public BasicTask
 {
@@ -12,15 +13,15 @@ class CGIWriteTask : public BasicTask
 
         // Construct env, spawn cgi
         CGIWriteTask(
-            Request&& request, const Request::Body& post_body, int write_end, pid_t pid,
-            Config& config
+            Request&& request, const Request::Body& post_body, int write_end, Child&& pid,
+            const Config& config
         );
 
         CGIWriteTask(const CGIWriteTask&) = delete;
-        CGIWriteTask(CGIWriteTask&&);
+        CGIWriteTask(CGIWriteTask&&) = default;
 
         CGIWriteTask& operator=(const CGIWriteTask&) = delete;
-        CGIWriteTask& operator=(CGIWriteTask&&);
+        CGIWriteTask& operator=(CGIWriteTask&&) = default;
 
         void abort() override;
 
@@ -37,7 +38,7 @@ class CGIWriteTask : public BasicTask
         void SignalhandlerChild(int sig);
 
         // Handle sudden termination of child
-        void terminate(bool err) override;
+        Child take_pid() &&;
 
         // Getters
         int                    write_end() const;
@@ -49,10 +50,8 @@ class CGIWriteTask : public BasicTask
         Request              _request;
         int                  _write_end;
         std::vector<char>    _post_body;
-        std::vector<char*>   _environment;
         size_t               _bytes_written_total = 0;
-        std::optional<pid_t> _pid;
+        Child                _pid;
         bool                 _is_error = false;
-        int                  _exit_status = 0;
         Seconds              _expire_time;
 };
