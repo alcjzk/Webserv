@@ -13,8 +13,6 @@
 #include "http.hpp"
 #include "Response.hpp"
 #include "ContentLength.hpp"
-#include "Log.hpp"
-#include <unistd.h>
 
 Response::Response(Status status) : _status(status), _size(0), _size_remaining(0), _is_built(false)
 {
