@@ -71,7 +71,7 @@ const HostAttributes& Server::map_attributes(std::string host_name) const
         [host_name](const auto& a) { return a.hostname() == host_name; }
     );
     if (attr == attributes.end())
-        return attributes.front();
+        return _config.first_attr();
     return *attr;
 }
 
