@@ -31,8 +31,6 @@ bool Response::send(int fd)
     offset = _size - _size_remaining;
     bytes_sent = ::send(fd, &_buffer[offset], _size_remaining, 0);
 
-    INFO("Response");
-    write(1, &_buffer[offset], _size_remaining);
     if (bytes_sent == -1)
         throw std::runtime_error(strerror(errno));
     assert(bytes_sent >= 0);
