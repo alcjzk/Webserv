@@ -2,6 +2,7 @@
 #include "Log.hpp"
 #include <signal.h>
 #include <sys/wait.h>
+#include <utility>
 
 // this is for preparing the content to write to the CGI
 // assign _pid & _fdout
@@ -56,7 +57,7 @@ std::vector<char>&& CGIReadTask::buffer()
     return (std::move(_buffer));
 }
 
-CGIReadTask::~CGIReadTask() { 
+CGIReadTask::~CGIReadTask() {
     if (_pid)
     {
         INFO("KILLING CHILD IN DESTRUCTOR");
