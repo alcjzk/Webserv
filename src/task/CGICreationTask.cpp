@@ -85,25 +85,23 @@ CGICreationTask::CGICreationTask(
     // {
     //     INFO("FIELD_NAME " << field.first << " FIELD_VALUE " << field.second);
     // }
+    // TODO: signla handler
+    // signal(SIGINT, SignalhandlerChild());
     if (pid == -1)
     {
         close(_pipe_fd[0]);
         close(_pipe_fd[1]);
         throw HTTPError(Status::INTERNAL_SERVER_ERROR);
     }
-    else if (pid == 0) // Child process
+    else if (pid == 0)
     {
         close(_pipe_fd[1]);
-        // TODO: signla handler
-        // signal(SIGINT, SignalhandlerChild());
-        dup2(_pipe_fd[0], STDIN_FILENO); // Redirect stdout to the write end of the pipe
-        dup2(_pipe_fd[0], STDOUT_FILENO); // Redirect stdout to the write end of the pipe
-
-        // setup env
+        dup2(_pipe_fd[0], STDIN_FILENO);
+        dup2(_pipe_fd[0], STDOUT_FILENO);
         SetupEnvironment(_environment, request);
 
         std::string path = uri;
-        char*       argv[] = {(char*)"/usr/local/bin/python3", (char*)path.c_str(), nullptr};
+        char*       argv[] = {const_cast<char*>("/usr/local/bin/python3"), const_cast<char*>(path.c_str()), nullptr};
 
         // execute
         if (execve(argv[0], argv, Environment(_environment)) == -1) // argument?
