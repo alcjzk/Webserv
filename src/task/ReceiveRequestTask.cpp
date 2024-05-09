@@ -66,8 +66,10 @@ void ReceiveRequestTask::fill_buffer()
         }
     }
 
-    ssize_t bytes_received =
-        recv(_connection.client(), reader.buffer().unfilled(), reader.buffer().unfilled_size(), 0);
+    ssize_t bytes_received = recv(
+        _connection.client(), reader.buffer().unfilled(),
+        std::min(4096UL, reader.buffer().unfilled_size()), 0
+    );
     if (bytes_received == 0)
     {
         throw Error(Error::CLOSED);
