@@ -70,7 +70,7 @@ void ReceiveRequestTask::fill_buffer()
     }
     else if (bytes_received == -1)
     {
-        throw std::runtime_error(strerror(errno));
+        throw std::runtime_error("recv failed");
     }
     reader.buffer().advance(bytes_received);
     _is_partial_data = false;

@@ -5,6 +5,7 @@
 #include <string>
 #include <cassert>
 #include <memory>
+#include <cstdio>
 #include "FieldName.hpp"
 #include "Log.hpp"
 #include "RequestLine.hpp"
@@ -158,9 +159,19 @@ Task* Request::process(Connection&& connection)
 
     if (target_status->is_regular())
     {
-        // TODO: Open is assumed to succeed here
         if (static_cast<std::string>(target).substr(static_cast<std::string>(target).size() - 3) == ".py")
             return new CGICreationTask(std::move(connection), *this, target, (Config&)server.config());
+        if (method() == Method::Delete)
+        {
+            if (std::remove(static_cast<string>(target).c_str()) != 0)
+                throw HTTPError(Status::INTERNAL_SERVER_ERROR);
+            else
+            {
+                unique_ptr<Response> response = std::make_unique<Response>(Status::OK);
+                response->keep_alive = connection._keep_alive;
+                return new SendResponseTask(std::move(connection), std::move(response));
+            }
+        }
         auto fd = target.open(O_RDONLY | O_NONBLOCK | O_CLOEXEC);
         if (!fd)
             throw HTTPError(Status::NOT_FOUND);
