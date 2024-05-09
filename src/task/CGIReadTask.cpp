@@ -23,7 +23,7 @@ void CGIReadTask::run()
     char buf[4096];
     ssize_t bytes_read = read(_fd, buf, 4096);
 
-    INFO("bytes read: " << bytes_read);
+    // INFO("bytes read: " << bytes_read);
     if (bytes_read < 0)
     {
         WARN("CGIReadTask: read failed for fd `" << _fd << "`");
@@ -36,6 +36,13 @@ void CGIReadTask::run()
     if (bytes_read == 0)
     {
         _is_complete = true;
+        return;
+    }
+    if (_buffer.size() > 1048576)
+    {
+        INFO("Buffer size limit exceeded");
+        _is_complete = true;
+        _is_error = true;
         return;
     }
 }
@@ -61,7 +68,7 @@ CGIReadTask::~CGIReadTask() {
     {
         INFO("KILLING CHILD IN DESTRUCTOR");
         kill(_pid.value(), SIGKILL);
-        auto code = waitpid(_pid.value(), &_exit_status, 0);
+        auto _code = waitpid(_pid.value(), &_exit_status, 0);
     }
 }
 

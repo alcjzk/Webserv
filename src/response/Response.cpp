@@ -13,6 +13,8 @@
 #include "http.hpp"
 #include "Response.hpp"
 #include "ContentLength.hpp"
+#include "Log.hpp"
+#include <unistd.h>
 
 Response::Response(Status status) : _status(status), _size(0), _size_remaining(0), _is_built(false)
 {
@@ -28,6 +30,9 @@ bool Response::send(int fd)
     assert(_is_built);
     offset = _size - _size_remaining;
     bytes_sent = ::send(fd, &_buffer[offset], _size_remaining, 0);
+
+    INFO("Response");
+    write(1, &_buffer[offset], _size_remaining);
     if (bytes_sent == -1)
         throw std::runtime_error(strerror(errno));
     assert(bytes_sent >= 0);
