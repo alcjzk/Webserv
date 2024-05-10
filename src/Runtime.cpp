@@ -15,9 +15,7 @@ using WaitFor = Task::WaitFor;
 
 using std::vector;
 
-bool Runtime::_is_interrupt_signaled = false;
-
-bool Runtime::_is_child_exited = false;
+volatile bool Runtime::_is_interrupt_signaled = false;
 
 Runtime& Runtime::instance()
 {

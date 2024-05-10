@@ -30,7 +30,6 @@ class Runtime
         void run_impl();
 
         std::vector<std::unique_ptr<Task>> _tasks;
-        static bool                        _is_interrupt_signaled;
-        static bool                        _is_child_exited;
+        volatile static bool               _is_interrupt_signaled;
         static Runtime                     _instance;
 };
