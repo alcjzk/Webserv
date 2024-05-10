@@ -88,8 +88,4 @@ std::optional<std::string> Route::get_cgi_option(std::string to_find) const
         }
     }
     return std::nullopt;
-    // const auto& cgi_pair = _cgi_opts.find(to_find);
-    // if (cgi_pair == _cgi_opts.end())
-    //     return std::nullopt;
-    // return cgi_pair->second;
 }
