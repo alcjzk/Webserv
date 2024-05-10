@@ -13,7 +13,7 @@
 class CGIReadTask : public BasicTask
 {
     public:
-        CGIReadTask(int read_end, const Config& config, Child&& pid);
+        CGIReadTask(File&& read_end, const Config& config, Child&& pid);
 
         virtual void                   run() override;
         virtual void                   abort() override;

@@ -6,7 +6,7 @@
 #include "Runtime.hpp"
 #include "http.hpp"
 
-CGIReadTask::CGIReadTask(int read_end, const Config& config, Child&& pid)
+CGIReadTask::CGIReadTask(File&& read_end, const Config& config, Child&& pid)
     : BasicTask(std::move(read_end), WaitFor::Readable), _pid(std::move(pid)),
       _expire_time(config.cgi_read_timeout())
 {
