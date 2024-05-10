@@ -61,6 +61,14 @@ namespace cgi_creation_task
             );
 
         private:
+            void setup_environment(
+                std::vector<char*>& environment, Request& request, const Path& uri,
+                const std::string& ip_address
+            );
+            char** environment(std::vector<char*>& environment);
+            void   set_env(
+                  const std::string& key, const std::string& value, std::vector<char*>& environment
+              );
             std::vector<char*> _environment;
             int                _pipe_fd[2];
             void               setup_environment();
@@ -72,7 +80,6 @@ namespace cgi_creation_task
         if (_task.is_error())
         {
             Status status = Status::INTERNAL_SERVER_ERROR;
-            int    exit_status;
 
             ErrorState error_state{
                 ErrorResponseTask(std::move(_connection), status),

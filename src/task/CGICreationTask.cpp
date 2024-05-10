@@ -10,33 +10,19 @@
 #include <string>
 #include <sys/socket.h>
 
+extern char** environ;
 using namespace cgi_creation_task;
 using std::string;
 
 // setup the environment for CGI
-static void
-SetEnv(const std::string& key, const std::string& value, std::vector<char*>& environment)
+void CGICreationTask::set_env(const std::string& key, const std::string& value, std::vector<char*>& environment)
 {
     std::string envVar = key + "=" + value;
     char*       envPtr = strdup(envVar.c_str()); // memory leak?
     environment.push_back(envPtr);
 }
 
-// Append QUERY_STRING=query.. into _environment
-// static void QueryString(const std::string& query_string, std::vector<char *>& environment)
-// {
-//     char* envPtr = strdup(query_string.c_str());
-//     environment.push_back(envPtr);
-// }
-
-// static void SignalhandlerChild(int sig)
-// {
-//     std::cerr << "Received signal (children process): " << sig << std::endl;
-//     std::exit(EXIT_FAILURE);
-// }
-
-// convert std::vector<char*> to char**
-static char** Environment(std::vector<char*>& environment)
+char** CGICreationTask::environment(std::vector<char*>& environment)
 {
     char** arr = new char*[environment.size() + 1];
     size_t i = 0;
@@ -50,35 +36,43 @@ static char** Environment(std::vector<char*>& environment)
     return arr;
 }
 
-static inline void SetupEnvironment(std::vector<char*>& environment, Request& request, const Path& uri)
+void CGICreationTask::setup_environment(
+    std::vector<char*>& environment, Request& request, const Path& uri,
+    const std::string& ip_address
+)
 {
-    extern char** environ;
-
     size_t i = 0;
     while (environ[i])
         ++i;
 
-    char* cwd = *std::find_if(environ, environ + i, [](std::string_view it){ return it.rfind("PWD=", 0) == 0; });
+    auto last = environ + i;
+    auto it = std::find_if(
+        environ, environ + i, [](std::string_view it) { return it.rfind("PWD=", 0) == 0; }
+    );
 
     std::string path_info = Path::canonical(uri);
-    std::string full_path = &cwd[4];
-    std::string path_translated = full_path + "/" + path_info;
-
-    SetEnv("PATH_INFO", path_info, environment);
-    SetEnv("PATH_TRANSLATED", path_translated, environment);
-    SetEnv("AUTH_TYPE", "basic", environment);
-    SetEnv("REDIRECT_STATUS", "200", environment);
-    SetEnv("GATEWAY_INTERFACE", "CGI/1.1", environment);
+    if (it != last)
+    {
+        std::string path_translated = std::string(&(*it)[4]) + "/" + path_info;
+        set_env("PATH_TRANSLATED", path_translated, environment);
+    }
+    set_env("REMOTE_ADDR", ip_address, environment);
+    set_env("PATH_INFO", path_info, environment);
+    set_env("GATEWAY_INTERFACE", "CGI/1.1", environment);
     if (request.body().size())
-        SetEnv("CONTENT_LENGTH", std::to_string(request.body().size()), environment);
-    SetEnv("SERVER_NAME", request.uri().host(), environment);
-    SetEnv("SERVER_PORT", request.uri().port(), environment);
-    SetEnv("SERVER_PROTOCOL", "HTTP/1.1", environment);
-    SetEnv("SERVER_SOFTWARE", "webserv", environment);
-    SetEnv("SCRIPT_NAME", request.uri().path(), environment);
-    SetEnv("REQUEST_METHOD", request.method().to_string(), environment);
-    SetEnv("QUERY_STRING", request.uri().query(), environment);
-    // QueryString(request.uri().query(), environment);
+        set_env("CONTENT_LENGTH", std::to_string(request.body().size()), environment);
+    if (auto value = request.headers().get(FieldName::CONTENT_TYPE))
+    {
+        std::string env = std::string("Content-type: ") + (**value);
+        set_env("CONTENT_TYPE", env, environment);
+    }
+    set_env("SERVER_NAME", request.uri().host(), environment);
+    set_env("SERVER_PORT", request.uri().port(), environment);
+    set_env("SERVER_PROTOCOL", "HTTP/1.1", environment);
+    set_env("SERVER_SOFTWARE", "webserv", environment);
+    set_env("SCRIPT_NAME", request.uri().path(), environment);
+    set_env("REQUEST_METHOD", request.method().to_string(), environment);
+    set_env("QUERY_STRING", request.uri().query(), environment);
 }
 
 CGICreationTask::CGICreationTask(
@@ -95,10 +89,6 @@ CGICreationTask::CGICreationTask(
     INFO("Pfd 1: " << _pipe_fd[1]);
     INFO("Request target " << request.request_line().request_target().c_str());
     INFO("Path URI " << uri);
-    // for ( auto field : request.headers())
-    // {
-    //     INFO("FIELD_NAME " << field.first << " FIELD_VALUE " << field.second);
-    // }
     int pid = fork();
     if (pid == -1)
     {
@@ -117,7 +107,7 @@ CGICreationTask::CGICreationTask(
             std::string script_name = std::string(Path(uri.cend() - 1, uri.cend()));
             char        buf[4096];
 
-            SetupEnvironment(_environment, request, uri);
+            setup_environment(_environment, request, uri, connection.ip());
 
             int dev_null = open("/dev/null", O_WRONLY);
             if (dev_null == -1)
@@ -135,7 +125,7 @@ CGICreationTask::CGICreationTask(
                 const_cast<char*>(cgi_executable.c_str()), const_cast<char*>(script_name.c_str()),
                 nullptr
             };
-            (void)execve(argv[0], argv, Environment(_environment));
+            (void)execve(argv[0], argv, environment(_environment));
             WARN(strerror(errno));
             close(_pipe_fd[0]);
             exit(1);
