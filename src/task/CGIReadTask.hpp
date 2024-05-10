@@ -46,7 +46,7 @@ class CGIReadTask : public BasicTask
 
     private:
         Expect                    _expect = Expect::Headers;
-        Reader                    _reader = Reader(2048UL);
+        Reader                    _reader = Reader(4096UL);
         std::unique_ptr<Response> _response = std::make_unique<Response>(Status::OK);
         Child                     _pid;
         bool                      _is_error = false;
