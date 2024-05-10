@@ -1,27 +1,22 @@
+#include <sys/socket.h>
+#include <sys/wait.h>
+#include <utility>
 #include "CGIReadTask.hpp"
 #include "Log.hpp"
 #include "Runtime.hpp"
 #include "http.hpp"
-#include <sys/socket.h>
-#include <sys/wait.h>
-#include <utility>
-
-// this is for preparing the content to write to the CGI
-// assign _pid & __reader.buffer().begin(efdout
 
 CGIReadTask::CGIReadTask(int read_end, const Config& config, Child&& pid)
     : BasicTask(std::move(read_end), WaitFor::Readable), _pid(std::move(pid)),
       _expire_time(config.cgi_read_timeout())
 {
-    INFO("FD num in read task: " << _fd);
 }
 
 void CGIReadTask::run()
 {
-    INFO("running");
     if (_reader.buffer().unfilled_size() == 0)
     {
-        if (!_reader.grow(_upload_limit))
+        if (!_reader.grow(MAX_CONTENT))
         {
             _is_error = true;
             _is_complete = true;
@@ -50,7 +45,6 @@ void CGIReadTask::run()
             _is_complete = true;
             return;
         }
-        INFO("CGIReadTask: EOF");
         _pid.wait();
         _response->body(std::vector(_reader.begin(), _reader.end()));
         _is_complete = true;
@@ -71,15 +65,9 @@ std::unique_ptr<Response> CGIReadTask::response() &&
     return std::move(_response);
 }
 
-CGIReadTask::~CGIReadTask()
-{
-    INFO("Destructing read task")
-}
-
 void CGIReadTask::abort()
 {
-    // BREAK
-    INFO("Aborting read task");
+    WARN("CGIReadTask: timed out");
     _is_complete = true;
     _is_error = true;
 }
