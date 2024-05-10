@@ -19,7 +19,8 @@ if __name__ == "__main__":
 
     qs = os.environ['QUERY_STRING']
 
-    print("""
+    print("""Content-type: text/html
+
           <!DOCTYPE HTML>
             <html>
               <head>
