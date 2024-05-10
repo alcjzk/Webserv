@@ -18,7 +18,6 @@ SRCS =							\
 Config.cpp						\
 Server.cpp						\
 Runtime.cpp						\
-Task.cpp						\
 Reader.cpp						\
 Method.cpp						\
 HTTPVersion.cpp					\
