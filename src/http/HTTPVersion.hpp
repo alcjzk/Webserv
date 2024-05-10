@@ -26,21 +26,19 @@ class HTTPVersion
         friend bool operator!=(const HTTPVersion& lhs, const HTTPVersion& rhs);
 
     private:
-        unsigned int _major;
-        unsigned int _minor;
+        unsigned int _major = 1;
+        unsigned int _minor = 1;
 };
 
 std::ostream& operator<<(std::ostream& os, const HTTPVersion& version);
 
-#ifdef TESTS
+#ifdef TEST
 
-class HTTPVersionTests : public HTTPVersion
+class HTTPVersionTest : public HTTPVersion
 {
     public:
-        static void all();
-
-        static void basic();
-        static void compatible();
+        static void basic_test();
+        static void compatible_test();
 };
 
 #endif

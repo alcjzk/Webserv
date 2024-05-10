@@ -57,13 +57,19 @@ void ReceiveRequestTask::fill_buffer()
         if (!reader.grow(RequestLine::MAX_LENGTH))
         {
             if (reader.is_aligned())
+            {
+                if (_expect == Expect::RequestLine)
+                    throw HTTPError(Status::URI_TOO_LONG);
                 throw HTTPError(Status::CONTENT_TOO_LARGE);
+            }
             realign_reader();
         }
     }
 
-    ssize_t bytes_received =
-        recv(_connection.client(), reader.buffer().unfilled(), reader.buffer().unfilled_size(), 0);
+    ssize_t bytes_received = recv(
+        _connection.client(), reader.buffer().unfilled(),
+        std::min(4096UL, reader.buffer().unfilled_size()), 0
+    );
     if (bytes_received == 0)
     {
         throw Error(Error::CLOSED);

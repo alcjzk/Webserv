@@ -16,14 +16,14 @@ static inline void to_lowercase_in_place(std::string& value)
     (void)std::transform(value.begin(), value.end(), value.begin(), to_lower);
 }
 
-FieldParams::FieldParams(const string_view& value)
+FieldParams::FieldParams(const string_view& text)
 {
     using Iterator = std::regex_iterator<string_view::const_iterator>;
     static const std::regex regex(
         R"((?:[ \t]*);(?:[ \t]*)([^ \t;=]+)=([^ \t;="]+|(?:"(?:[^"\\]|\\.)*")))"
     );
 
-    Iterator match(value.begin(), value.end(), regex);
+    Iterator match(text.begin(), text.end(), regex);
     Iterator end;
 
     for (; match != end; match++)

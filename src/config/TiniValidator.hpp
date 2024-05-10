@@ -25,7 +25,7 @@ class TiniValidator
         ~TiniValidator() = default;
         TiniValidator(const TiniValidator& other) = default;
         TiniValidator& operator=(const TiniValidator& other) = default;
-        int            validateConfig(std::vector<std::string>& split_input);
+        int            validateConfig(const std::vector<std::string>& split_input);
         int            validateContext(std::string ctx, int row);
         int            validateValue(std::string act, int row);
 };

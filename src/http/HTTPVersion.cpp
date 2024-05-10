@@ -59,44 +59,31 @@ ostream& operator<<(ostream& os, const HTTPVersion& version)
               << version.minor();
 }
 
-#ifdef TESTS
+#ifdef TEST
 
-void HTTPVersionTests::all()
+#include "testutils.hpp"
+
+void HTTPVersionTest::basic_test()
 {
-    basic();
-    compatible();
+    BEGIN
+
+    HTTPVersion version("HTTP/1.2");
+    EXPECT(version.major() == 1 && version.minor() == 2);
+
+    END
 }
 
-void HTTPVersionTests::basic()
+void HTTPVersionTest::compatible_test()
 {
-    try
-    {
-        HTTPVersion version("HTTP/1.2");
-        if (version.major() != 1 || version.minor() != 2)
-            throw TESTFAIL;
-    }
-    catch (...)
-    {
-        throw TESTFAIL;
-    }
-}
+    BEGIN
 
-void HTTPVersionTests::compatible()
-{
-    try
-    {
-        HTTPVersion one_zero(1, 0);
-        HTTPVersion one_one(1, 1);
-        HTTPVersion two_zero(2, 0);
-        if (!HTTPVersion(1, 0).is_compatible_with(HTTPVersion(1, 1)))
-            throw TESTFAIL;
-        if (HTTPVersion(2, 0).is_compatible_with(HTTPVersion(1, 0)))
-            throw TESTFAIL;
-    }
-    catch (...)
-    {
-        throw TESTFAIL;
-    }
+    HTTPVersion one_zero(1, 0);
+    HTTPVersion one_one(1, 1);
+    HTTPVersion two_zero(2, 0);
+    EXPECT(HTTPVersion(1, 0).is_compatible_with(HTTPVersion(1, 1)));
+    EXPECT(!HTTPVersion(2, 0).is_compatible_with(HTTPVersion(1, 0)));
+
+    END
 }
 
 #endif

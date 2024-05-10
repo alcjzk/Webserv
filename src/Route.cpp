@@ -48,21 +48,6 @@ bool Route::operator>=(const Route& rhs) const
     return rhs._priority >= _priority;
 }
 
-bool Route::method_get() const
-{
-    return (_allowed_methods.test(Method::Get));
-}
-
-bool Route::method_post() const
-{
-    return (_allowed_methods.test(Method::Post));
-}
-
-bool Route::method_del() const
-{
-    return (_allowed_methods.test(Method::Delete));
-}
-
 const AllowedMethods& Route::allowed_methods() const
 {
     return _allowed_methods;

@@ -122,7 +122,7 @@ int TiniValidator::validateValue(std::string act, int row)
     return (0);
 }
 
-int TiniValidator::validateConfig(std::vector<std::string>& split_input)
+int TiniValidator::validateConfig(const std::vector<std::string>& split_input)
 {
     _errc = 0;
 

@@ -28,7 +28,7 @@ void ReadTask::run()
 {
     char*   data = _buffer.data() + _bytes_read_total;
     size_t  remainder = _size - _bytes_read_total;
-    ssize_t bytes_read = read(_fd, data, remainder);
+    ssize_t bytes_read = read(_fd, data, std::min(4096UL, remainder));
 
     if (bytes_read < 0)
     {

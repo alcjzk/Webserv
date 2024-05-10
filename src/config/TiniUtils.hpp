@@ -11,7 +11,7 @@ namespace tiniutils
     int chr_to_ctx_state(char c, char p);
     int chr_to_act_state(char c);
     std::vector<std::string> removeSpaces(std::vector<std::string> split_input);
-    void                     printErr(int err_type, int col, int row, std::string line);
+    void                     printErr(int err_type, int col, int row, const std::string& line);
 } // namespace tiniutils
 
 namespace tiniutilsTest
