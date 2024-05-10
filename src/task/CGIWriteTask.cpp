@@ -58,12 +58,12 @@ std::optional<Task::Seconds> CGIWriteTask::expire_time() const
     return _expire_time;
 }
 
-Child CGIWriteTask::take_pid() &&
+Child CGIWriteTask::take_pid()
 {
     return std::move(_pid);
 }
 
-File CGIWriteTask::take_fd() &&
+File CGIWriteTask::take_fd()
 {
     return std::move(_fd);
 }
