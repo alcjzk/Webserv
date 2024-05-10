@@ -4,8 +4,9 @@ import cgi
 import time
 import string
 import random
+import sys
 
-form = cgi.FieldStorage()
+os.environ.pop('CONTENT_TYPE', None)
 
 def brot(c):
     itmax = 255
@@ -17,6 +18,7 @@ def brot(c):
 
 if __name__ == "__main__":
 
+    form = cgi.FieldStorage()
     qs = os.environ['QUERY_STRING']
 
     print("""Content-type: text/html
@@ -27,6 +29,8 @@ if __name__ == "__main__":
             p {
                 font-family: numberFont, regularFont
             }
+
+            <meta http-equiv="Content-type" content="application/x-www-form-urlencoded; charset=UTF-8"/>
             </head>
             <body>
             <pre>
