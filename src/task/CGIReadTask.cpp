@@ -27,7 +27,6 @@ void CGIReadTask::run()
     ssize_t bytes_received = recv(
         _fd, _reader.buffer().unfilled(), std::min(_reader.buffer().unfilled_size(), 4096UL), 0
     );
-    _reader.buffer().advance(bytes_received);
     INFO(bytes_received);
     if (bytes_received < 0)
     {
@@ -50,6 +49,7 @@ void CGIReadTask::run()
         _is_complete = true;
         return;
     }
+    _reader.buffer().advance(bytes_received);
 
     while (!_reader.is_empty() && _expect == Expect::Headers)
         read_headers();
