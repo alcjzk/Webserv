@@ -8,13 +8,9 @@
 // this is for preparing the content to write to the CGI
 // assign _pid & _fdout
 
-CGIReadTask::CGIReadTask(
-    int read_end, const Config& config, Child&& pid
-)
-    : BasicTask(
-          std::move(read_end), WaitFor::Readable
-      ),
-      _pid(std::move(pid)), _expire_time(config.cgi_read_timeout())
+CGIReadTask::CGIReadTask(int read_end, const Config& config, Child&& pid)
+    : BasicTask(std::move(read_end), WaitFor::Readable), _pid(std::move(pid)),
+      _expire_time(config.cgi_read_timeout())
 {
     INFO("FD num in read task: " << _fd);
 }
@@ -39,13 +35,23 @@ void CGIReadTask::run()
         _is_complete = true;
         return;
     }
-    if (bytes_received == 0)
+    else if (bytes_received == 0)
     {
         INFO("CGIReadTask: EOF");
         _pid.wait();
         _response->body(std::vector(_reader.begin(), _reader.end()));
         _is_complete = true;
         return;
+    }
+
+    switch (_expect)
+    {
+        case Expect::Headers:
+            read_headers();
+            break;
+        case Expect::Body:
+        default:
+            break;
     }
 }
 
@@ -59,7 +65,8 @@ std::unique_ptr<Response> CGIReadTask::response() &&
     return std::move(_response);
 }
 
-CGIReadTask::~CGIReadTask() {
+CGIReadTask::~CGIReadTask()
+{
     INFO("Destructing read task")
 }
 
@@ -74,4 +81,9 @@ void CGIReadTask::abort()
 std::optional<Task::Seconds> CGIReadTask::expire_time() const
 {
     return _expire_time;
+}
+
+void CGIReadTask::read_headers()
+{
+
 }
