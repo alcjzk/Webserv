@@ -15,7 +15,9 @@ using namespace cgi_creation_task;
 using std::string;
 
 // setup the environment for CGI
-void CGICreationTask::set_env(const std::string& key, const std::string& value, std::vector<char*>& environment)
+void CGICreationTask::set_env(
+    const std::string& key, const std::string& value, std::vector<char*>& environment
+)
 {
     std::string envVar = key + "=" + value;
     char*       envPtr = strdup(envVar.c_str()); // memory leak?

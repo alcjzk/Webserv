@@ -5,7 +5,7 @@
 #include "Request.hpp"
 #include "Response.hpp"
 
-//set the header and body
+// set the header and body
 class CGIResponse : public Response
 {
     public:

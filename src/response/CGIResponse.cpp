@@ -8,5 +8,5 @@ using std::vector;
 
 CGIResponse::CGIResponse(std::vector<char>&& body)
 {
-    //header(Header("Location", value));
+    // header(Header("Location", value));
 }
