@@ -23,8 +23,8 @@ class CGIWriteTask : public BasicTask
 
         const Config& config() const;
 
-        Child take_pid();
-        File  take_fd();
+        Child take_pid() &&;
+        File  take_fd() &&;
 
     private:
         const Config&     _config;
