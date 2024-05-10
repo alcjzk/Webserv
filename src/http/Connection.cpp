@@ -6,8 +6,8 @@
 #include "Reader.hpp"
 #include "Connection.hpp"
 
-Connection::Connection(File&& client, const Server& server)
-    : _client(std::move(client)), _server(server)
+Connection::Connection(File&& client, const Server& server, const std::string& ip)
+    : _ip(ip), _client(std::move(client)), _server(server)
 {
 }
 
@@ -44,4 +44,9 @@ std::optional<Reader>& Connection::reader()
 const std::optional<Reader>& Connection::reader() const
 {
     return _reader;
+}
+
+const std::string& Connection::ip() const
+{
+    return _ip;
 }
