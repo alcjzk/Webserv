@@ -2,10 +2,13 @@
 
 #include <cstddef>
 #include <sys/wait.h>
+#include <memory>
 
 #include "BasicTask.hpp"
 #include "Child.hpp"
 #include "Config.hpp"
+#include "Reader.hpp"
+#include "Response.hpp"
 
 class CGIReadTask : public BasicTask
 {
@@ -24,14 +27,11 @@ class CGIReadTask : public BasicTask
         // Read cgi output into response body, enqueue ServerSendResponseTask
         virtual void run() override;
 
-        // TODO: override Task::abort (signal child to exit)
-        void SignalhandlerChild(int sig);
-
         // For error state checking
         bool is_error() const;
 
-        // Get the buffer
-        std::vector<char>&& buffer();
+        /// Returns the complete response from CGI.
+        std::unique_ptr<Response> response() &&;
 
         // Abort override
         void abort() override;
@@ -39,9 +39,10 @@ class CGIReadTask : public BasicTask
         std::optional<Seconds> expire_time() const override;
 
     private:
-        std::vector<char>    _buffer;
-        Child                _pid;
-        bool                 _is_error = false;
-        const static size_t  _upload_limit = 100000000;
-        Seconds              _expire_time;
+        Reader                    _reader = Reader(2048UL);
+        std::unique_ptr<Response> _response = std::make_unique<Response>(Status::OK);
+        Child                     _pid;
+        bool                      _is_error = false;
+        const static size_t       _upload_limit = 1000000;
+        Seconds                   _expire_time;
 };

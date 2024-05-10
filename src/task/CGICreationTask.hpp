@@ -89,7 +89,6 @@ namespace cgi_creation_task
     template <typename Parent>
     void ReadState::on_complete(Parent& parent)
     {
-        INFO("Printti")
         if (_task.is_error())
         {
             Status status = Status::INTERNAL_SERVER_ERROR;
@@ -101,9 +100,8 @@ namespace cgi_creation_task
         }
 
         INFO("READ TASK IS COMPLETE!");
-        auto response = std::make_unique<Response>(Status::OK);
+        auto response = std::move(_task).response();
         response->keep_alive = _connection._keep_alive;
-        response->body(std::move(_task.buffer()));
 
         SendState send_state{
             SendResponseTask(std::move(_connection), std::move(response)),

@@ -1,6 +1,7 @@
 #include "CGIReadTask.hpp"
 #include "Log.hpp"
 #include "Runtime.hpp"
+#include <sys/socket.h>
 #include <sys/wait.h>
 #include <utility>
 
@@ -18,41 +19,34 @@ CGIReadTask::CGIReadTask(
     INFO("FD num in read task: " << _fd);
 }
 
-// Write body from request to cgi
 void CGIReadTask::run()
 {
-    char buf[4096];
-    ssize_t bytes_read = read(_fd, buf, 4096);
+    if (_reader.buffer().unfilled_size() == 0)
+    {
+        if (!_reader.grow(_upload_limit))
+        {
+            _is_error = true;
+            _is_complete = true;
+            return;
+        }
+    }
 
-    INFO("READING")
-    if (bytes_read < 0)
+    ssize_t bytes_received = recv(_fd, _reader.buffer().unfilled(), 4096UL, 0);
+    if (bytes_received < 0)
     {
         WARN("CGIReadTask: read failed for fd `" << _fd << "`");
         _is_error = true;
         _is_complete = true;
         return;
     }
-
-    _buffer.insert(_buffer.end(), buf, buf + bytes_read);
-    if (bytes_read == 0)
+    if (bytes_received == 0)
     {
+        INFO("CGIReadTask: EOF");
         _pid.wait();
+        _response->body(std::vector(_reader.begin(), _reader.end()));
         _is_complete = true;
         return;
     }
-    if (_buffer.size() > _upload_limit)
-    {
-        INFO("Buffer size limit exceeded");
-        _is_complete = true;
-        _is_error = true;
-        return;
-    }
-}
-
-void CGIReadTask::SignalhandlerChild(int sig)
-{
-    std::cerr << "Received signal (children process): " << sig << std::endl;
-    std::exit(EXIT_FAILURE);
 }
 
 bool CGIReadTask::is_error() const
@@ -60,9 +54,9 @@ bool CGIReadTask::is_error() const
     return (_is_error);
 }
 
-std::vector<char>&& CGIReadTask::buffer()
+std::unique_ptr<Response> CGIReadTask::response() &&
 {
-    return (std::move(_buffer));
+    return std::move(_response);
 }
 
 CGIReadTask::~CGIReadTask() {

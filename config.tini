@@ -17,7 +17,7 @@
             methods = GET, POST, DELETE
             default_file = index.html
             [servers.alpha.localhost.routes./.cgi]
-                .py=/Users/lsileoni/.brew/bin/python3
+                .py=~/.brew/bin/python3
                 .sh=/bin/bash
         [servers.alpha.localhost.routes./source]
             type = normal
