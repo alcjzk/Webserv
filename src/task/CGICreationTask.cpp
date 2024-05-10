@@ -50,8 +50,22 @@ static char** Environment(std::vector<char*>& environment)
     return arr;
 }
 
-static void SetupEnvironment(std::vector<char*>& environment, Request& request)
+static inline void SetupEnvironment(std::vector<char*>& environment, Request& request, const Path& uri)
 {
+    extern char** environ;
+
+    size_t i = 0;
+    while (environ[i])
+        ++i;
+
+    char* cwd = *std::find_if(environ, environ + i, [](std::string_view it){ return it.rfind("PWD=", 0) == 0; });
+
+    std::string path_info = Path::canonical(uri);
+    std::string full_path = &cwd[4];
+    std::string path_translated = full_path + "/" + path_info;
+
+    SetEnv("PATH_INFO", path_info, environment);
+    SetEnv("PATH_TRANSLATED", path_translated, environment);
     SetEnv("AUTH_TYPE", "basic", environment);
     SetEnv("REDIRECT_STATUS", "200", environment);
     SetEnv("GATEWAY_INTERFACE", "CGI/1.1", environment);
@@ -81,13 +95,11 @@ CGICreationTask::CGICreationTask(
     INFO("Pfd 1: " << _pipe_fd[1]);
     INFO("Request target " << request.request_line().request_target().c_str());
     INFO("Path URI " << uri);
-    INFO("Path URI canonical " << Path::canonical(uri));
-    INFO("New path without end " << Path(uri.cbegin(), uri.cend() - 1))
     // for ( auto field : request.headers())
     // {
     //     INFO("FIELD_NAME " << field.first << " FIELD_VALUE " << field.second);
     // }
-    int pid = fork(); // Fork to create a child process
+    int pid = fork();
     if (pid == -1)
     {
         close(_pipe_fd[0]);
@@ -96,44 +108,44 @@ CGICreationTask::CGICreationTask(
     }
     else if (pid == 0)
     {
-        // chdir(request.request_line().request_target().c_str());
         close(_pipe_fd[1]);
-        int dev_null = open("/dev/null", O_WRONLY);
 
-        if (dev_null == -1)
+        try
         {
-            INFO("dev null fail: " << strerror(errno));
-            close(_pipe_fd[0]);
-            exit(1);
-        }
-        if (dup2(_pipe_fd[0], STDIN_FILENO) == -1)
-        {
-            close(_pipe_fd[0]);
-            exit(1);
-        }
-        if (dup2(_pipe_fd[0], STDOUT_FILENO) == -1)
-        {
-            close(_pipe_fd[0]);
-            exit(1);
-        }
-        if (dup2(dev_null, STDERR_FILENO) == -1)
-        {
-            close(_pipe_fd[0]);
-            exit(1);
-        }
-        SetupEnvironment(_environment, request);
+            std::string relative_cd_path =
+                std::string("./") + std::string(Path(uri.cbegin(), uri.cend() - 1));
+            std::string script_name = std::string(Path(uri.cend() - 1, uri.cend()));
+            char        buf[4096];
 
-        std::string path = uri;
-        char*       argv[] = {
-            const_cast<char*>(cgi_executable.c_str()), const_cast<char*>(path.c_str()), nullptr
-        };
+            SetupEnvironment(_environment, request, uri);
 
-        // execute
-        (void)execve(argv[0], argv, Environment(_environment)); // argument?
-        close(_pipe_fd[0]);
-        exit(1);
+            int dev_null = open("/dev/null", O_WRONLY);
+            if (dev_null == -1)
+                throw std::exception();
+            if (dup2(_pipe_fd[0], STDIN_FILENO) == -1)
+                throw std::exception();
+            if (dup2(_pipe_fd[0], STDOUT_FILENO) == -1)
+                throw std::exception();
+            if (dup2(dev_null, STDERR_FILENO) == -1)
+                throw std::exception();
+            if (chdir(relative_cd_path.c_str()) == -1)
+                throw std::exception();
+
+            char* argv[] = {
+                const_cast<char*>(cgi_executable.c_str()), const_cast<char*>(script_name.c_str()),
+                nullptr
+            };
+            (void)execve(argv[0], argv, Environment(_environment));
+            WARN(strerror(errno));
+            close(_pipe_fd[0]);
+            exit(1);
+        }
+        catch (std::exception& e)
+        {
+            close(_pipe_fd[0]);
+            exit(1);
+        }
     }
-    INFO("Child's pid is " << pid);
     close(_pipe_fd[0]);
     if (request.body().size())
     {
@@ -145,7 +157,6 @@ CGICreationTask::CGICreationTask(
     }
     else
     {
-        // close(_pipe_fd[1]);
         INFO("yeet");
         ReadState read_state{
             CGIReadTask(_pipe_fd[1], config, pid),
