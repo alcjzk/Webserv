@@ -17,8 +17,8 @@ namespace cgi_creation_task
     struct ReadState
     {
         public:
-            CGIReadTask       _task;
-            Connection        _connection;
+            CGIReadTask _task;
+            Connection  _connection;
 
             template <typename Parent>
             void on_complete(Parent& parent);
@@ -28,7 +28,7 @@ namespace cgi_creation_task
     {
         public:
             CGIWriteTask _task;
-            Connection  _connection;
+            Connection   _connection;
 
             template <typename Parent>
             void on_complete(Parent& parent);
@@ -56,13 +56,14 @@ namespace cgi_creation_task
     {
         public:
             CGICreationTask(
-                Connection&& connection, Request& request, const Path& uri, Config& config, std::string executable
+                Connection&& connection, Request& request, const Path& uri, Config& config,
+                std::string executable
             );
 
         private:
             std::vector<char*> _environment;
-            int _pipe_fd[2];
-            void setup_environment();
+            int                _pipe_fd[2];
+            void               setup_environment();
     };
 
     template <typename Parent>
@@ -71,7 +72,7 @@ namespace cgi_creation_task
         if (_task.is_error())
         {
             Status status = Status::INTERNAL_SERVER_ERROR;
-            int exit_status;
+            int    exit_status;
 
             ErrorState error_state{
                 ErrorResponseTask(std::move(_connection), status),
@@ -80,7 +81,7 @@ namespace cgi_creation_task
         }
 
         ReadState read_state{
-            CGIReadTask(_task.write_end(), _task.config(), std::move(_task).take_pid()),
+            CGIReadTask(std::move(_task).take_fd(), _task.config(), std::move(_task).take_pid()),
             std::move(_connection),
         };
         parent.state(std::move(read_state));

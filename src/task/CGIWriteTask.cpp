@@ -6,13 +6,11 @@
 // assign _pid & _fdout
 
 CGIWriteTask::CGIWriteTask(
-    Request&& request, const Request::Body& post_body, int write_end, Child&& pid, const Config& config
+    Request&& request, const Request::Body& post_body, File&& write_end, Child&& pid,
+    const Config& config
 )
-    : BasicTask(
-          File(), WaitFor::Writable
-      ),
-      _config(config), _request(request), _write_end(write_end), _post_body(post_body),
-      _pid(std::move(pid)), _expire_time(config.cgi_write_timeout())
+    : BasicTask(std::move(write_end), WaitFor::Writable), _config(config), _request(request),
+      _post_body(post_body), _pid(std::move(pid)), _expire_time(config.cgi_write_timeout())
 {
     INFO("Writing post body: \n" << std::string(_post_body.begin(), _post_body.end()));
 }
@@ -23,11 +21,11 @@ void CGIWriteTask::run()
     char*  data = _post_body.data() + _bytes_written_total;
     size_t remainder = _post_body.size() - _bytes_written_total;
 
-    ssize_t bytes_written = write(_write_end, data, remainder);
+    ssize_t bytes_written = write(_fd, data, remainder);
     INFO("Write return value: " << bytes_written);
     if (bytes_written < 0)
     {
-        WARN("CGIWriteTask: write failed for fd `" << _write_end << "`");
+        WARN("CGIWriteTask: write failed for fd `" << _fd << "`");
         _is_error = true;
         _is_complete = true;
         return;
@@ -48,25 +46,11 @@ bool CGIWriteTask::is_error() const
     return _is_error;
 }
 
-int CGIWriteTask::write_end() const
-{
-    return _write_end;
-}
-
-CGIWriteTask::~CGIWriteTask()
-{
-}
-
 void CGIWriteTask::abort()
 {
-    INFO("CGIWriteTask for fd " << _write_end << " timed out.");
+    INFO("CGIWriteTask for fd " << _fd << " timed out.");
     _is_complete = true;
     _is_error = true;
-}
-
-int CGIWriteTask::fd() const
-{
-    return _write_end;
 }
 
 std::optional<Task::Seconds> CGIWriteTask::expire_time() const
@@ -77,4 +61,9 @@ std::optional<Task::Seconds> CGIWriteTask::expire_time() const
 Child CGIWriteTask::take_pid() &&
 {
     return std::move(_pid);
+}
+
+File CGIWriteTask::take_fd() &&
+{
+    return std::move(_fd);
 }

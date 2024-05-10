@@ -95,8 +95,8 @@ CGICreationTask::CGICreationTask(
         close(_pipe_fd[1]);
         dup2(_pipe_fd[0], STDIN_FILENO);
         dup2(_pipe_fd[0], STDOUT_FILENO);
-        //int dev_null = open("/dev/null/", O_WRONLY);
-        //dup2(dev_null, STDERR_FILENO);
+        // int dev_null = open("/dev/null/", O_WRONLY);
+        // dup2(dev_null, STDERR_FILENO);
         //
 
         SetupEnvironment(_environment, request);
