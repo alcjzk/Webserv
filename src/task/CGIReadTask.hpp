@@ -13,6 +13,12 @@
 class CGIReadTask : public BasicTask
 {
     public:
+        enum class Expect
+        {
+            Headers,
+            Body,
+        };
+
         virtual ~CGIReadTask() override;
 
         // Construct env, spawn cgi
@@ -39,10 +45,13 @@ class CGIReadTask : public BasicTask
         std::optional<Seconds> expire_time() const override;
 
     private:
+        Expect                    _expect = Expect::Headers;
         Reader                    _reader = Reader(2048UL);
         std::unique_ptr<Response> _response = std::make_unique<Response>(Status::OK);
         Child                     _pid;
         bool                      _is_error = false;
         const static size_t       _upload_limit = 1000000;
         Seconds                   _expire_time;
+
+        void read_headers();
 };

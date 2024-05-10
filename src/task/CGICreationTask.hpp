@@ -89,6 +89,7 @@ namespace cgi_creation_task
     template <typename Parent>
     void ReadState::on_complete(Parent& parent)
     {
+        INFO("READ TASK IS COMPLETE!");
         if (_task.is_error())
         {
             Status status = Status::INTERNAL_SERVER_ERROR;
@@ -99,7 +100,6 @@ namespace cgi_creation_task
             return parent.state(std::move(error_state));
         }
 
-        INFO("READ TASK IS COMPLETE!");
         auto response = std::move(_task).response();
         response->keep_alive = _connection._keep_alive;
 

@@ -128,7 +128,8 @@ CGICreationTask::CGICreationTask(
             const_cast<char*>(cgi_executable.c_str()), const_cast<char*>(path.c_str()), nullptr
         };
 
-        execve(argv[0], argv, Environment(_environment));
+        // execute
+        (void)execve(argv[0], argv, Environment(_environment)); // argument?
         close(_pipe_fd[0]);
         exit(1);
     }
@@ -145,6 +146,7 @@ CGICreationTask::CGICreationTask(
     else
     {
         // close(_pipe_fd[1]);
+        INFO("yeet");
         ReadState read_state{
             CGIReadTask(_pipe_fd[1], config, pid),
             std::move(connection),
