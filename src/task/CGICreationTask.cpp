@@ -63,7 +63,7 @@ void CGICreationTask::setup_environment(
         set_env("CONTENT_LENGTH", std::to_string(request.body().size()), environment);
     if (auto value = request.headers().get(FieldName::CONTENT_TYPE))
     {
-        std::string env = std::string("Content-type: ") + (**value);
+        std::string env = std::string("Content-Type: ") + (**value);
         set_env("CONTENT_TYPE", env, environment);
     }
     set_env("SERVER_NAME", request.uri().host(), environment);
@@ -73,6 +73,7 @@ void CGICreationTask::setup_environment(
     set_env("SCRIPT_NAME", request.uri().path(), environment);
     set_env("REQUEST_METHOD", request.method().to_string(), environment);
     set_env("QUERY_STRING", request.uri().query(), environment);
+    set_env("PYTHONUTF8", "1", environment);
 }
 
 CGICreationTask::CGICreationTask(
@@ -85,10 +86,6 @@ CGICreationTask::CGICreationTask(
         throw HTTPError(Status::INTERNAL_SERVER_ERROR);
     }
 
-    INFO("Pfd 0: " << _pipe_fd[0]);
-    INFO("Pfd 1: " << _pipe_fd[1]);
-    INFO("Request target " << request.request_line().request_target().c_str());
-    INFO("Path URI " << uri);
     int pid = fork();
     if (pid == -1)
     {
