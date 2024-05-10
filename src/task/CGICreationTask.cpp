@@ -64,7 +64,7 @@ CGICreationTask::CGICreationTask(
     std::string cgi_executable
 )
 {
-    if (socketpair(AF_UNIX, SOCK_STREAM, 0, _pipe_fd) == -1)
+    if (socketpair(AF_UNIX, SOCK_STREAM, 0, _sock_fd) == -1)
     {
         throw HTTPError(Status::INTERNAL_SERVER_ERROR);
     }
@@ -72,13 +72,13 @@ CGICreationTask::CGICreationTask(
     int pid = fork();
     if (pid == -1)
     {
-        close(_pipe_fd[0]);
-        close(_pipe_fd[1]);
+        close(_sock_fd[0]);
+        close(_sock_fd[1]);
         throw HTTPError(Status::INTERNAL_SERVER_ERROR);
     }
     else if (pid == 0)
     {
-        close(_pipe_fd[1]);
+        close(_sock_fd[1]);
 
         try
         {
@@ -91,9 +91,9 @@ CGICreationTask::CGICreationTask(
             int dev_null = open("/dev/null", O_WRONLY);
             if (dev_null == -1)
                 throw std::exception();
-            if (dup2(_pipe_fd[0], STDIN_FILENO) == -1)
+            if (dup2(_sock_fd[0], STDIN_FILENO) == -1)
                 throw std::exception();
-            if (dup2(_pipe_fd[0], STDOUT_FILENO) == -1)
+            if (dup2(_sock_fd[0], STDOUT_FILENO) == -1)
                 throw std::exception();
             if (dup2(dev_null, STDERR_FILENO) == -1)
                 throw std::exception();
@@ -114,20 +114,20 @@ CGICreationTask::CGICreationTask(
 
             (void)execve(argv[0], argv, const_cast<char**>(envp.data()));
             WARN(strerror(errno));
-            close(_pipe_fd[0]);
+            close(_sock_fd[0]);
             exit(1);
         }
         catch (std::exception& e)
         {
-            close(_pipe_fd[0]);
+            close(_sock_fd[0]);
             exit(1);
         }
     }
-    close(_pipe_fd[0]);
+    close(_sock_fd[0]);
     if (request.body().size())
     {
         WriteState write_state{
-            CGIWriteTask(std::move(request), request.body(), _pipe_fd[1], pid, config),
+            CGIWriteTask(std::move(request), request.body(), _sock_fd[1], pid, config),
             std::move(connection)
         };
         state(std::move(write_state));
@@ -135,7 +135,7 @@ CGICreationTask::CGICreationTask(
     else
     {
         ReadState read_state{
-            CGIReadTask(_pipe_fd[1], config, pid),
+            CGIReadTask(_sock_fd[1], config, pid),
             std::move(connection),
         };
         state(std::move(read_state));

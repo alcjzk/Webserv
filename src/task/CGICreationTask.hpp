@@ -65,7 +65,7 @@ namespace cgi_creation_task
             setup_environment(Request& request, const Path& uri, const std::string& ip_address);
             void                     set_env(const std::string& key, const std::string& value);
             std::vector<std::string> _env_strings;
-            int                      _pipe_fd[2];
+            int                      _sock_fd[2];
             void                     setup_environment();
     };
 
