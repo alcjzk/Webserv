@@ -18,7 +18,6 @@ SRCS =							\
 Config.cpp						\
 Server.cpp						\
 Runtime.cpp						\
-Task.cpp						\
 Reader.cpp						\
 Method.cpp						\
 HTTPVersion.cpp					\
@@ -60,7 +59,12 @@ FieldParams.cpp					\
 FieldName.cpp					\
 FieldValue.cpp					\
 FieldMap.cpp					\
+CGICreationTask.cpp				\
+CGIReadTask.cpp					\
+CGIWriteTask.cpp				\
+Child.cpp						\
 main.cpp
+
 
 SRCS_TEST = test/testmain.cpp
 

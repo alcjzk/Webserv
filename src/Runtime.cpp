@@ -1,21 +1,21 @@
 #include <algorithm>
-#include <cassert>
-#include <utility>
 #include <memory>
 #include <system_error>
 #include <errno.h>
 #include <signal.h>
 #include <poll.h>
 #include <chrono>
+#include <sys/wait.h>
 #include "Log.hpp"
 #include "Runtime.hpp"
 #include "Task.hpp"
+#include "Log.hpp"
 
 using WaitFor = Task::WaitFor;
 
 using std::vector;
 
-bool Runtime::_is_interrupt_signaled = false;
+volatile bool Runtime::_is_interrupt_signaled = false;
 
 Runtime& Runtime::instance()
 {

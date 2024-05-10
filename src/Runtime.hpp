@@ -17,6 +17,7 @@ class Runtime
 
         static void enqueue(Task* task);
         static void run();
+        static void child_add(pid_t pid_to_add, Task& task_to_add);
 
     private:
         static const int POLL_TIMEOUT_MILLIS = 1000;
@@ -29,6 +30,6 @@ class Runtime
         void run_impl();
 
         std::vector<std::unique_ptr<Task>> _tasks;
-        static bool                        _is_interrupt_signaled;
+        volatile static bool               _is_interrupt_signaled;
         static Runtime                     _instance;
 };

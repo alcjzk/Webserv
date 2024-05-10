@@ -27,6 +27,7 @@ bool Response::send(int fd)
     assert(_is_built);
     offset = _size - _size_remaining;
     bytes_sent = ::send(fd, &_buffer[offset], _size_remaining, 0);
+
     if (bytes_sent == -1)
         throw std::runtime_error("send failed");
     assert(bytes_sent >= 0);

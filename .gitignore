@@ -12,5 +12,6 @@
 !.clang-format
 test/testmain.cpp
 !testgen.py
+!mandelbrot.py
 www/uploads/*
 !YoupiBanane/**

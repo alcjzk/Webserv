@@ -1,5 +1,8 @@
+#include <arpa/inet.h>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <sys/types.h>
+#include <netdb.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <stdexcept>
@@ -24,11 +27,23 @@ AcceptTask::AcceptTask(const Server& server)
 
 void AcceptTask::run()
 {
-    int fd;
+    int             fd;
+    std::string     ip;
+    struct sockaddr socket_address;
+    socklen_t       socket_length = sizeof(socket_address);
 
     try
     {
-        fd = accept(_server.fd(), NULL, NULL);
+        fd = accept(_server.fd(), &socket_address, &socket_length);
+        struct sockaddr_in* ipv4 = (struct sockaddr_in*)&socket_address;
+        struct in_addr      ip_addr = ipv4->sin_addr;
+        std::stringstream   ss;
+
+        ss << std::to_string(int(ip_addr.s_addr & 0xFF)) << "."
+           << std::to_string(int((ip_addr.s_addr & 0xFF00) >> 8)) << "."
+           << std::to_string(int((ip_addr.s_addr & 0xFF0000) >> 16)) << "."
+           << std::to_string(int((ip_addr.s_addr & 0xFF000000) >> 24));
+
         if (fd == -1)
         {
             throw std::runtime_error(strerror(errno));
@@ -38,7 +53,7 @@ void AcceptTask::run()
             WARN("AcceptTask::run(): fcntl: " << strerror(errno));
         }
         INFO("Client connected on fd " << fd);
-        Connection connection(fd, _server);
+        Connection connection(fd, _server, ss.str());
         Runtime::enqueue(new ReceiveRequestTask(std::move(connection)));
     }
     catch (const std::runtime_error& error)

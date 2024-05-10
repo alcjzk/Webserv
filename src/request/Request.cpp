@@ -1,4 +1,3 @@
-#include <cstddef>
 #include <fcntl.h>
 #include <stdexcept>
 #include <sys/fcntl.h>
@@ -26,6 +25,7 @@
 #include "Path.hpp"
 #include "ContentLength.hpp"
 #include "Connection.hpp"
+#include "CGICreationTask.hpp"
 #include "FileResponseTask.hpp"
 #include "UploadResponseTask.hpp"
 #include "http.hpp"
@@ -159,6 +159,12 @@ Task* Request::process(Connection&& connection)
 
     if (target_status->is_regular())
     {
+        // TODO: Open is assumed to succeed here
+        std::optional<std::string> cgi_exe = route->get_cgi_option(target);
+        if (cgi_exe.has_value())
+            return new CGICreationTask(
+                std::move(connection), *this, target, (Config&)server.config(), cgi_exe.value()
+            );
         if (method() == Method::Delete)
         {
             if (std::remove(static_cast<string>(target).c_str()) != 0)
