@@ -1,6 +1,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include "TiniUtils.hpp"
 #include "TiniNode.hpp"
 
