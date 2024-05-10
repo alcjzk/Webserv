@@ -85,7 +85,6 @@ CGICreationTask::CGICreationTask(
             std::string relative_cd_path =
                 std::string("./") + std::string(Path(uri.cbegin(), uri.cend() - 1));
             std::string script_name = std::string(Path(uri.cend() - 1, uri.cend()));
-            char        buf[4096];
 
             setup_environment(request, uri, connection.ip());
 
