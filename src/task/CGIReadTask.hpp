@@ -42,6 +42,6 @@ class CGIReadTask : public BasicTask
         std::vector<char>    _buffer;
         Child                _pid;
         bool                 _is_error = false;
-        const static size_t  _upload_limit = 1000000;
+        const static size_t  _upload_limit = 100000000;
         Seconds              _expire_time;
 };

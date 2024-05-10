@@ -79,11 +79,15 @@ CGICreationTask::CGICreationTask(
 
     INFO("Pfd 0: " << _pipe_fd[0]);
     INFO("Pfd 1: " << _pipe_fd[1]);
-    int pid = fork(); // Fork to create a child process
+    INFO("Request target " << request.request_line().request_target().c_str());
+    INFO("Path URI " << uri);
+    INFO("Path URI canonical " << Path::canonical(uri));
+    INFO("New path without end " << Path(uri.cbegin(), uri.cend() - 1))
     // for ( auto field : request.headers())
     // {
     //     INFO("FIELD_NAME " << field.first << " FIELD_VALUE " << field.second);
     // }
+    int pid = fork(); // Fork to create a child process
     if (pid == -1)
     {
         close(_pipe_fd[0]);
@@ -92,9 +96,31 @@ CGICreationTask::CGICreationTask(
     }
     else if (pid == 0)
     {
+        // chdir(request.request_line().request_target().c_str());
         close(_pipe_fd[1]);
-        dup2(_pipe_fd[0], STDIN_FILENO);
-        dup2(_pipe_fd[0], STDOUT_FILENO);
+        int dev_null = open("/dev/null", O_WRONLY);
+
+        if (dev_null == -1)
+        {
+            INFO("dev null fail: " << strerror(errno));
+            close(_pipe_fd[0]);
+            exit(1);
+        }
+        if (dup2(_pipe_fd[0], STDIN_FILENO) == -1)
+        {
+            close(_pipe_fd[0]);
+            exit(1);
+        }
+        if (dup2(_pipe_fd[0], STDOUT_FILENO) == -1)
+        {
+            close(_pipe_fd[0]);
+            exit(1);
+        }
+        if (dup2(dev_null, STDERR_FILENO) == -1)
+        {
+            close(_pipe_fd[0]);
+            exit(1);
+        }
         SetupEnvironment(_environment, request);
 
         std::string path = uri;
@@ -102,14 +128,11 @@ CGICreationTask::CGICreationTask(
             const_cast<char*>(cgi_executable.c_str()), const_cast<char*>(path.c_str()), nullptr
         };
 
-        // execute
-        if (execve(argv[0], argv, Environment(_environment)) == -1) // argument?
-        {
-            throw HTTPError(Status::INTERNAL_SERVER_ERROR);
-        }
+        execve(argv[0], argv, Environment(_environment));
         close(_pipe_fd[0]);
-        exit(0);
+        exit(1);
     }
+    INFO("Child's pid is " << pid);
     close(_pipe_fd[0]);
     if (request.body().size())
     {
