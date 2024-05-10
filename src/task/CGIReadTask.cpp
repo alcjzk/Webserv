@@ -1,6 +1,7 @@
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <utility>
+#include <cassert>
 #include "CGIReadTask.hpp"
 #include "Log.hpp"
 #include "Runtime.hpp"
