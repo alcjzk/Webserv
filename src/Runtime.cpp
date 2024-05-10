@@ -43,7 +43,6 @@ void Runtime::run_impl()
 
     while (!_is_interrupt_signaled)
     {
-        INFO("Poll loop start")
         try
         {
             vector<struct pollfd> pollfds;
