@@ -95,6 +95,10 @@ CGICreationTask::CGICreationTask(
         close(_pipe_fd[1]);
         dup2(_pipe_fd[0], STDIN_FILENO);
         dup2(_pipe_fd[0], STDOUT_FILENO);
+        //int dev_null = open("/dev/null/", O_WRONLY);
+        //dup2(dev_null, STDERR_FILENO);
+        //
+
         SetupEnvironment(_environment, request);
 
         std::string path = uri;
@@ -103,10 +107,7 @@ CGICreationTask::CGICreationTask(
         };
 
         // execute
-        if (execve(argv[0], argv, Environment(_environment)) == -1) // argument?
-        {
-            throw HTTPError(Status::INTERNAL_SERVER_ERROR);
-        }
+        (void)execve(argv[0], argv, Environment(_environment)); // argument?
         close(_pipe_fd[0]);
         exit(0);
     }
@@ -122,6 +123,7 @@ CGICreationTask::CGICreationTask(
     else
     {
         // close(_pipe_fd[1]);
+        INFO("yeet");
         ReadState read_state{
             CGIReadTask(_pipe_fd[1], config, pid),
             std::move(connection),
