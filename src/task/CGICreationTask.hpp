@@ -61,17 +61,12 @@ namespace cgi_creation_task
             );
 
         private:
-            void setup_environment(
-                std::vector<char*>& environment, Request& request, const Path& uri,
-                const std::string& ip_address
-            );
-            char** environment(std::vector<char*>& environment);
-            void   set_env(
-                  const std::string& key, const std::string& value, std::vector<char*>& environment
-              );
-            std::vector<char*> _environment;
-            int                _pipe_fd[2];
-            void               setup_environment();
+            void
+            setup_environment(Request& request, const Path& uri, const std::string& ip_address);
+            void                     set_env(const std::string& key, const std::string& value);
+            std::vector<std::string> _env_strings;
+            int                      _pipe_fd[2];
+            void                     setup_environment();
     };
 
     template <typename Parent>

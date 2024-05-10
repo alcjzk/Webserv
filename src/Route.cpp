@@ -81,7 +81,9 @@ std::optional<std::string> Route::get_cgi_option(std::string to_find) const
     INFO("Searching for cgi option")
     for (const auto& cgi_pair : _cgi_opts)
     {
-        if (static_cast<std::string>(to_find).substr(static_cast<std::string>(to_find).size() - cgi_pair.first.size()) == cgi_pair.first)
+        if (static_cast<std::string>(to_find).substr(
+                static_cast<std::string>(to_find).size() - cgi_pair.first.size()
+            ) == cgi_pair.first)
         {
             INFO("Found cgi option, which is " << cgi_pair.second);
             return cgi_pair.second;

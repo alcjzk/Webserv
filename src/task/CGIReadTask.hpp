@@ -32,7 +32,7 @@ class CGIReadTask : public BasicTask
             Body,
         };
 
-        const static size_t       MAX_CONTENT = 1000000;
+        const static size_t MAX_CONTENT = 1000000;
 
         Expect                    _expect = Expect::Headers;
         Reader                    _reader = Reader(4096UL);
