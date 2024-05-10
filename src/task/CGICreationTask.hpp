@@ -81,7 +81,7 @@ namespace cgi_creation_task
         }
 
         ReadState read_state{
-            CGIReadTask(std::move(_task).take_fd(), _task.config(), std::move(_task).take_pid()),
+            CGIReadTask(_task.take_fd(), _task.config(), _task.take_pid()),
             std::move(_connection),
         };
         parent.state(std::move(read_state));

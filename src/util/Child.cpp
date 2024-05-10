@@ -12,14 +12,10 @@ Child::~Child()
         _pid.reset();
     }
 }
-Child::Child(pid_t pid) : _pid(pid)
-{
 
-}
-Child::Child(Child&& other) : _pid(std::exchange(other._pid, std::nullopt))
-{
+Child::Child(pid_t pid) : _pid(pid) {}
 
-}
+Child::Child(Child&& other) : _pid(std::exchange(other._pid, std::nullopt)) {}
 
 Child& Child::operator=(Child&& other)
 {
@@ -31,7 +27,7 @@ Child& Child::operator=(Child&& other)
 
 int Child::wait()
 {
-    int status = 0;
+    int  status = 0;
     auto pid = waitpid(_pid.value(), &status, 0);
     _pid.reset();
     return WEXITSTATUS(status);

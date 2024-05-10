@@ -3,6 +3,7 @@
 #include <optional>
 #include <sys/types.h>
 
+/// RAII wrapper for a child process.
 class Child
 {
     public:
@@ -13,6 +14,7 @@ class Child
 
         Child& operator=(const Child&) = delete;
         Child& operator=(Child&& other);
+
         int wait();
 
     private:
