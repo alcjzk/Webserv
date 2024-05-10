@@ -75,13 +75,15 @@ template <typename... States>
 void CompositeTask<States...>::abort()
 {
     std::visit(
-        [](auto&& state)
+        [&](auto&& state)
         {
             using T = std::decay_t<decltype(state)>;
 
             if constexpr (!std::is_same_v<T, std::monostate>)
             {
                 state._task.abort();
+                if (state._task.is_complete())
+                    state.on_complete(*this);
             }
             else
             {
