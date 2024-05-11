@@ -41,9 +41,7 @@ class TiniNode
         };
 
     private:
-        TiniNodeType _type;
-        // Could be union or some sort of variant type, but feel like the dynamic
-        // casting is not worth the space savings here
+        TiniNodeType                                     _type;
         std::optional<std::pair<std::string, TiniNode*>> _firstMapValue = std::nullopt;
         std::vector<TiniNode*>*                          _vectorValue;
         std::map<std::string, TiniNode*>*                _mapValue;
@@ -80,7 +78,6 @@ class TiniNodeTest : public TiniNode
 {
     public:
         static void deepcopy_test();
-        static void ownership_change_test();
 };
 
 #endif

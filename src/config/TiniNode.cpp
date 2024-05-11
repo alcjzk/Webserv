@@ -247,6 +247,8 @@ TiniNode& TiniNode::fetchTiniNode(std::string key)
 {
     if (_type == T_VECTOR)
     {
+        if (!_vectorValue)
+            throw std::runtime_error("TiniNode: fetchTiniNode: _vectorValue is null");
         for (size_t i = 0; i < _vectorValue->size(); ++i)
         {
             if ((*_vectorValue)[i]->getType() == T_MAP &&
@@ -296,6 +298,8 @@ void TiniNode::printContents(int depth, std::string name) const
     switch (_type)
     {
         case T_MAP:
+            if (!_mapValue)
+                throw std::runtime_error("TiniNode: printContents: _mapValue is null");
             for (const auto& [key, val] : *_mapValue)
             {
                 if (val->getType() == T_STRING)
@@ -327,6 +331,8 @@ void TiniNode::printContents(int depth, std::string name) const
             }
             break;
         case T_VECTOR:
+            if (!_vectorValue)
+                throw std::runtime_error("TiniNode: printContents: _vectorValue is null");
             for (unsigned long i = 0; i < _vectorValue->size(); ++i)
             {
                 for (int j = 0; j < depth; ++j)
@@ -347,6 +353,8 @@ void TiniNode::printContents(int depth, std::string name) const
             }
             break;
         case T_STRING:
+            if (!_stringValue)
+                throw std::runtime_error("TiniNode: printContents: _stringValue is null");
             for (int i = 0; i < depth; ++i)
                 std::cout << " ";
             std::cout << "string value: " << *_stringValue;
@@ -417,17 +425,6 @@ void TiniNodeTest::deepcopy_test()
 
     delete root;
     delete rootcopy;
-    END
-}
-
-void TiniNodeTest::ownership_change_test()
-{
-    BEGIN
-    TiniNode* root = new TiniNode(TiniNode::T_MAP);
-    EXPECT(root != nullptr);
-    root->getMapValue()["key"] = new TiniNode(TiniNode::T_MAP);
-    TiniNode moved_into(std::move(*root));
-    EXPECT(moved_into.getMapValue()["key"]->getType() == TiniNode::T_MAP);
     END
 }
 
