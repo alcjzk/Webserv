@@ -77,7 +77,8 @@ Config::Config(
     {
         int stoi_return = std::stoi(header_buffer_size->getStringValue());
         if (stoi_return > std::numeric_limits<short>::max() || stoi_return < 0)
-            ERR("Config: Header buffer size specified in config is too invalid(!0-32767), defaulting to 4096");
+            ERR("Config: Header buffer size specified in config is too invalid(!0-32767), "
+                "defaulting to 4096");
         _header_buffer_size = stoi_return;
     }
     if (!body_size || body_size->getType() != TiniNode::T_STRING)
@@ -88,7 +89,8 @@ Config::Config(
     {
         int stoi_return = std::stoi(body_size->getStringValue());
         if (stoi_return < 0)
-            ERR("Config: Header buffer size specified in config is too invalid(!0-2147483647), defaulting to 4096");
+            ERR("Config: Header buffer size specified in config is too invalid(!0-2147483647), "
+                "defaulting to 4096");
         _body_size = std::stoi(body_size->getStringValue());
     }
     if (!s_port || s_port->getType() != TiniNode::T_STRING)
