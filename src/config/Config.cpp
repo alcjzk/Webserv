@@ -70,7 +70,9 @@ Config::Config(
         throw std::runtime_error("Server is not defined as map!");
     }
     if (!header_buffer_size || header_buffer_size->getType() != TiniNode::T_STRING)
+    {
         INFO("Config: Header buffer size not specified or invalid type, defaulting to 4096");
+    }
     else
     {
         int stoi_return = std::stoi(header_buffer_size->getStringValue());
