@@ -34,6 +34,8 @@ class FieldValue
         /// Splits out field paramets from the value.
         std::pair<FieldValue, FieldParams> split() const;
 
+        void append(const FieldValue& other);
+
         static const FieldValue CLOSE;
 
     private:

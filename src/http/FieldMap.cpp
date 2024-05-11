@@ -36,6 +36,11 @@ bool FieldMap::erase(const FieldName& name)
     return _container.erase(name) == 1;
 }
 
+iterator FieldMap::find(const FieldName& name)
+{
+    return _container.find(name);
+}
+
 iterator FieldMap::begin() noexcept
 {
     return _container.begin();
