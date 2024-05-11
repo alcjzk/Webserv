@@ -2,7 +2,6 @@
 #include "Log.hpp"
 #include <cstddef>
 #include <fstream>
-#include <climits>
 
 using std::string;
 
@@ -77,7 +76,7 @@ Config::Config(
     else
     {
         int stoi_return = std::stoi(header_buffer_size->getStringValue());
-        if (stoi_return > SHRT_MAX || stoi_return < 0)
+        if (stoi_return > std::numeric_limits<short>::max() || stoi_return < 0)
             ERR("Config: Header buffer size specified in config is too invalid(!0-32767), defaulting to 4096");
         _header_buffer_size = stoi_return;
     }
