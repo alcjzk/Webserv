@@ -26,7 +26,7 @@ void CGIWriteTask::run()
     if (bytes_written < 0)
     {
         WARN("CGIWriteTask: write failed for fd `" << _fd << "`");
-        _is_error = true;
+        _error_status = Status::INTERNAL_SERVER_ERROR;
         _is_complete = true;
         return;
     }
@@ -41,16 +41,16 @@ const Config& CGIWriteTask::config() const
     return _config;
 }
 
-bool CGIWriteTask::is_error() const
+int CGIWriteTask::error() const
 {
-    return _is_error;
+    return _error_status;
 }
 
 void CGIWriteTask::abort()
 {
     INFO("CGIWriteTask for fd " << _fd << " timed out.");
     _is_complete = true;
-    _is_error = true;
+    _error_status = Status::GATEWAY_TIMEOUT;
 }
 
 std::optional<Task::Seconds> CGIWriteTask::expire_time() const

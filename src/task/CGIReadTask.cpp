@@ -19,7 +19,7 @@ void CGIReadTask::run()
     {
         if (!_reader.grow(MAX_CONTENT))
         {
-            _is_error = true;
+            _error_status = Status::INTERNAL_SERVER_ERROR;
             _is_complete = true;
             return;
         }
@@ -31,7 +31,7 @@ void CGIReadTask::run()
     if (bytes_received < 0)
     {
         WARN("CGIReadTask: read failed for fd `" << _fd << "`");
-        _is_error = true;
+        _error_status = Status::INTERNAL_SERVER_ERROR;
         _is_complete = true;
         return;
     }
@@ -40,7 +40,7 @@ void CGIReadTask::run()
         if (_expect == Expect::Headers)
         {
             WARN("CGIReadTask: cgi eof while reading headers");
-            _is_error = true;
+            _error_status = Status::BAD_GATEWAY;
             _is_complete = true;
             return;
         }
@@ -55,9 +55,9 @@ void CGIReadTask::run()
         read_headers();
 }
 
-bool CGIReadTask::is_error() const
+int CGIReadTask::error() const
 {
-    return (_is_error);
+    return (_error_status);
 }
 
 std::unique_ptr<Response> CGIReadTask::response() &&
@@ -69,7 +69,7 @@ void CGIReadTask::abort()
 {
     WARN("CGIReadTask: timed out");
     _is_complete = true;
-    _is_error = true;
+    _error_status = Status::GATEWAY_TIMEOUT;
 }
 
 std::optional<Task::Seconds> CGIReadTask::expire_time() const
@@ -108,7 +108,7 @@ void CGIReadTask::read_headers()
     catch (const std::exception& error)
     {
         WARN("CGIReadTask: " << error.what());
-        _is_error = true;
+        _error_status = Status::INTERNAL_SERVER_ERROR;
         _is_complete = true;
     }
 }
