@@ -9,12 +9,10 @@ class TiniValidator
             {TiniNode::S_OBRACK, {TiniNode::S_OBRACK, TiniNode::S_VALID}},
             {TiniNode::S_VALID, {TiniNode::S_VALID, TiniNode::S_DOT, TiniNode::S_CBRACK}},
             {TiniNode::S_DOT, {TiniNode::S_VALID}},
-            {TiniNode::S_CBRACK, {TiniNode::S_CBRACK}}
-        };
+            {TiniNode::S_CBRACK, {TiniNode::S_CBRACK}}};
         std::map<int, std::vector<int>> _value_transitions = {
             {TiniNode::S_ISPRINT, {TiniNode::S_ISPRINT, TiniNode::S_EQ}},
-            {TiniNode::S_EQ, {TiniNode::S_ISPRINT}}
-        };
+            {TiniNode::S_EQ, {TiniNode::S_ISPRINT}}};
         std::map<int, std::vector<int>>::iterator _map_idx;
         int                                       _cur_state = TiniNode::S_NONE;
         int                                       _next_state = TiniNode::S_NONE;
