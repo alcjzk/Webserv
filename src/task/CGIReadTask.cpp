@@ -28,7 +28,6 @@ void CGIReadTask::run()
     ssize_t bytes_received = recv(
         _fd, _reader.buffer().unfilled(), std::min(_reader.buffer().unfilled_size(), 4096UL), 0
     );
-    INFO(bytes_received);
     if (bytes_received < 0)
     {
         WARN("CGIReadTask: read failed for fd `" << _fd << "`");
