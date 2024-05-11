@@ -87,13 +87,10 @@ int TiniValidator::validateValue(std::string act, int row)
                 tiniutils::printErr(TiniNode::E_UNEXP, it - act.begin() + 1, row, act);
                 return (-1);
             }
-            int good = 0;
-            for (auto a : _value_transitions[_cur_state])
-            {
-                if (a == _next_state)
-                    good = 1;
-            }
-            if (good != 1)
+            if (!std::any_of(
+                    _value_transitions[_cur_state].begin(), _value_transitions[_cur_state].end(),
+                    [&](int correct_transition) { return correct_transition == _next_state; }
+                ))
             {
                 tiniutils::printErr(TiniNode::E_UNEXP, it - act.begin() + 1, row, act);
                 return (-1);
