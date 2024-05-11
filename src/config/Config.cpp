@@ -69,20 +69,30 @@ Config::Config(
         ERR("Config: what: " << err.what())
         throw std::runtime_error("Server is not defined as map!");
     }
-
     if (!header_buffer_size || header_buffer_size->getType() != TiniNode::T_STRING)
     {
-        _header_buffer_size = 4096;
         INFO("Config: Header buffer size not specified or invalid type, defaulting to 4096");
     }
     else
-        _header_buffer_size = std::stoi(header_buffer_size->getStringValue());
+    {
+        int stoi_return = std::stoi(header_buffer_size->getStringValue());
+        if (stoi_return > std::numeric_limits<short>::max() || stoi_return < 0)
+            ERR("Config: Header buffer size specified in config is too invalid(!0-32767), "
+                "defaulting to 4096");
+        _header_buffer_size = stoi_return;
+    }
     if (!body_size || body_size->getType() != TiniNode::T_STRING)
     {
         INFO("Config: Body size not specified or invalid type, defaulting to 4096");
     }
     else
+    {
+        int stoi_return = std::stoi(body_size->getStringValue());
+        if (stoi_return < 0)
+            ERR("Config: Header buffer size specified in config is too invalid(!0-2147483647), "
+                "defaulting to 4096");
         _body_size = std::stoi(body_size->getStringValue());
+    }
     if (!s_port || s_port->getType() != TiniNode::T_STRING)
     {
         INFO("Config: Port not specified or invalid type, defaulting to 8000");

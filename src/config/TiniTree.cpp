@@ -202,6 +202,8 @@ void TiniTree::constructTree()
 
 TiniNode& TiniTree::getRoot()
 {
+    if (!_root)
+        throw std::runtime_error("TiniTree: getRoot: FATAL, root is null");
     return *_root;
 }
 

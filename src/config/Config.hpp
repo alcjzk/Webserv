@@ -78,7 +78,7 @@ class Config
         HostAttributes              _first_attr;
         int                         _backlog = 25;
         size_t                      _body_size = 4096;
-        size_t                      _header_buffer_size = 1024;
+        size_t                      _header_buffer_size = 4096;
         std::map<int, Path>         _error_pages;
         std::string                 _error_template = R"(<!DOCTYPE html>
                                                         <html lang="en">
