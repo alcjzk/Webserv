@@ -25,14 +25,15 @@ int TiniValidator::validateContext(std::string ctx, int row)
                 tiniutils::printErr(TiniNode::E_UNEXP, it - ctx.begin() + 1, row, ctx);
                 return (-1);
             }
-            if (std::any_of(
+            if (std::none_of(
                     _context_transitions[_cur_state].begin(),
                     _context_transitions[_cur_state].end(),
                     [&](int correct_transition) { return correct_transition == _next_state; }
                 ))
-                break;
-            tiniutils::printErr(TiniNode::E_UNEXP, it - ctx.begin() + 1, row, ctx);
-            return (-1);
+            {
+                tiniutils::printErr(TiniNode::E_UNEXP, it - ctx.begin() + 1, row, ctx);
+                return (-1);
+            }
         }
         switch (_cur_state)
         {
