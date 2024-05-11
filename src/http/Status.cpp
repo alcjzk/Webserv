@@ -43,6 +43,10 @@ const char* Status::text() const
             return "500 Internal Server Error";
         case NOT_IMPLEMENTED:
             return "501 Not Implemented";
+        case BAD_GATEWAY:
+            return "502 Bad Gateway";
+        case GATEWAY_TIMEOUT:
+            return "504 Gateway Timeout";
         case HTTP_VERSION_NOT_SUPPORTED:
             return "505 HTTP Version Not Supported";
         default:
