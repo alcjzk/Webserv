@@ -25,6 +25,8 @@ class FieldMap
 
         bool erase(const FieldName& name);
 
+        iterator find(const FieldName& name);
+
         iterator       begin() noexcept;
         const_iterator begin() const noexcept;
 

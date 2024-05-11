@@ -70,4 +70,9 @@ pair<FieldValue, FieldParams> FieldValue::split() const
     return {string((*this)->begin(), rev_it.base()), FieldParams(string(it, (*this)->end()))};
 }
 
+void FieldValue::append(const FieldValue& other)
+{
+    _value = _value + ", " + other._value;
+}
+
 FieldValue::FieldValue(const string& value) : FieldValue(string(value)) {}

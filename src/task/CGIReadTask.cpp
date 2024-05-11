@@ -97,9 +97,12 @@ void CGIReadTask::read_headers()
                 _expect = Expect::Body;
                 return;
             }
-            if (!_response->headers().insert(http::parse_field(line.value())))
+            auto header = http::parse_field(line.value());
+
+            if (!_response->headers().insert(header))
             {
-                throw std::runtime_error("duplicate field value");
+                auto previous = _response->headers().find(header.first);
+                previous->second.append(header.second);
             }
         }
     }
