@@ -2,6 +2,7 @@
 #include "Log.hpp"
 #include <cstddef>
 #include <fstream>
+#include <climits>
 
 using std::string;
 
