@@ -9,7 +9,7 @@ Child::~Child()
     {
         int status = 0;
         kill(_pid.value(), SIGKILL);
-        auto pid = waitpid(_pid.value(), &status, 0);
+        (void)waitpid(_pid.value(), &status, 0);
         _pid.reset();
     }
 }
@@ -28,8 +28,8 @@ Child& Child::operator=(Child&& other)
 
 int Child::wait()
 {
-    int  status = 0;
-    auto pid = waitpid(_pid.value(), &status, 0);
+    int status = 0;
+    (void)waitpid(_pid.value(), &status, 0);
     _pid.reset();
     return WEXITSTATUS(status);
 }

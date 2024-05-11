@@ -56,7 +56,6 @@ void CGICreationTask::setup_environment(
     set_env("SCRIPT_NAME", request.uri().path());
     set_env("REQUEST_METHOD", request.method().to_string());
     set_env("QUERY_STRING", request.uri().query());
-    set_env("PYTHONUTF8", "1");
 }
 
 CGICreationTask::CGICreationTask(

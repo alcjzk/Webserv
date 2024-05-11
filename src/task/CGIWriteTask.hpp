@@ -19,7 +19,7 @@ class CGIWriteTask : public BasicTask
         virtual std::optional<Seconds> expire_time() const override;
 
         /// Returns true if the task completed with an error.
-        bool is_error() const;
+        int error() const;
 
         const Config& config() const;
 
@@ -32,6 +32,6 @@ class CGIWriteTask : public BasicTask
         std::vector<char> _post_body;
         size_t            _bytes_written_total = 0;
         Child             _pid;
-        bool              _is_error = false;
+        int               _error_status = 0;
         Seconds           _expire_time;
 };

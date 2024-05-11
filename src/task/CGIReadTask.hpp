@@ -20,7 +20,7 @@ class CGIReadTask : public BasicTask
         virtual std::optional<Seconds> expire_time() const override;
 
         // Returns true if the task completed with an error.
-        bool is_error() const;
+        int error() const;
 
         /// Returns the complete response from CGI.
         std::unique_ptr<Response> response() &&;
@@ -38,7 +38,7 @@ class CGIReadTask : public BasicTask
         Reader                    _reader = Reader(4096UL);
         std::unique_ptr<Response> _response = std::make_unique<Response>(Status::OK);
         Child                     _pid;
-        bool                      _is_error = false;
+        int                       _error_status = 0;
         Seconds                   _expire_time;
 
         void read_headers();

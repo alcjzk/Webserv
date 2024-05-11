@@ -72,9 +72,9 @@ namespace cgi_creation_task
     template <typename Parent>
     void WriteState::on_complete(Parent& parent)
     {
-        if (_task.is_error())
+        if (_task.error())
         {
-            Status status = Status::INTERNAL_SERVER_ERROR;
+            Status status = Status::Code(_task.error());
 
             ErrorState error_state{
                 ErrorResponseTask(std::move(_connection), status),
@@ -93,9 +93,9 @@ namespace cgi_creation_task
     void ReadState::on_complete(Parent& parent)
     {
         INFO("READ TASK IS COMPLETE!");
-        if (_task.is_error())
+        if (_task.error())
         {
-            Status status = Status::INTERNAL_SERVER_ERROR;
+            Status status = Status::Code(_task.error());
 
             ErrorState error_state{
                 ErrorResponseTask(std::move(_connection), status),
